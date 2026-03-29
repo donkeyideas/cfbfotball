@@ -1,0 +1,24 @@
+{
+  "name": "cfb-social",
+  "private": true,
+  "scripts": {
+    "dev": "turbo dev --filter=!cfb-social-mobile",
+    "dev:mobile": "pnpm --filter cfb-social-mobile dev",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "typecheck": "turbo typecheck",
+    "clean": "turbo clean",
+    "db:migrate": "supabase db push",
+    "db:reset": "supabase db reset",
+    "db:types": "supabase gen types typescript --local > packages/types/src/database.ts"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.58.2",
+    "turbo": "^2.4.0",
+    "typescript": "^5.7.0"
+  },
+  "packageManager": "pnpm@9.15.0",
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

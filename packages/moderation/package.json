@@ -1,0 +1,14 @@
+{
+  "name": "@cfb-social/moderation",
+  "version": "0.1.0",
+  "private": true,
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "dependencies": {
+    "openai": "^4.73.0",
+    "@cfb-social/types": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0"
+  }
+}

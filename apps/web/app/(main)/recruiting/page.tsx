@@ -1,0 +1,136 @@
+import { RecruitingClient } from './RecruitingClient';
+
+export const metadata = {
+  title: 'Recruiting Desk | College Football Recruiting & Portal Activity',
+  description: 'Track transfer portal activity and recruiting intelligence across all FBS programs. See which schools are winning and losing the portal.',
+  openGraph: {
+    title: 'Recruiting Desk | CFB Social',
+    description: 'Transfer portal activity and recruiting intelligence across all FBS programs.',
+  },
+};
+
+export default async function RecruitingPage() {
+  const { createClient } = await import('@/lib/supabase/server');
+  const supabase = await createClient();
+
+  // Get all FBS schools
+  const { data: schools } = await supabase
+    .from('schools')
+    .select('id, name, abbreviation, slug, primary_color, secondary_color, conference, mascot')
+    .eq('is_fbs', true)
+    .order('name');
+
+  // Get portal players for aggregation
+  const { data: portalPlayers } = await supabase
+    .from('portal_players')
+    .select('previous_school_id, committed_school_id, star_rating, status');
+
+  // Get roster claims
+  const { data: claims } = await supabase
+    .from('roster_claims')
+    .select('school_id');
+
+  // Build aggregation maps
+  const lostMap = new Map<string, number>();
+  const gainedMap = new Map<string, number>();
+  const starsMap = new Map<string, number[]>();
+
+  for (const p of portalPlayers ?? []) {
+    if (p.previous_school_id) {
+      lostMap.set(p.previous_school_id, (lostMap.get(p.previous_school_id) ?? 0) + 1);
+    }
+    if (p.committed_school_id) {
+      gainedMap.set(p.committed_school_id, (gainedMap.get(p.committed_school_id) ?? 0) + 1);
+    }
+    if (p.previous_school_id && p.star_rating) {
+      const arr = starsMap.get(p.previous_school_id) ?? [];
+      arr.push(p.star_rating);
+      starsMap.set(p.previous_school_id, arr);
+    }
+  }
+
+  const claimsMap = new Map<string, number>();
+  for (const c of claims ?? []) {
+    if (c.school_id) {
+      claimsMap.set(c.school_id, (claimsMap.get(c.school_id) ?? 0) + 1);
+    }
+  }
+
+  type ActivityLevel = 'LOW' | 'MODERATE' | 'HIGH' | 'VERY_HIGH';
+  function getActivityLevel(score: number): ActivityLevel {
+    if (score >= 15) return 'VERY_HIGH';
+    if (score >= 8) return 'HIGH';
+    if (score >= 3) return 'MODERATE';
+    return 'LOW';
+  }
+
+  const stats = (schools ?? []).map((school) => {
+    const lost = lostMap.get(school.id) ?? 0;
+    const gained = gainedMap.get(school.id) ?? 0;
+    const totalClaims = claimsMap.get(school.id) ?? 0;
+    const stars = starsMap.get(school.id) ?? [];
+    const avgStarRating = stars.length > 0
+      ? Math.round((stars.reduce((a: number, b: number) => a + b, 0) / stars.length) * 10) / 10
+      : 0;
+    const activityScore = lost + gained + totalClaims;
+
+    return {
+      schoolId: school.id,
+      schoolName: school.name,
+      abbreviation: school.abbreviation,
+      slug: school.slug,
+      primaryColor: school.primary_color,
+      secondaryColor: school.secondary_color,
+      conference: school.conference,
+      mascot: school.mascot,
+      playersLost: lost,
+      playersGained: gained,
+      totalClaims,
+      avgStarRating,
+      netMovement: gained - lost,
+      activityLevel: getActivityLevel(activityScore),
+    };
+  });
+
+  // Summary stats
+  const totalInPortal = portalPlayers?.filter((p) => p.status === 'IN_PORTAL').length ?? 0;
+  const totalCommitted = portalPlayers?.filter((p) => p.status === 'COMMITTED').length ?? 0;
+  const mostActive = [...stats].sort((a, b) =>
+    (b.playersLost + b.playersGained + b.totalClaims) - (a.playersLost + a.playersGained + a.totalClaims)
+  )[0];
+
+  return (
+    <div>
+      <div className="feed-header">
+        <h1 className="feed-title">Recruiting Desk</h1>
+        <p style={{ fontFamily: 'var(--sans)', fontSize: '0.82rem', color: 'var(--faded-ink)', marginTop: 4 }}>
+          Transfer portal activity and recruiting intelligence across all FBS programs.
+        </p>
+      </div>
+
+      {/* Summary Row */}
+      <div className="recruiting-summary">
+        <div className="recruiting-summary-stat">
+          <span className="recruiting-summary-value">{totalInPortal}</span>
+          <span className="recruiting-summary-label">In Portal</span>
+        </div>
+        <div className="recruiting-summary-stat">
+          <span className="recruiting-summary-value">{totalCommitted}</span>
+          <span className="recruiting-summary-label">Committed</span>
+        </div>
+        <div className="recruiting-summary-stat">
+          <span className="recruiting-summary-value">{stats.length}</span>
+          <span className="recruiting-summary-label">FBS Programs</span>
+        </div>
+        {mostActive && (
+          <div className="recruiting-summary-stat">
+            <span className="recruiting-summary-value">{mostActive.abbreviation}</span>
+            <span className="recruiting-summary-label">Most Active</span>
+          </div>
+        )}
+      </div>
+
+      <RecruitingClient stats={stats} />
+    </div>
+  );
+}
