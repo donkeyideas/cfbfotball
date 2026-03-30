@@ -22,10 +22,11 @@ export function SettingsClient() {
   const [displayName, setDisplayName] = useState('');
   const [bio, setBio] = useState('');
   const [schoolId, setSchoolId] = useState('');
-  const [bannerColor, setBannerColor] = useState('');
   const [schools, setSchools] = useState<School[]>([]);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [bannerFile, setBannerFile] = useState<File | null>(null);
+  const [bannerPreview, setBannerPreview] = useState<string | null>(null);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   useEffect(() => {
@@ -46,7 +47,9 @@ export function SettingsClient() {
         setDisplayName(profileResult.data.display_name ?? '');
         setBio(profileResult.data.bio ?? '');
         setSchoolId(profileResult.data.school_id ?? '');
-        setBannerColor(profileResult.data.banner_color ?? '');
+        if (profileResult.data.banner_url) {
+          setBannerPreview(profileResult.data.banner_url);
+        }
         if (profileResult.data.avatar_url) {
           setAvatarPreview(profileResult.data.avatar_url);
         }
@@ -64,8 +67,8 @@ export function SettingsClient() {
 
   // Get current school colors for preview
   const selectedSchool = schools.find((s) => s.id === schoolId);
-  const previewBannerStyle = bannerColor
-    ? { background: bannerColor }
+  const previewBannerStyle: React.CSSProperties = bannerPreview
+    ? { background: `url(${bannerPreview}) center/cover no-repeat` }
     : selectedSchool
       ? { background: `linear-gradient(135deg, ${selectedSchool.primary_color}, ${selectedSchool.secondary_color})` }
       : { background: 'var(--crimson)' };
@@ -98,17 +101,43 @@ export function SettingsClient() {
       avatarUrl = urlData.publicUrl;
     }
 
+    // Upload banner if selected
+    let bannerUrl: string | undefined;
+    if (bannerFile) {
+      const fileExt = bannerFile.name.split('.').pop();
+      const filePath = `${authUser.id}/banner.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, bannerFile, { upsert: true, contentType: bannerFile.type });
+
+      if (uploadError) {
+        setMessage({ type: 'error', text: 'Failed to upload banner: ' + uploadError.message });
+        setSaving(false);
+        return;
+      }
+
+      const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(filePath);
+      bannerUrl = urlData.publicUrl;
+    }
+
     const updatePayload: Record<string, unknown> = {
       username,
       display_name: displayName || null,
       bio: bio || null,
       school_id: schoolId || null,
-      banner_color: bannerColor || null,
       updated_at: new Date().toISOString(),
     };
 
     if (avatarUrl) {
       updatePayload.avatar_url = avatarUrl;
+    }
+
+    if (bannerUrl) {
+      updatePayload.banner_url = bannerUrl;
+    } else if (!bannerPreview) {
+      // User cleared banner — reset to school colors
+      updatePayload.banner_url = null;
     }
 
     const { error } = await supabase
@@ -162,29 +191,35 @@ export function SettingsClient() {
         )}
 
         <form onSubmit={handleSave} className="space-y-5">
-          {/* Banner preview */}
+          {/* Banner image */}
           <div>
             <label className="mb-1 block text-sm font-medium text-[var(--text-secondary)]">
               Profile Banner
             </label>
             <div
-              className="h-20 rounded-md"
+              className="h-24 rounded-md"
               style={previewBannerStyle}
             />
             <div className="mt-2 flex items-center gap-3">
               <input
-                type="color"
-                value={bannerColor || (selectedSchool?.primary_color ?? '#8b1a1a')}
-                onChange={(e) => setBannerColor(e.target.value)}
-                className="h-8 w-12 cursor-pointer rounded border border-[var(--border)] p-0"
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0] ?? null;
+                  setBannerFile(file);
+                  if (file) {
+                    setBannerPreview(URL.createObjectURL(file));
+                  }
+                }}
+                className="gridiron-input flex-1 text-sm file:mr-3 file:rounded-md file:border-0 file:bg-[var(--surface)] file:px-3 file:py-1 file:text-sm file:font-medium"
               />
-              <span className="text-xs text-[var(--text-muted)]">
-                {bannerColor ? bannerColor : 'Using school colors'}
-              </span>
-              {bannerColor && (
+              {bannerPreview && (
                 <button
                   type="button"
-                  onClick={() => setBannerColor('')}
+                  onClick={() => {
+                    setBannerPreview(null);
+                    setBannerFile(null);
+                  }}
                   className="text-xs text-[var(--text-muted)] hover:text-ink"
                 >
                   Reset to school colors
