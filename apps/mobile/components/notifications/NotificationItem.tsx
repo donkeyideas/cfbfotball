@@ -1,10 +1,11 @@
+import { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { supabase } from '@/lib/supabase';
 import { Avatar } from '@/components/ui/Avatar';
 import { timeAgo } from '@/lib/utils/timeAgo';
 import { useSchoolTheme } from '@/lib/theme/SchoolThemeProvider';
-import { colors } from '@/lib/theme/colors';
+import { useColors } from '@/lib/theme/ThemeProvider';
 import { typography } from '@/lib/theme/typography';
 
 interface NotificationActor {
@@ -81,10 +82,67 @@ function getNavigationTarget(notification: NotificationData): string | null {
 }
 
 export function NotificationItem({ notification, onRead }: NotificationItemProps) {
+  const colors = useColors();
   const router = useRouter();
   const { dark } = useSchoolTheme();
   const message = getNotificationMessage(notification);
   const target = getNavigationTarget(notification);
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: 12,
+      paddingHorizontal: 16,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: colors.border,
+      backgroundColor: colors.paper,
+    },
+    unreadContainer: {
+      backgroundColor: colors.surfaceRaised,
+    },
+    avatarColumn: {
+      marginRight: 12,
+    },
+    systemIcon: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: colors.surface,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    systemIconText: {
+      fontFamily: typography.serifBold,
+      fontSize: 18,
+      color: colors.crimson,
+    },
+    content: {
+      flex: 1,
+      gap: 2,
+    },
+    message: {
+      fontFamily: typography.sans,
+      fontSize: 14,
+      color: colors.textPrimary,
+      lineHeight: 20,
+    },
+    unreadMessage: {
+      fontFamily: typography.sansSemiBold,
+    },
+    timestamp: {
+      fontFamily: typography.sans,
+      fontSize: 12,
+      color: colors.textMuted,
+    },
+    unreadDot: {
+      width: 8,
+      height: 8,
+      borderRadius: 4,
+      backgroundColor: colors.crimson,
+      marginLeft: 8,
+    },
+  }), [colors]);
 
   const handlePress = async () => {
     if (!notification.is_read) {
@@ -139,59 +197,3 @@ export function NotificationItem({ notification, onRead }: NotificationItemProps
     </Pressable>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.border,
-    backgroundColor: colors.paper,
-  },
-  unreadContainer: {
-    backgroundColor: colors.surfaceRaised,
-  },
-  avatarColumn: {
-    marginRight: 12,
-  },
-  systemIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: colors.surface,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  systemIconText: {
-    fontFamily: typography.serifBold,
-    fontSize: 18,
-    color: colors.crimson,
-  },
-  content: {
-    flex: 1,
-    gap: 2,
-  },
-  message: {
-    fontFamily: typography.sans,
-    fontSize: 14,
-    color: colors.textPrimary,
-    lineHeight: 20,
-  },
-  unreadMessage: {
-    fontFamily: typography.sansSemiBold,
-  },
-  timestamp: {
-    fontFamily: typography.sans,
-    fontSize: 12,
-    color: colors.textMuted,
-  },
-  unreadDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: colors.crimson,
-    marginLeft: 8,
-  },
-});

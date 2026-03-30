@@ -6,7 +6,7 @@ import { useAuth } from '@/lib/auth/AuthProvider';
 // expo-notifications was removed from Expo Go in SDK 53.
 //
 // The server-side infrastructure is ready:
-//   - profiles.push_token column stores the device token
+//   - device_tokens table stores push tokens per user/platform
 //   - on_notification_created trigger sends pushes via Expo push API
 //
 // To enable client-side push registration in a dev build:
@@ -18,17 +18,27 @@ export function usePushNotifications() {
   const { userId } = useAuth();
   const [expoPushToken, setExpoPushToken] = useState<string | null>(null);
 
-  // Save push token to Supabase when user is logged in
+  // Save push token to device_tokens table when user is logged in
   useEffect(() => {
     if (!userId || !expoPushToken) return;
 
-    supabase
-      .from('profiles')
-      .update({ push_token: expoPushToken })
-      .eq('id', userId)
-      .then(() => {
-        // Token saved
-      });
+    (async () => {
+      try {
+        await supabase
+          .from('device_tokens')
+          .upsert(
+            {
+              user_id: userId,
+              token: expoPushToken,
+              platform: 'expo',
+              is_active: true,
+            },
+            { onConflict: 'user_id,token' }
+          );
+      } catch (err) {
+        console.warn('Failed to save push token:', err);
+      }
+    })();
   }, [userId, expoPushToken]);
 
   return { expoPushToken };

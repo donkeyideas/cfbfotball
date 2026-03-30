@@ -18,7 +18,7 @@ import {
   NotificationItem,
   type NotificationData,
 } from '@/components/notifications/NotificationItem';
-import { colors } from '@/lib/theme/colors';
+import { useColors } from '@/lib/theme/ThemeProvider';
 import { typography } from '@/lib/theme/typography';
 import { useSchoolTheme } from '@/lib/theme/SchoolThemeProvider';
 
@@ -30,11 +30,40 @@ const NOTIFICATION_SELECT = `
 `;
 
 export default function NotificationsScreen() {
+  const colors = useColors();
   const { dark } = useSchoolTheme();
   const { session, userId } = useAuth();
   const [notifications, setNotifications] = useState<NotificationData[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.paper,
+    },
+    markAllRow: {
+      alignItems: 'flex-end',
+      paddingHorizontal: 16,
+    },
+    markAllButton: {
+      paddingVertical: 6,
+      paddingHorizontal: 12,
+    },
+    markAllText: {
+      fontFamily: typography.sansSemiBold,
+      fontSize: 13,
+      color: colors.crimson,
+    },
+    loaderContainer: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    listContent: {
+      paddingBottom: 40,
+    },
+  }), [colors]);
 
   const fetchNotifications = useCallback(async () => {
     if (!userId) return;
@@ -66,6 +95,13 @@ export default function NotificationsScreen() {
     setRefreshing(true);
     fetchNotifications();
   };
+
+  const renderItem = useCallback(
+    ({ item }: { item: NotificationData }) => (
+      <NotificationItem notification={item} onRead={handleRead} />
+    ),
+    []
+  );
 
   const handleRead = (id: string) => {
     setNotifications((prev) =>
@@ -117,9 +153,11 @@ export default function NotificationsScreen() {
         <FlatList
           data={notifications}
           keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <NotificationItem notification={item} onRead={handleRead} />
-          )}
+          renderItem={renderItem}
+          removeClippedSubviews
+          maxToRenderPerBatch={8}
+          initialNumToRender={6}
+          windowSize={5}
           contentContainerStyle={styles.listContent}
           refreshControl={
             <RefreshControl
@@ -139,31 +177,3 @@ export default function NotificationsScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.paper,
-  },
-  markAllRow: {
-    alignItems: 'flex-end',
-    paddingHorizontal: 16,
-  },
-  markAllButton: {
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-  },
-  markAllText: {
-    fontFamily: typography.sansSemiBold,
-    fontSize: 13,
-    color: colors.crimson,
-  },
-  loaderContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  listContent: {
-    paddingBottom: 40,
-  },
-});

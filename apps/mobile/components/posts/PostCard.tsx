@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { TicketStubCard } from './TicketStubCard';
 import { NewspaperClippingCard } from './NewspaperClippingCard';
 import { PenaltyFlagCard } from './PenaltyFlagCard';
@@ -17,6 +18,10 @@ export interface PostData {
   created_at: string;
   moderation_reason: string | null;
   moderation_labels: string[] | null;
+  /** Pre-fetched user interaction status (set by batch query in feed) */
+  _userVote?: 'TD' | 'FUMBLE' | null;
+  _userReposted?: boolean;
+  _userSaved?: boolean;
   author?: {
     id: string;
     username: string | null;
@@ -35,7 +40,7 @@ interface PostCardProps {
   post: PostData;
 }
 
-export function PostCard({ post }: PostCardProps) {
+export const PostCard = memo(function PostCard({ post }: PostCardProps) {
   // Flagged posts always render as penalty flag card
   if (post.status === 'FLAGGED') {
     return <PenaltyFlagCard post={post} />;
@@ -53,4 +58,4 @@ export function PostCard({ post }: PostCardProps) {
 
   // Default: standard ticket stub card
   return <TicketStubCard post={post} />;
-}
+});

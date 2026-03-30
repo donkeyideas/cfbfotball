@@ -18,6 +18,7 @@ import { useSchoolTheme } from '@/lib/theme/SchoolThemeProvider';
 import { supabase } from '@/lib/supabase';
 import { typography } from '@/lib/theme/typography';
 import { useColors } from '@/lib/theme/ThemeProvider';
+import { MAX_POST_CHARS } from '@/lib/constants';
 
 type PostType = 'STANDARD' | 'RECEIPT' | 'PREDICTION' | 'SIDELINE' | 'AGING_TAKE';
 
@@ -34,7 +35,7 @@ const POST_TYPES: { key: PostType; label: string }[] = [
   { key: 'AGING_TAKE', label: 'Challenge' },
 ];
 
-const MAX_CHARS = 3000;
+const MAX_CHARS = MAX_POST_CHARS;
 
 export function PostComposer({ visible, onClose, onPostCreated }: PostComposerProps) {
   const colors = useColors();
@@ -272,7 +273,7 @@ export function PostComposer({ visible, onClose, onPostCreated }: PostComposerPr
     onClose();
   };
 
-  const charWarning = content.length > 2800;
+  const charWarning = content.length > MAX_CHARS * 0.9;
 
   return (
     <Modal

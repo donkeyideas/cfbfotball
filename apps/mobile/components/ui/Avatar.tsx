@@ -1,6 +1,7 @@
+import { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Image } from 'expo-image';
-import { colors } from '@/lib/theme/colors';
+import { useColors } from '@/lib/theme/ThemeProvider';
 import { typography } from '@/lib/theme/typography';
 
 interface AvatarProps {
@@ -11,8 +12,24 @@ interface AvatarProps {
 }
 
 export function Avatar({ url, name, size = 40, borderColor }: AvatarProps) {
+  const colors = useColors();
   const initial = (name || '?')[0].toUpperCase();
   const borderStyle = borderColor ? { borderWidth: 2, borderColor } : {};
+
+  const styles = useMemo(() => StyleSheet.create({
+    image: {
+      backgroundColor: colors.surface,
+    },
+    fallback: {
+      backgroundColor: colors.surface,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    initial: {
+      fontFamily: typography.serifBold,
+      color: colors.textSecondary,
+    },
+  }), [colors]);
 
   if (url) {
     return (
@@ -40,18 +57,3 @@ export function Avatar({ url, name, size = 40, borderColor }: AvatarProps) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  image: {
-    backgroundColor: colors.surface,
-  },
-  fallback: {
-    backgroundColor: colors.surface,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  initial: {
-    fontFamily: typography.serifBold,
-    color: colors.textSecondary,
-  },
-});

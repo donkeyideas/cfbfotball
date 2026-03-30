@@ -223,7 +223,7 @@ export function ClaimModal({
         .from('schools')
         .select('id, name, abbreviation, primary_color, slug')
         .order('name', { ascending: true })
-        .limit(200);
+        .limit(700);
       if (data) {
         setSchools(data as SchoolOption[]);
       }

@@ -153,7 +153,7 @@ export default function ChallengeDetailScreen() {
     winnerText: {
       fontFamily: typography.mono,
       fontSize: 9,
-      color: '#fff',
+      color: colors.textInverse,
       letterSpacing: 1,
     },
     totalVotes: {
@@ -212,7 +212,7 @@ export default function ChallengeDetailScreen() {
     voteBtnText: {
       fontFamily: typography.sansBold,
       fontSize: 14,
-      color: '#ffffff',
+      color: colors.textInverse,
       letterSpacing: 0.5,
       textTransform: 'uppercase',
     },

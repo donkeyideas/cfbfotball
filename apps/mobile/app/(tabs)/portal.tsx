@@ -178,8 +178,11 @@ export default function PortalScreen() {
   // ---------------------------------------------------------------
   // Render
   // ---------------------------------------------------------------
-  const renderItem = ({ item }: { item: PortalPlayerData }) => (
-    <PortalCard player={item} onClaim={handleClaim} />
+  const renderItem = useCallback(
+    ({ item }: { item: PortalPlayerData }) => (
+      <PortalCard player={item} onClaim={handleClaim} />
+    ),
+    []
   );
 
   return (
@@ -196,6 +199,10 @@ export default function PortalScreen() {
           data={players}
           keyExtractor={(item) => item.id}
           renderItem={renderItem}
+          removeClippedSubviews
+          maxToRenderPerBatch={8}
+          initialNumToRender={6}
+          windowSize={5}
           contentContainerStyle={styles.listContent}
           refreshControl={
             <RefreshControl

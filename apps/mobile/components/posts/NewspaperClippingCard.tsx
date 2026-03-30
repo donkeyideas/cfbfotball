@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { memo, useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { PostHeader } from './PostHeader';
@@ -13,7 +13,7 @@ interface NewspaperClippingCardProps {
   post: PostData;
 }
 
-export function NewspaperClippingCard({ post }: NewspaperClippingCardProps) {
+export const NewspaperClippingCard = memo(function NewspaperClippingCard({ post }: NewspaperClippingCardProps) {
   const colors = useColors();
   const router = useRouter();
   const isReceipt = post.post_type === 'RECEIPT';
@@ -127,9 +127,10 @@ export function NewspaperClippingCard({ post }: NewspaperClippingCardProps) {
         authorId={post.author_id}
         initialTdCount={post.touchdown_count}
         initialFmCount={post.fumble_count}
+        prefetchedVote={post._userVote}
       />
 
-      <PostActions postId={post.id} postAuthorId={post.author_id} />
+      <PostActions postId={post.id} postAuthorId={post.author_id} prefetchedReposted={post._userReposted} prefetchedSaved={post._userSaved} />
     </View>
   );
-}
+});

@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -17,7 +17,7 @@ import { OrnamentDivider } from '@/components/ui/OrnamentDivider';
 import { SchoolBadge } from '@/components/ui/SchoolBadge';
 import { PostCard, type PostData } from '@/components/posts/PostCard';
 import { RivalryVoteBar } from '@/components/rivalry/RivalryVoteBar';
-import { colors } from '@/lib/theme/colors';
+import { useColors } from '@/lib/theme/ThemeProvider';
 import { typography } from '@/lib/theme/typography';
 
 interface DebateSchool {
@@ -53,12 +53,114 @@ const POST_SELECT = `
 `;
 
 export default function CoachesCallScreen() {
+  const colors = useColors();
   const router = useRouter();
   const { dark } = useSchoolTheme();
   const [debates, setDebates] = useState<DebateRivalry[]>([]);
   const [predictions, setPredictions] = useState<PostData[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.paper,
+    },
+    loaderContainer: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    scrollContent: {
+      padding: 16,
+      paddingBottom: 40,
+    },
+    description: {
+      fontFamily: typography.sans,
+      fontSize: 14,
+      color: colors.textSecondary,
+      textAlign: 'center',
+      lineHeight: 20,
+      paddingHorizontal: 8,
+    },
+    sectionTitle: {
+      fontFamily: typography.serifBold,
+      fontSize: 20,
+      color: colors.ink,
+      marginBottom: 12,
+    },
+    emptyText: {
+      fontFamily: typography.sans,
+      fontSize: 13,
+      color: colors.textMuted,
+      textAlign: 'center',
+      paddingVertical: 16,
+    },
+    debatesList: {
+      gap: 12,
+    },
+    debateCard: {
+      backgroundColor: colors.surfaceRaised,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 12,
+      overflow: 'hidden',
+    },
+    debateColorBar: {
+      flexDirection: 'row',
+      height: 4,
+    },
+    colorHalf: {
+      flex: 1,
+    },
+    debateContent: {
+      padding: 14,
+      gap: 10,
+    },
+    debateName: {
+      fontFamily: typography.serifBold,
+      fontSize: 16,
+      color: colors.ink,
+      textAlign: 'center',
+    },
+    matchupRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    schoolSide: {
+      flex: 1,
+      alignItems: 'center',
+      gap: 4,
+    },
+    schoolName: {
+      fontFamily: typography.sansSemiBold,
+      fontSize: 12,
+      textAlign: 'center',
+    },
+    voteCount: {
+      fontFamily: typography.mono,
+      fontSize: 11,
+      color: colors.textMuted,
+    },
+    vs: {
+      fontFamily: typography.serifBold,
+      fontSize: 14,
+      color: colors.textMuted,
+      paddingHorizontal: 8,
+    },
+    totalVotes: {
+      fontFamily: typography.mono,
+      fontSize: 10,
+      color: colors.textMuted,
+      textAlign: 'center',
+      letterSpacing: 1,
+      textTransform: 'uppercase',
+    },
+    predictionsList: {
+      gap: 12,
+    },
+  }), [colors]);
 
   const fetchData = useCallback(async () => {
     const [rivalryRes, predictionRes] = await Promise.all([
@@ -222,108 +324,3 @@ export default function CoachesCallScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.paper,
-  },
-  loaderContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  scrollContent: {
-    padding: 16,
-    paddingBottom: 40,
-  },
-  description: {
-    fontFamily: typography.sans,
-    fontSize: 14,
-    color: colors.textSecondary,
-    textAlign: 'center',
-    lineHeight: 20,
-    paddingHorizontal: 8,
-  },
-  sectionTitle: {
-    fontFamily: typography.serifBold,
-    fontSize: 20,
-    color: colors.ink,
-    marginBottom: 12,
-  },
-  emptyText: {
-    fontFamily: typography.sans,
-    fontSize: 13,
-    color: colors.textMuted,
-    textAlign: 'center',
-    paddingVertical: 16,
-  },
-
-  // Debates
-  debatesList: {
-    gap: 12,
-  },
-  debateCard: {
-    backgroundColor: colors.surfaceRaised,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 12,
-    overflow: 'hidden',
-  },
-  debateColorBar: {
-    flexDirection: 'row',
-    height: 4,
-  },
-  colorHalf: {
-    flex: 1,
-  },
-  debateContent: {
-    padding: 14,
-    gap: 10,
-  },
-  debateName: {
-    fontFamily: typography.serifBold,
-    fontSize: 16,
-    color: colors.ink,
-    textAlign: 'center',
-  },
-  matchupRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  schoolSide: {
-    flex: 1,
-    alignItems: 'center',
-    gap: 4,
-  },
-  schoolName: {
-    fontFamily: typography.sansSemiBold,
-    fontSize: 12,
-    textAlign: 'center',
-  },
-  voteCount: {
-    fontFamily: typography.mono,
-    fontSize: 11,
-    color: colors.textMuted,
-  },
-  vs: {
-    fontFamily: typography.serifBold,
-    fontSize: 14,
-    color: colors.textMuted,
-    paddingHorizontal: 8,
-  },
-  totalVotes: {
-    fontFamily: typography.mono,
-    fontSize: 10,
-    color: colors.textMuted,
-    textAlign: 'center',
-    letterSpacing: 1,
-    textTransform: 'uppercase',
-  },
-
-  // Predictions
-  predictionsList: {
-    gap: 12,
-  },
-});

@@ -201,6 +201,61 @@ export default function FeedScreen() {
   );
 
   // ------------------------------------------------------------------
+  // Batch-fetch user status for posts (votes, reposts, bookmarks)
+  // Eliminates N+1 queries: 3 batch queries instead of 3*N individual
+  // ------------------------------------------------------------------
+  const enrichPostsWithUserStatus = useCallback(
+    async (rawPosts: PostData[]): Promise<PostData[]> => {
+      if (!userId || rawPosts.length === 0) return rawPosts;
+
+      const postIds = rawPosts.map((p) => p.id);
+
+      const [reactionsRes, repostsRes, bookmarksRes] = await Promise.all([
+        supabase
+          .from('reactions')
+          .select('post_id, reaction_type')
+          .eq('user_id', userId)
+          .in('post_id', postIds),
+        supabase
+          .from('reposts')
+          .select('post_id')
+          .eq('user_id', userId)
+          .in('post_id', postIds),
+        supabase
+          .from('bookmarks')
+          .select('post_id')
+          .eq('user_id', userId)
+          .in('post_id', postIds),
+      ]);
+
+      const voteMap = new Map<string, 'TD' | 'FUMBLE'>();
+      if (reactionsRes.data) {
+        for (const r of reactionsRes.data) {
+          voteMap.set(r.post_id, r.reaction_type as 'TD' | 'FUMBLE');
+        }
+      }
+
+      const repostSet = new Set<string>();
+      if (repostsRes.data) {
+        for (const r of repostsRes.data) repostSet.add(r.post_id);
+      }
+
+      const bookmarkSet = new Set<string>();
+      if (bookmarksRes.data) {
+        for (const b of bookmarksRes.data) bookmarkSet.add(b.post_id);
+      }
+
+      return rawPosts.map((post) => ({
+        ...post,
+        _userVote: voteMap.get(post.id) ?? null,
+        _userReposted: repostSet.has(post.id),
+        _userSaved: bookmarkSet.has(post.id),
+      }));
+    },
+    [userId]
+  );
+
+  // ------------------------------------------------------------------
   // Fetch posts
   // ------------------------------------------------------------------
   const fetchPosts = useCallback(
@@ -214,10 +269,11 @@ export default function FeedScreen() {
 
       if (!error && data) {
         const typed = data as unknown as PostData[];
+        const enriched = await enrichPostsWithUserStatus(typed);
         if (reset) {
-          setPosts(typed);
+          setPosts(enriched);
         } else {
-          setPosts((prev) => [...prev, ...typed]);
+          setPosts((prev) => [...prev, ...enriched]);
         }
         setHasMore(typed.length >= PAGE_SIZE);
         offsetRef.current += typed.length;
@@ -227,7 +283,7 @@ export default function FeedScreen() {
       setRefreshing(false);
       setLoadingMore(false);
     },
-    [buildQuery]
+    [buildQuery, enrichPostsWithUserStatus]
   );
 
   useEffect(() => {
@@ -283,32 +339,35 @@ export default function FeedScreen() {
   // ------------------------------------------------------------------
   // Build FlatList data with dynasty widget sentinel after 3rd post
   // ------------------------------------------------------------------
-  const feedData: FeedItem[] = [];
-  for (let i = 0; i < posts.length; i++) {
-    feedData.push(posts[i]);
-    if (i === 2) {
-      feedData.push(DYNASTY_SENTINEL);
+  const feedData: FeedItem[] = useMemo(() => {
+    const data: FeedItem[] = [];
+    for (let i = 0; i < posts.length; i++) {
+      data.push(posts[i]);
+      if (i === 2) {
+        data.push(DYNASTY_SENTINEL);
+      }
     }
-  }
-  // If fewer than 3 posts, still add dynasty widget at the end
-  if (posts.length > 0 && posts.length <= 3 && !feedData.includes(DYNASTY_SENTINEL)) {
-    feedData.push(DYNASTY_SENTINEL);
-  }
+    // If fewer than 3 posts, still add dynasty widget at the end
+    if (posts.length > 0 && posts.length <= 3 && !data.includes(DYNASTY_SENTINEL)) {
+      data.push(DYNASTY_SENTINEL);
+    }
+    return data;
+  }, [posts]);
 
   // ------------------------------------------------------------------
   // Render
   // ------------------------------------------------------------------
-  const renderItem = ({ item }: { item: FeedItem }) => {
+  const renderItem = useCallback(({ item }: { item: FeedItem }) => {
     if (item === DYNASTY_SENTINEL) {
       return <DynastyWidget />;
     }
     return <PostCard post={item} />;
-  };
+  }, []);
 
-  const keyExtractor = (item: FeedItem, index: number) => {
+  const keyExtractor = useCallback((item: FeedItem) => {
     if (item === DYNASTY_SENTINEL) return 'dynasty-widget';
     return item.id;
-  };
+  }, []);
 
   const ListFooter = loadingMore ? (
     <ActivityIndicator
@@ -368,16 +427,22 @@ export default function FeedScreen() {
               </Text>
             </View>
           }
+          removeClippedSubviews
+          maxToRenderPerBatch={8}
+          initialNumToRender={6}
+          windowSize={5}
         />
       )}
 
       {/* Floating compose button - bottom left */}
-      <Pressable
-        style={[styles.fab, { backgroundColor: dark }]}
-        onPress={() => setComposerVisible(true)}
-      >
-        <Text style={styles.fabText}>+</Text>
-      </Pressable>
+      {session && (
+        <Pressable
+          style={[styles.fab, { backgroundColor: dark }]}
+          onPress={() => setComposerVisible(true)}
+        >
+          <Text style={styles.fabText}>+</Text>
+        </Pressable>
+      )}
 
       <PostComposer
         visible={composerVisible}

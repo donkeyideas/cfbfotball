@@ -132,7 +132,8 @@ export default function PostDetailScreen() {
       .select(POST_SELECT)
       .eq('parent_id', id)
       .eq('status', 'PUBLISHED')
-      .order('created_at', { ascending: true });
+      .order('created_at', { ascending: true })
+      .limit(100);
 
     if (!error && data) {
       setReplies(data as unknown as PostData[]);
@@ -148,6 +149,11 @@ export default function PostDetailScreen() {
   useEffect(() => {
     loadAll();
   }, [loadAll]);
+
+  const renderItem = useCallback(
+    ({ item }: { item: PostData }) => <PostCard post={item} />,
+    []
+  );
 
   const handleReplySent = () => {
     fetchReplies();
@@ -191,7 +197,11 @@ export default function PostDetailScreen() {
       <FlatList
         data={replies}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <PostCard post={item} />}
+        renderItem={renderItem}
+        removeClippedSubviews
+        maxToRenderPerBatch={8}
+        initialNumToRender={6}
+        windowSize={5}
         contentContainerStyle={styles.listContent}
         ListHeaderComponent={
           <View>

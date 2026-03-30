@@ -107,7 +107,7 @@ export default function SchoolHubScreen() {
     schoolAvatarText: {
       fontFamily: typography.sansBold,
       fontSize: 20,
-      color: '#ffffff',
+      color: colors.textInverse,
       letterSpacing: 1,
     },
     schoolName: {

@@ -28,6 +28,9 @@ const MENU_ITEMS: { label: string; route: string; authRequired?: boolean }[] = [
   { label: 'Notifications', route: '/notifications', authRequired: true },
   { label: 'Settings', route: '/settings', authRequired: true },
   { label: 'Contact', route: '/contact' },
+  { label: 'Privacy Policy', route: '/privacy' },
+  { label: 'Terms of Service', route: '/terms' },
+  { label: 'Delete Account', route: '/delete-account', authRequired: true },
 ];
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');

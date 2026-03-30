@@ -4,6 +4,7 @@ import { Image } from 'expo-image';
 import { useColors } from '@/lib/theme/ThemeProvider';
 import { withAlpha } from '@/lib/theme/utils';
 import { typography } from '@/lib/theme/typography';
+import { ESPN_SCOREBOARD_URL, SCORE_REFRESH_MS } from '@/lib/constants';
 
 interface TeamInfo {
   displayName: string;
@@ -81,7 +82,7 @@ export function LiveScoreboard({ espnGameId, viewerCount }: ScoreboardProps) {
   const fetchScore = async () => {
     try {
       const res = await fetch(
-        `https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard/${espnGameId}`
+        `${ESPN_SCOREBOARD_URL}/${espnGameId}`
       );
       const data = await res.json();
 
@@ -138,7 +139,7 @@ export function LiveScoreboard({ espnGameId, viewerCount }: ScoreboardProps) {
   useEffect(() => {
     fetchScore();
 
-    intervalRef.current = setInterval(fetchScore, 30000);
+    intervalRef.current = setInterval(fetchScore, SCORE_REFRESH_MS);
 
     return () => {
       if (intervalRef.current) {

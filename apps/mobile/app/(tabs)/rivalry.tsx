@@ -93,7 +93,8 @@ export default function RivalryScreen() {
       .from('rivalries')
       .select(RIVALRY_SELECT)
       .eq('status', 'ACTIVE')
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false })
+      .limit(50);
     if (data) {
       setRivalries(data as unknown as RivalryData[]);
     }
@@ -221,16 +222,25 @@ export default function RivalryScreen() {
   // ---------------------------------------------------------------
   // Render items
   // ---------------------------------------------------------------
-  const renderRivalryItem = ({ item }: { item: RivalryData }) => (
-    <FightCard rivalry={item} onVote={handleRivalryVote} />
+  const renderRivalryItem = useCallback(
+    ({ item }: { item: RivalryData }) => (
+      <FightCard rivalry={item} onVote={handleRivalryVote} />
+    ),
+    []
   );
 
-  const renderChallengeItem = ({ item }: { item: ChallengeData }) => (
-    <ChallengeCard challenge={item} />
+  const renderChallengeItem = useCallback(
+    ({ item }: { item: ChallengeData }) => (
+      <ChallengeCard challenge={item} />
+    ),
+    []
   );
 
-  const renderPastItem = ({ item }: { item: RivalryData }) => (
-    <FightCard rivalry={item} />
+  const renderPastItem = useCallback(
+    ({ item }: { item: RivalryData }) => (
+      <FightCard rivalry={item} />
+    ),
+    []
   );
 
   // ---------------------------------------------------------------
@@ -270,6 +280,10 @@ export default function RivalryScreen() {
           data={rivalries}
           keyExtractor={(item) => item.id}
           renderItem={renderRivalryItem}
+          removeClippedSubviews
+          maxToRenderPerBatch={8}
+          initialNumToRender={6}
+          windowSize={5}
           contentContainerStyle={styles.listContent}
           refreshControl={
             <RefreshControl
@@ -285,6 +299,10 @@ export default function RivalryScreen() {
           data={challenges}
           keyExtractor={(item) => item.id}
           renderItem={renderChallengeItem}
+          removeClippedSubviews
+          maxToRenderPerBatch={8}
+          initialNumToRender={6}
+          windowSize={5}
           contentContainerStyle={styles.listContent}
           refreshControl={
             <RefreshControl
@@ -300,6 +318,10 @@ export default function RivalryScreen() {
           data={pastRivalries}
           keyExtractor={(item) => item.id}
           renderItem={renderPastItem}
+          removeClippedSubviews
+          maxToRenderPerBatch={8}
+          initialNumToRender={6}
+          windowSize={5}
           contentContainerStyle={styles.listContent}
           refreshControl={
             <RefreshControl

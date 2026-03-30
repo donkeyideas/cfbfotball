@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { memo, useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { AppealForm } from '@/components/moderation/AppealForm';
@@ -20,7 +20,7 @@ interface PenaltyFlagCardProps {
   post: PostData;
 }
 
-export function PenaltyFlagCard({ post }: PenaltyFlagCardProps) {
+export const PenaltyFlagCard = memo(function PenaltyFlagCard({ post }: PenaltyFlagCardProps) {
   const colors = useColors();
   const { userId } = useAuth();
 
@@ -112,4 +112,4 @@ export function PenaltyFlagCard({ post }: PenaltyFlagCardProps) {
       </View>
     </View>
   );
-}
+});

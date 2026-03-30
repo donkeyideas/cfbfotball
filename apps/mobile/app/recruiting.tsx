@@ -15,7 +15,7 @@ import { SectionLabel } from '@/components/ui/SectionLabel';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { ConferenceFilter } from '@/components/recruiting/ConferenceFilter';
 import { SchoolCard, type RecruitingSchool } from '@/components/recruiting/SchoolCard';
-import { colors } from '@/lib/theme/colors';
+import { useColors } from '@/lib/theme/ThemeProvider';
 import { typography } from '@/lib/theme/typography';
 
 type SortMode = 'activity' | 'claims' | 'name';
@@ -27,12 +27,57 @@ const SORT_OPTIONS: { key: SortMode; label: string }[] = [
 ];
 
 export default function RecruitingScreen() {
+  const colors = useColors();
   const { dark } = useSchoolTheme();
   const [schools, setSchools] = useState<RecruitingSchool[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [conference, setConference] = useState('ALL');
   const [sortMode, setSortMode] = useState<SortMode>('activity');
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.paper,
+    },
+    loaderContainer: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    sortRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+      gap: 8,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+    },
+    sortLabel: {
+      fontFamily: typography.mono,
+      fontSize: 10,
+      color: colors.textMuted,
+      letterSpacing: 1,
+      textTransform: 'uppercase',
+    },
+    sortPill: {
+      paddingHorizontal: 10,
+      paddingVertical: 5,
+      borderRadius: 12,
+    },
+    sortPillText: {
+      fontFamily: typography.sansSemiBold,
+      fontSize: 11,
+    },
+    listContent: {
+      padding: 8,
+      paddingBottom: 40,
+    },
+    columnWrapper: {
+      justifyContent: 'space-between',
+    },
+  }), [colors]);
 
   const fetchSchools = useCallback(async () => {
     const { data, error } = await supabase
@@ -69,6 +114,11 @@ export default function RecruitingScreen() {
     setRefreshing(true);
     fetchSchools();
   };
+
+  const renderItem = useCallback(
+    ({ item }: { item: RecruitingSchool }) => <SchoolCard school={item} />,
+    []
+  );
 
   // Filter by conference
   const filtered = useMemo(() => {
@@ -150,7 +200,11 @@ export default function RecruitingScreen() {
         data={sorted}
         keyExtractor={(item) => item.id}
         numColumns={2}
-        renderItem={({ item }) => <SchoolCard school={item} />}
+        renderItem={renderItem}
+        removeClippedSubviews
+        maxToRenderPerBatch={8}
+        initialNumToRender={6}
+        windowSize={5}
         contentContainerStyle={styles.listContent}
         columnWrapperStyle={styles.columnWrapper}
         refreshControl={
@@ -170,47 +224,3 @@ export default function RecruitingScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.paper,
-  },
-  loaderContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  sortRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    gap: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  sortLabel: {
-    fontFamily: typography.mono,
-    fontSize: 10,
-    color: colors.textMuted,
-    letterSpacing: 1,
-    textTransform: 'uppercase',
-  },
-  sortPill: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 12,
-  },
-  sortPillText: {
-    fontFamily: typography.sansSemiBold,
-    fontSize: 11,
-  },
-  listContent: {
-    padding: 8,
-    paddingBottom: 40,
-  },
-  columnWrapper: {
-    justifyContent: 'space-between',
-  },
-});

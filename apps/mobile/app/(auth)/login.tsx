@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -18,10 +18,12 @@ import { makeRedirectUri } from 'expo-auth-session';
 import { supabase } from '@/lib/supabase';
 import { useSchoolTheme } from '@/lib/theme/SchoolThemeProvider';
 import { OrnamentDivider } from '@/components/ui/OrnamentDivider';
-import { colors } from '@/lib/theme/colors';
+import { useColors } from '@/lib/theme/ThemeProvider';
 import { typography } from '@/lib/theme/typography';
+import { withAlpha } from '@/lib/theme/utils';
 
 export default function LoginScreen() {
+  const colors = useColors();
   const router = useRouter();
   const { dark } = useSchoolTheme();
   const [email, setEmail] = useState('');
@@ -30,8 +32,124 @@ export default function LoginScreen() {
   const [oauthLoading, setOauthLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.paper,
+    },
+    scrollContent: {
+      flexGrow: 1,
+      justifyContent: 'center',
+      paddingHorizontal: 32,
+      paddingVertical: 48,
+    },
+    title: {
+      fontFamily: typography.serifBold,
+      fontSize: 36,
+      color: colors.ink,
+      textAlign: 'center',
+    },
+    divider: {
+      width: 60,
+      height: 1,
+      backgroundColor: colors.border,
+      alignSelf: 'center',
+      marginVertical: 12,
+    },
+    subtitle: {
+      fontFamily: typography.serif,
+      fontSize: 22,
+      color: colors.ink,
+      textAlign: 'center',
+      marginBottom: 24,
+    },
+    errorContainer: {
+      backgroundColor: withAlpha(colors.crimson, 0.08),
+      padding: 12,
+      borderRadius: 8,
+      marginBottom: 16,
+    },
+    errorText: {
+      fontFamily: typography.sans,
+      fontSize: 14,
+      color: colors.crimson,
+    },
+    form: {
+      gap: 16,
+    },
+    label: {
+      fontFamily: typography.sansSemiBold,
+      fontSize: 14,
+      color: colors.textSecondary,
+      marginBottom: 4,
+    },
+    input: {
+      backgroundColor: colors.surfaceRaised,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 8,
+      paddingHorizontal: 14,
+      paddingVertical: 12,
+      fontFamily: typography.sans,
+      fontSize: 16,
+      color: colors.ink,
+    },
+    button: {
+      paddingVertical: 16,
+      borderRadius: 8,
+      alignItems: 'center',
+      marginTop: 8,
+    },
+    buttonDisabled: {
+      opacity: 0.5,
+    },
+    buttonText: {
+      fontFamily: typography.sansBold,
+      fontSize: 16,
+      color: colors.textInverse,
+    },
+    oauthDividerContainer: {
+      marginVertical: 20,
+    },
+    oauthContainer: {
+      gap: 12,
+    },
+    oauthButton: {
+      borderWidth: 1.5,
+      borderColor: colors.borderStrong,
+      paddingVertical: 14,
+      borderRadius: 8,
+      alignItems: 'center',
+      backgroundColor: 'transparent',
+    },
+    oauthButtonText: {
+      fontFamily: typography.sansSemiBold,
+      fontSize: 15,
+      color: colors.ink,
+    },
+    footer: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      marginTop: 24,
+    },
+    footerText: {
+      fontFamily: typography.sans,
+      fontSize: 14,
+      color: colors.textMuted,
+    },
+    footerLink: {
+      fontFamily: typography.sansSemiBold,
+      fontSize: 14,
+      color: colors.crimson,
+    },
+  }), [colors]);
+
   async function handleLogin() {
     if (!email || !password) return;
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setError('Please enter a valid email address.');
+      return;
+    }
     setLoading(true);
     setError(null);
 
@@ -41,7 +159,11 @@ export default function LoginScreen() {
     });
 
     if (signInError) {
-      setError(signInError.message);
+      const friendlyMessages: Record<string, string> = {
+        'Invalid login credentials': 'Incorrect email or password. Please try again.',
+        'Email not confirmed': 'Please verify your email before signing in.',
+      };
+      setError(friendlyMessages[signInError.message] || 'Something went wrong. Please try again.');
       setLoading(false);
       return;
     }
@@ -73,7 +195,17 @@ export default function LoginScreen() {
       if (data?.url) {
         const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo);
 
-        if (result.type === 'success') {
+        if (result.type === 'success' && result.url) {
+          // Extract tokens from the redirect URL fragment
+          const url = new URL(result.url);
+          const params = new URLSearchParams(url.hash.replace('#', '?'));
+          const access_token = params.get('access_token');
+          const refresh_token = params.get('refresh_token');
+
+          if (access_token && refresh_token) {
+            await supabase.auth.setSession({ access_token, refresh_token });
+          }
+
           router.replace('/(tabs)/feed');
         }
       }
@@ -181,7 +313,7 @@ export default function LoginScreen() {
             disabled={loading || oauthLoading}
           >
             {loading ? (
-              <ActivityIndicator color="#ffffff" />
+              <ActivityIndicator color={colors.textInverse} />
             ) : (
               <Text style={styles.buttonText}>Sign In</Text>
             )}
@@ -231,115 +363,3 @@ export default function LoginScreen() {
     </KeyboardAvoidingView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.paper,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    paddingHorizontal: 32,
-    paddingVertical: 48,
-  },
-  title: {
-    fontFamily: typography.serifBold,
-    fontSize: 36,
-    color: colors.ink,
-    textAlign: 'center',
-  },
-  divider: {
-    width: 60,
-    height: 1,
-    backgroundColor: colors.border,
-    alignSelf: 'center',
-    marginVertical: 12,
-  },
-  subtitle: {
-    fontFamily: typography.serif,
-    fontSize: 22,
-    color: colors.ink,
-    textAlign: 'center',
-    marginBottom: 24,
-  },
-  errorContainer: {
-    backgroundColor: `${colors.crimson}15`,
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 16,
-  },
-  errorText: {
-    fontFamily: typography.sans,
-    fontSize: 14,
-    color: colors.crimson,
-  },
-  form: {
-    gap: 16,
-  },
-  label: {
-    fontFamily: typography.sansSemiBold,
-    fontSize: 14,
-    color: colors.textSecondary,
-    marginBottom: 4,
-  },
-  input: {
-    backgroundColor: colors.surfaceRaised,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 8,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    fontFamily: typography.sans,
-    fontSize: 16,
-    color: colors.ink,
-  },
-  button: {
-    paddingVertical: 16,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  buttonDisabled: {
-    opacity: 0.5,
-  },
-  buttonText: {
-    fontFamily: typography.sansBold,
-    fontSize: 16,
-    color: '#ffffff',
-  },
-  oauthDividerContainer: {
-    marginVertical: 20,
-  },
-  oauthContainer: {
-    gap: 12,
-  },
-  oauthButton: {
-    borderWidth: 1.5,
-    borderColor: colors.borderStrong,
-    paddingVertical: 14,
-    borderRadius: 8,
-    alignItems: 'center',
-    backgroundColor: 'transparent',
-  },
-  oauthButtonText: {
-    fontFamily: typography.sansSemiBold,
-    fontSize: 15,
-    color: colors.ink,
-  },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: 24,
-  },
-  footerText: {
-    fontFamily: typography.sans,
-    fontSize: 14,
-    color: colors.textMuted,
-  },
-  footerLink: {
-    fontFamily: typography.sansSemiBold,
-    fontSize: 14,
-    color: colors.crimson,
-  },
-});

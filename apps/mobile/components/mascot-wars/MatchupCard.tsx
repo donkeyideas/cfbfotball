@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { useThemedAlert } from '@/lib/AlertProvider';
 import { useSchoolTheme } from '@/lib/theme/SchoolThemeProvider';
 import { VoteBar } from './VoteBar';
-import { colors } from '@/lib/theme/colors';
+import { useColors } from '@/lib/theme/ThemeProvider';
 import { typography } from '@/lib/theme/typography';
 
 interface SchoolInfo {
@@ -38,6 +38,7 @@ interface MatchupCardProps {
 }
 
 export function MatchupCard({ matchup, userVoteSchoolId, onVoted }: MatchupCardProps) {
+  const colors = useColors();
   const { userId } = useAuth();
   const { dark } = useSchoolTheme();
   const { showAlert } = useThemedAlert();
@@ -46,10 +47,86 @@ export function MatchupCard({ matchup, userVoteSchoolId, onVoted }: MatchupCardP
   const [localS1Votes, setLocalS1Votes] = useState(matchup.school_1_votes);
   const [localS2Votes, setLocalS2Votes] = useState(matchup.school_2_votes);
 
+  // Sync when props change (e.g. pull-to-refresh)
+  useEffect(() => {
+    setLocalVote(userVoteSchoolId);
+    setLocalS1Votes(matchup.school_1_votes);
+    setLocalS2Votes(matchup.school_2_votes);
+  }, [userVoteSchoolId, matchup.school_1_votes, matchup.school_2_votes]);
+
   const s1 = matchup.school_1;
   const s2 = matchup.school_2;
   const isResolved = matchup.winner_id !== null;
   const hasVoted = localVote !== null;
+
+  const styles = useMemo(() => StyleSheet.create({
+    card: {
+      backgroundColor: colors.surfaceRaised,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 10,
+      padding: 12,
+      gap: 8,
+    },
+    winnerBadge: {
+      alignSelf: 'center',
+      paddingHorizontal: 12,
+      paddingVertical: 3,
+      borderRadius: 10,
+      marginBottom: 2,
+    },
+    winnerBadgeText: {
+      fontFamily: typography.mono,
+      fontSize: 10,
+      color: colors.textInverse,
+      letterSpacing: 1,
+    },
+    schoolRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 10,
+      paddingVertical: 8,
+      paddingHorizontal: 10,
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: 'transparent',
+      backgroundColor: colors.surface,
+    },
+    schoolRowSelected: {
+      borderWidth: 2,
+      backgroundColor: colors.paper,
+    },
+    colorDot: {
+      width: 14,
+      height: 14,
+      borderRadius: 7,
+    },
+    schoolInfo: {
+      flex: 1,
+      gap: 1,
+    },
+    schoolName: {
+      fontFamily: typography.serifBold,
+      fontSize: 14,
+      color: colors.textPrimary,
+    },
+    mascotName: {
+      fontFamily: typography.sans,
+      fontSize: 11,
+      color: colors.textMuted,
+    },
+    voteLabel: {
+      fontFamily: typography.mono,
+      fontSize: 10,
+      letterSpacing: 1,
+    },
+    vsText: {
+      fontFamily: typography.serif,
+      fontSize: 12,
+      color: colors.textMuted,
+      textAlign: 'center',
+    },
+  }), [colors]);
 
   const handleVote = async (schoolId: string) => {
     if (!userId) {
@@ -167,72 +244,3 @@ export function MatchupCard({ matchup, userVoteSchoolId, onVoted }: MatchupCardP
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: colors.surfaceRaised,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 10,
-    padding: 12,
-    gap: 8,
-  },
-  winnerBadge: {
-    alignSelf: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 3,
-    borderRadius: 10,
-    marginBottom: 2,
-  },
-  winnerBadgeText: {
-    fontFamily: typography.mono,
-    fontSize: 10,
-    color: colors.textInverse,
-    letterSpacing: 1,
-  },
-  schoolRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    paddingVertical: 8,
-    paddingHorizontal: 10,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: 'transparent',
-    backgroundColor: colors.surface,
-  },
-  schoolRowSelected: {
-    borderWidth: 2,
-    backgroundColor: colors.paper,
-  },
-  colorDot: {
-    width: 14,
-    height: 14,
-    borderRadius: 7,
-  },
-  schoolInfo: {
-    flex: 1,
-    gap: 1,
-  },
-  schoolName: {
-    fontFamily: typography.serifBold,
-    fontSize: 14,
-    color: colors.textPrimary,
-  },
-  mascotName: {
-    fontFamily: typography.sans,
-    fontSize: 11,
-    color: colors.textMuted,
-  },
-  voteLabel: {
-    fontFamily: typography.mono,
-    fontSize: 10,
-    letterSpacing: 1,
-  },
-  vsText: {
-    fontFamily: typography.serif,
-    fontSize: 12,
-    color: colors.textMuted,
-    textAlign: 'center',
-  },
-});

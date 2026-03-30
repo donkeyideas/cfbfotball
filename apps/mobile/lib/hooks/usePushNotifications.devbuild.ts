@@ -98,13 +98,23 @@ export function usePushNotifications() {
   useEffect(() => {
     if (!userId || !expoPushToken) return;
 
-    supabase
-      .from('profiles')
-      .update({ push_token: expoPushToken })
-      .eq('id', userId)
-      .then(() => {
-        // Token saved
-      });
+    (async () => {
+      try {
+        await supabase
+          .from('device_tokens')
+          .upsert(
+            {
+              user_id: userId,
+              token: expoPushToken,
+              platform: Platform.OS,
+              is_active: true,
+            },
+            { onConflict: 'user_id,token' }
+          );
+      } catch (err) {
+        console.warn('Failed to save push token:', err);
+      }
+    })();
   }, [userId, expoPushToken]);
 
   return { expoPushToken };

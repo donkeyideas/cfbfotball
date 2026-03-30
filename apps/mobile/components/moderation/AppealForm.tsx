@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { View, Text, TextInput, Pressable, StyleSheet, ActivityIndicator } from 'react-native';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { useSchoolTheme } from '@/lib/theme/SchoolThemeProvider';
-import { colors } from '@/lib/theme/colors';
+import { useColors } from '@/lib/theme/ThemeProvider';
 import { typography } from '@/lib/theme/typography';
 
 interface AppealFormProps {
@@ -11,12 +11,80 @@ interface AppealFormProps {
 }
 
 export function AppealForm({ postId }: AppealFormProps) {
+  const colors = useColors();
   const { userId } = useAuth();
   const { dark } = useSchoolTheme();
   const [expanded, setExpanded] = useState(false);
   const [reason, setReason] = useState('');
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      padding: 12,
+      backgroundColor: colors.surface,
+      borderRadius: 8,
+      marginTop: 8,
+    },
+    appealButton: {
+      marginTop: 8,
+      padding: 10,
+      alignItems: 'center',
+    },
+    appealButtonText: {
+      fontFamily: typography.mono,
+      fontSize: 12,
+      color: colors.warning,
+      textDecorationLine: 'underline',
+      letterSpacing: 1,
+    },
+    title: {
+      fontFamily: typography.serifBold,
+      fontSize: 16,
+      color: colors.ink,
+      marginBottom: 8,
+    },
+    input: {
+      backgroundColor: colors.surfaceRaised,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 6,
+      padding: 10,
+      fontFamily: typography.sans,
+      fontSize: 14,
+      color: colors.ink,
+      minHeight: 80,
+      textAlignVertical: 'top',
+    },
+    actions: {
+      flexDirection: 'row',
+      gap: 12,
+      alignItems: 'center',
+      marginTop: 10,
+    },
+    submitButton: {
+      paddingVertical: 10,
+      paddingHorizontal: 20,
+      borderRadius: 6,
+    },
+    submitText: {
+      fontFamily: typography.sansBold,
+      fontSize: 14,
+      color: '#fff',
+    },
+    cancelText: {
+      fontFamily: typography.sans,
+      fontSize: 14,
+      color: colors.textMuted,
+      textDecorationLine: 'underline',
+    },
+    successText: {
+      fontFamily: typography.sans,
+      fontSize: 14,
+      color: colors.success,
+      fontStyle: 'italic',
+    },
+  }), [colors]);
 
   if (!userId) return null;
 
@@ -83,70 +151,3 @@ export function AppealForm({ postId }: AppealFormProps) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    padding: 12,
-    backgroundColor: '#f5e6a0',
-    borderRadius: 8,
-    marginTop: 8,
-  },
-  appealButton: {
-    marginTop: 8,
-    padding: 10,
-    alignItems: 'center',
-  },
-  appealButtonText: {
-    fontFamily: typography.mono,
-    fontSize: 12,
-    color: colors.warning,
-    textDecorationLine: 'underline',
-    letterSpacing: 1,
-  },
-  title: {
-    fontFamily: typography.serifBold,
-    fontSize: 16,
-    color: colors.ink,
-    marginBottom: 8,
-  },
-  input: {
-    backgroundColor: '#fff',
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 6,
-    padding: 10,
-    fontFamily: typography.sans,
-    fontSize: 14,
-    color: colors.ink,
-    minHeight: 80,
-    textAlignVertical: 'top',
-  },
-  actions: {
-    flexDirection: 'row',
-    gap: 12,
-    alignItems: 'center',
-    marginTop: 10,
-  },
-  submitButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 6,
-  },
-  submitText: {
-    fontFamily: typography.sansBold,
-    fontSize: 14,
-    color: '#fff',
-  },
-  cancelText: {
-    fontFamily: typography.sans,
-    fontSize: 14,
-    color: colors.textMuted,
-    textDecorationLine: 'underline',
-  },
-  successText: {
-    fontFamily: typography.sans,
-    fontSize: 14,
-    color: colors.success,
-    fontStyle: 'italic',
-  },
-});

@@ -12,6 +12,8 @@ interface BallotButtonsProps {
   authorId: string;
   initialTdCount: number;
   initialFmCount: number;
+  /** Pre-fetched user vote to avoid per-post query. undefined = not pre-fetched (will query). */
+  prefetchedVote?: 'TD' | 'FUMBLE' | null;
 }
 
 export function BallotButtons({
@@ -19,6 +21,7 @@ export function BallotButtons({
   authorId,
   initialTdCount,
   initialFmCount,
+  prefetchedVote,
 }: BallotButtonsProps) {
   const colors = useColors();
   const { userId } = useAuth();
@@ -28,6 +31,12 @@ export function BallotButtons({
   const [fmCount, setFmCount] = useState(initialFmCount);
   const [voting, setVoting] = useState(false);
   const mountedRef = useRef(true);
+
+  // Sync counts when props change (e.g. pull-to-refresh)
+  useEffect(() => {
+    setTdCount(initialTdCount);
+    setFmCount(initialFmCount);
+  }, [initialTdCount, initialFmCount]);
 
   const styles = useMemo(() => StyleSheet.create({
     container: {
@@ -71,8 +80,12 @@ export function BallotButtons({
     };
   }, []);
 
-  // Check existing vote on mount
+  // Use pre-fetched vote if available, otherwise query on mount
   useEffect(() => {
+    if (prefetchedVote !== undefined) {
+      setVoted(prefetchedVote);
+      return;
+    }
     if (!userId) return;
 
     supabase
@@ -86,7 +99,7 @@ export function BallotButtons({
           setVoted(data.reaction_type as 'TD' | 'FUMBLE');
         }
       });
-  }, [userId, postId]);
+  }, [userId, postId, prefetchedVote]);
 
   const handleVote = useCallback(
     async (type: 'TD' | 'FUMBLE') => {
@@ -149,7 +162,7 @@ export function BallotButtons({
             await supabase.from('notifications').insert({
               type: 'TD',
               recipient_id: authorId,
-              sender_id: userId,
+              actor_id: userId,
               post_id: postId,
             });
           }

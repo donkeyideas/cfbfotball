@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import {
   View,
   Text,
@@ -23,7 +23,9 @@ import { AppHeader } from '@/components/navigation/AppHeader';
 import { Avatar } from '@/components/ui/Avatar';
 import { OrnamentDivider } from '@/components/ui/OrnamentDivider';
 import { LoadingScreen } from '@/components/ui/LoadingScreen';
+import { AuthGate } from '@/components/ui/AuthGate';
 import { typography } from '@/lib/theme/typography';
+import Constants from 'expo-constants';
 
 interface SchoolOption {
   id: string;
@@ -50,7 +52,7 @@ const DEFAULT_PREFS: NotificationPrefs = {
   moderation_notifications: true,
 };
 
-const APP_VERSION = '1.0.0';
+const APP_VERSION = Constants.expoConfig?.version ?? '1.0.0';
 
 export default function SettingsScreen() {
   const router = useRouter();
@@ -130,6 +132,8 @@ export default function SettingsScreen() {
     loadData();
   }, [session, userId, profile]);
 
+  const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const searchSchools = useCallback(async (query: string) => {
     setSchoolSearch(query);
     if (query.length < 2) {
@@ -137,15 +141,18 @@ export default function SettingsScreen() {
       return;
     }
 
-    const { data } = await supabase
-      .from('schools')
-      .select('id, name, abbreviation, primary_color')
-      .ilike('name', `%${query}%`)
-      .limit(20);
+    if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+    searchTimerRef.current = setTimeout(async () => {
+      const { data } = await supabase
+        .from('schools')
+        .select('id, name, abbreviation, primary_color')
+        .ilike('name', `%${query}%`)
+        .limit(20);
 
-    if (data) {
-      setSchools(data as SchoolOption[]);
-    }
+      if (data) {
+        setSchools(data as SchoolOption[]);
+      }
+    }, 300);
   }, []);
 
   async function handlePickAvatar() {
@@ -250,6 +257,17 @@ export default function SettingsScreen() {
 
   if (loading) {
     return <LoadingScreen />;
+  }
+
+  if (!session) {
+    return (
+      <>
+        <AppHeader />
+        <View style={{ flex: 1, backgroundColor: colors.paper }}>
+          <AuthGate message="Sign in to manage your settings" />
+        </View>
+      </>
+    );
   }
 
   return (
@@ -444,7 +462,7 @@ export default function SettingsScreen() {
           disabled={saving}
         >
           {saving ? (
-            <ActivityIndicator color="#ffffff" />
+            <ActivityIndicator color={colors.textInverse} />
           ) : (
             <Text style={styles.saveButtonText}>Save Changes</Text>
           )}
@@ -458,6 +476,30 @@ export default function SettingsScreen() {
         <Pressable style={[styles.signOutButton, { borderColor: dark }]} onPress={handleSignOut}>
           <Text style={[styles.signOutText, { color: dark }]}>Sign Out</Text>
         </Pressable>
+
+        <Pressable
+          style={[styles.signOutButton, { borderColor: colors.crimson }]}
+          onPress={() => router.push('/delete-account' as never)}
+        >
+          <Text style={[styles.signOutText, { color: colors.crimson }]}>Delete Account</Text>
+        </Pressable>
+
+        <OrnamentDivider />
+
+        {/* ===================== LEGAL ===================== */}
+        <Text style={styles.sectionTitle}>Legal</Text>
+
+        <View style={{ gap: 8 }}>
+          <Pressable onPress={() => router.push('/privacy' as never)}>
+            <Text style={{ fontFamily: typography.sans, fontSize: 15, color: colors.textSecondary, textDecorationLine: 'underline' }}>Privacy Policy</Text>
+          </Pressable>
+          <Pressable onPress={() => router.push('/terms' as never)}>
+            <Text style={{ fontFamily: typography.sans, fontSize: 15, color: colors.textSecondary, textDecorationLine: 'underline' }}>Terms of Service</Text>
+          </Pressable>
+          <Pressable onPress={() => router.push('/contact' as never)}>
+            <Text style={{ fontFamily: typography.sans, fontSize: 15, color: colors.textSecondary, textDecorationLine: 'underline' }}>Contact Us</Text>
+          </Pressable>
+        </View>
 
         <Text style={styles.versionText}>CFB Social v{APP_VERSION}</Text>
       </ScrollView>
@@ -633,7 +675,7 @@ function useStyles(c: ColorPalette) {
     saveButtonText: {
       fontFamily: typography.sansBold,
       fontSize: 16,
-      color: '#ffffff',
+      color: c.textInverse,
     },
     signOutButton: {
       borderWidth: 1,

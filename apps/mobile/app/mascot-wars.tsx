@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -16,7 +16,7 @@ import { AppHeader } from '@/components/navigation/AppHeader';
 import { SectionLabel } from '@/components/ui/SectionLabel';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { MatchupCard, type MatchupData } from '@/components/mascot-wars/MatchupCard';
-import { colors } from '@/lib/theme/colors';
+import { useColors } from '@/lib/theme/ThemeProvider';
 import { typography } from '@/lib/theme/typography';
 
 const ROUND_LABELS: Record<number, string> = {
@@ -35,6 +35,7 @@ const MATCHUP_SELECT = `
 `;
 
 export default function MascotWarsScreen() {
+  const colors = useColors();
   const { userId } = useAuth();
   const { dark } = useSchoolTheme();
   const [bracketId, setBracketId] = useState<string | null>(null);
@@ -45,6 +46,50 @@ export default function MascotWarsScreen() {
   const [activeRound, setActiveRound] = useState<number>(1);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.paper,
+    },
+    loaderContainer: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    bracketName: {
+      fontFamily: typography.serifBold,
+      fontSize: 18,
+      color: colors.textPrimary,
+      textAlign: 'center',
+      paddingHorizontal: 16,
+      paddingBottom: 8,
+    },
+    roundScrollContainer: {
+      maxHeight: 44,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+    },
+    roundScroll: {
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+      gap: 8,
+    },
+    roundPill: {
+      paddingHorizontal: 14,
+      paddingVertical: 6,
+      borderRadius: 16,
+    },
+    roundPillText: {
+      fontFamily: typography.sansSemiBold,
+      fontSize: 12,
+    },
+    listContent: {
+      padding: 16,
+      gap: 12,
+      paddingBottom: 40,
+    },
+  }), [colors]);
 
   const fetchData = useCallback(async () => {
     // 1. Fetch active bracket
@@ -129,6 +174,17 @@ export default function MascotWarsScreen() {
     setUserVotes((prev) => ({ ...prev, [matchupId]: schoolId }));
   };
 
+  const renderItem = useCallback(
+    ({ item }: { item: MatchupData }) => (
+      <MatchupCard
+        matchup={item}
+        userVoteSchoolId={userVotes[item.id] || null}
+        onVoted={handleVoted}
+      />
+    ),
+    [userVotes]
+  );
+
   const currentMatchups = matchupsByRound[activeRound] || [];
 
   if (loading) {
@@ -202,13 +258,11 @@ export default function MascotWarsScreen() {
       <FlatList
         data={currentMatchups}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <MatchupCard
-            matchup={item}
-            userVoteSchoolId={userVotes[item.id] || null}
-            onVoted={handleVoted}
-          />
-        )}
+        renderItem={renderItem}
+        removeClippedSubviews
+        maxToRenderPerBatch={8}
+        initialNumToRender={6}
+        windowSize={5}
         contentContainerStyle={styles.listContent}
         refreshControl={
           <RefreshControl
@@ -227,47 +281,3 @@ export default function MascotWarsScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.paper,
-  },
-  loaderContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  bracketName: {
-    fontFamily: typography.serifBold,
-    fontSize: 18,
-    color: colors.textPrimary,
-    textAlign: 'center',
-    paddingHorizontal: 16,
-    paddingBottom: 8,
-  },
-  roundScrollContainer: {
-    maxHeight: 44,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  roundScroll: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    gap: 8,
-  },
-  roundPill: {
-    paddingHorizontal: 14,
-    paddingVertical: 6,
-    borderRadius: 16,
-  },
-  roundPillText: {
-    fontFamily: typography.sansSemiBold,
-    fontSize: 12,
-  },
-  listContent: {
-    padding: 16,
-    gap: 12,
-    paddingBottom: 40,
-  },
-});

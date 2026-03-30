@@ -1,7 +1,7 @@
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { View, Text, StyleSheet, Animated } from 'react-native';
 import { supabase } from '@/lib/supabase';
-import { colors } from '@/lib/theme/colors';
+import { useColors } from '@/lib/theme/ThemeProvider';
 import { typography } from '@/lib/theme/typography';
 
 interface ChaosLevel {
@@ -27,9 +27,71 @@ function getChaosLevel(score: number): ChaosLevel {
 }
 
 export function ChaosMeter() {
+  const colors = useColors();
   const [score, setScore] = useState(0);
   const [loading, setLoading] = useState(true);
   const barWidth = useRef(new Animated.Value(0)).current;
+
+  const styles = useMemo(() => StyleSheet.create({
+    card: {
+      backgroundColor: colors.surfaceRaised,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 12,
+      padding: 16,
+      alignItems: 'center',
+      gap: 8,
+    },
+    title: {
+      fontFamily: typography.serifBold,
+      fontSize: 16,
+      color: colors.ink,
+      letterSpacing: 0.5,
+    },
+    scoreRow: {
+      flexDirection: 'row',
+      alignItems: 'baseline',
+    },
+    scoreNumber: {
+      fontFamily: typography.serifBold,
+      fontSize: 36,
+    },
+    scoreMax: {
+      fontFamily: typography.mono,
+      fontSize: 14,
+      color: colors.textMuted,
+      marginLeft: 2,
+    },
+    barBg: {
+      width: '100%',
+      height: 10,
+      borderRadius: 5,
+      backgroundColor: colors.surface,
+      overflow: 'hidden',
+    },
+    barFill: {
+      height: '100%',
+      borderRadius: 5,
+    },
+    levelBadge: {
+      paddingHorizontal: 12,
+      paddingVertical: 4,
+      borderRadius: 10,
+      marginTop: 4,
+    },
+    levelText: {
+      fontFamily: typography.sansBold,
+      fontSize: 11,
+      color: colors.textInverse,
+      letterSpacing: 1,
+      textTransform: 'uppercase',
+    },
+    levelDescription: {
+      fontFamily: typography.sans,
+      fontSize: 12,
+      color: colors.textMuted,
+    },
+  }), [colors]);
 
   const fetchChaosData = useCallback(async () => {
     const twentyFourHoursAgo = new Date(
@@ -135,64 +197,3 @@ export function ChaosMeter() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: colors.surfaceRaised,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 12,
-    padding: 16,
-    alignItems: 'center',
-    gap: 8,
-  },
-  title: {
-    fontFamily: typography.serifBold,
-    fontSize: 16,
-    color: colors.ink,
-    letterSpacing: 0.5,
-  },
-  scoreRow: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-  },
-  scoreNumber: {
-    fontFamily: typography.serifBold,
-    fontSize: 36,
-  },
-  scoreMax: {
-    fontFamily: typography.mono,
-    fontSize: 14,
-    color: colors.textMuted,
-    marginLeft: 2,
-  },
-  barBg: {
-    width: '100%',
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: colors.surface,
-    overflow: 'hidden',
-  },
-  barFill: {
-    height: '100%',
-    borderRadius: 5,
-  },
-  levelBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 10,
-    marginTop: 4,
-  },
-  levelText: {
-    fontFamily: typography.sansBold,
-    fontSize: 11,
-    color: colors.textInverse,
-    letterSpacing: 1,
-    textTransform: 'uppercase',
-  },
-  levelDescription: {
-    fontFamily: typography.sans,
-    fontSize: 12,
-    color: colors.textMuted,
-  },
-});

@@ -1,7 +1,7 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useMemo } from 'react';
 import { View, Text, StyleSheet, Animated } from 'react-native';
 import { typography } from '@/lib/theme/typography';
-import { colors } from '@/lib/theme/colors';
+import { useColors } from '@/lib/theme/ThemeProvider';
 
 interface VoteBarProps {
   school1Color: string;
@@ -16,12 +16,43 @@ export function VoteBar({
   school1Votes,
   school2Votes,
 }: VoteBarProps) {
+  const colors = useColors();
   const total = school1Votes + school2Votes;
   const pct1 = total > 0 ? Math.round((school1Votes / total) * 100) : 50;
   const pct2 = total > 0 ? 100 - pct1 : 50;
 
   const animatedWidth1 = useRef(new Animated.Value(0)).current;
   const animatedWidth2 = useRef(new Animated.Value(0)).current;
+
+  const styles = useMemo(() => StyleSheet.create({
+    wrapper: {
+      gap: 4,
+    },
+    barContainer: {
+      flexDirection: 'row',
+      height: 10,
+      borderRadius: 5,
+      overflow: 'hidden',
+      backgroundColor: colors.surface,
+    },
+    segment: {
+      height: '100%',
+    },
+    labelRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    pctLabel: {
+      fontFamily: typography.sansBold,
+      fontSize: 12,
+    },
+    totalLabel: {
+      fontFamily: typography.sans,
+      fontSize: 10,
+      color: colors.textMuted,
+    },
+  }), [colors]);
 
   useEffect(() => {
     Animated.parallel([
@@ -78,33 +109,3 @@ export function VoteBar({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  wrapper: {
-    gap: 4,
-  },
-  barContainer: {
-    flexDirection: 'row',
-    height: 10,
-    borderRadius: 5,
-    overflow: 'hidden',
-    backgroundColor: '#e0d8cc',
-  },
-  segment: {
-    height: '100%',
-  },
-  labelRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  pctLabel: {
-    fontFamily: typography.sansBold,
-    fontSize: 12,
-  },
-  totalLabel: {
-    fontFamily: typography.sans,
-    fontSize: 10,
-    color: colors.textMuted,
-  },
-});

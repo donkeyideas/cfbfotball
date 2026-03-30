@@ -1,6 +1,7 @@
+import { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { typography } from '@/lib/theme/typography';
-import { colors } from '@/lib/theme/colors';
+import { useColors } from '@/lib/theme/ThemeProvider';
 
 const CATEGORY_ABBREV: Record<string, string> = {
   SOCIAL: 'S',
@@ -34,8 +35,93 @@ function formatDate(dateStr: string): string {
 }
 
 export function AchievementCard({ achievement }: AchievementCardProps) {
+  const colors = useColors();
   const isUnlocked = achievement.unlocked !== false && !!achievement.earned_at;
   const abbrev = CATEGORY_ABBREV[achievement.category] || achievement.category?.[0] || '?';
+
+  const styles = useMemo(() => StyleSheet.create({
+    card: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+      backgroundColor: colors.surfaceRaised,
+      borderWidth: 1,
+      borderRadius: 10,
+      padding: 12,
+    },
+    unlocked: {
+      borderColor: colors.secondary,
+      opacity: 1,
+    },
+    locked: {
+      borderColor: colors.border,
+      opacity: 0.6,
+    },
+    iconCircle: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: colors.surface,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    iconCircleUnlocked: {
+      backgroundColor: colors.secondary,
+    },
+    iconText: {
+      fontFamily: typography.sansBold,
+      fontSize: 14,
+      color: colors.textMuted,
+    },
+    iconTextUnlocked: {
+      color: colors.textInverse,
+    },
+    content: {
+      flex: 1,
+      gap: 2,
+    },
+    name: {
+      fontFamily: typography.serifBold,
+      fontSize: 14,
+      color: colors.textPrimary,
+    },
+    description: {
+      fontFamily: typography.sans,
+      fontSize: 12,
+      color: colors.textSecondary,
+      lineHeight: 16,
+    },
+    earnedDate: {
+      fontFamily: typography.mono,
+      fontSize: 10,
+      color: colors.success,
+      marginTop: 2,
+      letterSpacing: 0.3,
+    },
+    lockedText: {
+      color: colors.textMuted,
+    },
+    xpBadge: {
+      paddingHorizontal: 8,
+      paddingVertical: 3,
+      borderRadius: 4,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    xpBadgeUnlocked: {
+      borderColor: colors.secondary,
+      backgroundColor: colors.secondary,
+    },
+    xpText: {
+      fontFamily: typography.mono,
+      fontSize: 10,
+      color: colors.textMuted,
+      letterSpacing: 0.5,
+    },
+    xpTextUnlocked: {
+      color: colors.textInverse,
+    },
+  }), [colors]);
 
   return (
     <View style={[styles.card, isUnlocked ? styles.unlocked : styles.locked]}>
@@ -72,87 +158,3 @@ export function AchievementCard({ achievement }: AchievementCardProps) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  card: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    backgroundColor: colors.surfaceRaised,
-    borderWidth: 1,
-    borderRadius: 10,
-    padding: 12,
-  },
-  unlocked: {
-    borderColor: colors.secondary,
-    opacity: 1,
-  },
-  locked: {
-    borderColor: colors.border,
-    opacity: 0.6,
-  },
-  iconCircle: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: colors.surface,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  iconCircleUnlocked: {
-    backgroundColor: colors.secondary,
-  },
-  iconText: {
-    fontFamily: typography.sansBold,
-    fontSize: 14,
-    color: colors.textMuted,
-  },
-  iconTextUnlocked: {
-    color: colors.textInverse,
-  },
-  content: {
-    flex: 1,
-    gap: 2,
-  },
-  name: {
-    fontFamily: typography.serifBold,
-    fontSize: 14,
-    color: colors.textPrimary,
-  },
-  description: {
-    fontFamily: typography.sans,
-    fontSize: 12,
-    color: colors.textSecondary,
-    lineHeight: 16,
-  },
-  earnedDate: {
-    fontFamily: typography.mono,
-    fontSize: 10,
-    color: colors.success,
-    marginTop: 2,
-    letterSpacing: 0.3,
-  },
-  lockedText: {
-    color: colors.textMuted,
-  },
-  xpBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 4,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  xpBadgeUnlocked: {
-    borderColor: colors.secondary,
-    backgroundColor: colors.secondary,
-  },
-  xpText: {
-    fontFamily: typography.mono,
-    fontSize: 10,
-    color: colors.textMuted,
-    letterSpacing: 0.5,
-  },
-  xpTextUnlocked: {
-    color: colors.textInverse,
-  },
-});

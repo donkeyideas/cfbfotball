@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Bell } from 'lucide-react-native';
@@ -6,15 +6,42 @@ import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { useRealtimeNotifications } from '@/lib/hooks/useRealtimeNotifications';
 import { useSchoolTheme } from '@/lib/theme/SchoolThemeProvider';
-import { colors } from '@/lib/theme/colors';
+import { useColors } from '@/lib/theme/ThemeProvider';
 import { typography } from '@/lib/theme/typography';
 
 export function NotificationBell() {
+  const colors = useColors();
   const { userId } = useAuth();
   const { dark } = useSchoolTheme();
   const router = useRouter();
   const { unreadCount: realtimeCount, resetCount } = useRealtimeNotifications(userId);
   const [initialCount, setInitialCount] = useState(0);
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      padding: 6,
+      position: 'relative',
+    },
+    badge: {
+      position: 'absolute',
+      top: 0,
+      right: 0,
+      borderRadius: 10,
+      minWidth: 18,
+      height: 18,
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingHorizontal: 4,
+      borderWidth: 1.5,
+      borderColor: colors.dark,
+    },
+    badgeText: {
+      fontFamily: typography.sansBold,
+      fontSize: 10,
+      color: colors.textInverse,
+      lineHeight: 14,
+    },
+  }), [colors]);
 
   useEffect(() => {
     if (!userId) return;
@@ -55,29 +82,3 @@ export function NotificationBell() {
     </Pressable>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    padding: 6,
-    position: 'relative',
-  },
-  badge: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    borderRadius: 10,
-    minWidth: 18,
-    height: 18,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 4,
-    borderWidth: 1.5,
-    borderColor: colors.dark,
-  },
-  badgeText: {
-    fontFamily: typography.sansBold,
-    fontSize: 10,
-    color: colors.textInverse,
-    lineHeight: 14,
-  },
-});

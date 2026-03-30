@@ -1,6 +1,7 @@
+import { useMemo } from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
-import { colors } from '@/lib/theme/colors';
+import { useColors } from '@/lib/theme/ThemeProvider';
 import { typography } from '@/lib/theme/typography';
 
 type ActivityLevel = 'LOW' | 'MODERATE' | 'HIGH' | 'VERY HIGH';
@@ -27,12 +28,12 @@ function getActivityLevel(total: number): ActivityLevel {
   return 'LOW';
 }
 
-function getActivityColor(level: ActivityLevel): string {
+function getActivityColor(level: ActivityLevel, successColor: string): string {
   switch (level) {
     case 'VERY HIGH': return '#c0392b';
     case 'HIGH': return '#e67e22';
     case 'MODERATE': return '#f1c40f';
-    case 'LOW': return colors.success;
+    case 'LOW': return successColor;
   }
 }
 
@@ -42,11 +43,93 @@ function getActivityBarWidth(total: number): number {
 }
 
 export function SchoolCard({ school }: SchoolCardProps) {
+  const colors = useColors();
   const router = useRouter();
   const total = school.portalCount + school.claimsCount;
   const level = getActivityLevel(total);
-  const activityColor = getActivityColor(level);
+  const activityColor = getActivityColor(level, colors.success);
   const barWidth = getActivityBarWidth(total);
+
+  const styles = useMemo(() => StyleSheet.create({
+    card: {
+      flex: 1,
+      backgroundColor: colors.surfaceRaised,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 10,
+      overflow: 'hidden',
+      margin: 4,
+    },
+    topBar: {
+      height: 6,
+    },
+    content: {
+      padding: 10,
+      gap: 4,
+    },
+    schoolName: {
+      fontFamily: typography.serifBold,
+      fontSize: 13,
+      color: colors.textPrimary,
+    },
+    abbreviation: {
+      fontFamily: typography.mono,
+      fontSize: 10,
+      color: colors.textMuted,
+      letterSpacing: 1,
+    },
+    statsRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginTop: 6,
+      gap: 8,
+    },
+    statItem: {
+      alignItems: 'center',
+      gap: 1,
+    },
+    statValue: {
+      fontFamily: typography.sansBold,
+      fontSize: 16,
+      color: colors.textPrimary,
+    },
+    statLabel: {
+      fontFamily: typography.sans,
+      fontSize: 9,
+      color: colors.textMuted,
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
+    },
+    statDivider: {
+      width: 1,
+      height: 20,
+      backgroundColor: colors.border,
+    },
+    activityBadge: {
+      alignSelf: 'center',
+      paddingHorizontal: 8,
+      paddingVertical: 2,
+      borderRadius: 8,
+      marginTop: 4,
+    },
+    activityBadgeText: {
+      fontFamily: typography.mono,
+      fontSize: 8,
+      letterSpacing: 0.8,
+    },
+    activityBarBg: {
+      height: 4,
+      borderRadius: 2,
+      backgroundColor: colors.surface,
+      overflow: 'hidden',
+      marginTop: 4,
+    },
+    activityBarFill: {
+      height: '100%',
+      borderRadius: 2,
+    },
+  }), [colors]);
 
   return (
     <Pressable
@@ -92,84 +175,3 @@ export function SchoolCard({ school }: SchoolCardProps) {
     </Pressable>
   );
 }
-
-const styles = StyleSheet.create({
-  card: {
-    flex: 1,
-    backgroundColor: colors.surfaceRaised,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 10,
-    overflow: 'hidden',
-    margin: 4,
-  },
-  topBar: {
-    height: 6,
-  },
-  content: {
-    padding: 10,
-    gap: 4,
-  },
-  schoolName: {
-    fontFamily: typography.serifBold,
-    fontSize: 13,
-    color: colors.textPrimary,
-  },
-  abbreviation: {
-    fontFamily: typography.mono,
-    fontSize: 10,
-    color: colors.textMuted,
-    letterSpacing: 1,
-  },
-  statsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 6,
-    gap: 8,
-  },
-  statItem: {
-    alignItems: 'center',
-    gap: 1,
-  },
-  statValue: {
-    fontFamily: typography.sansBold,
-    fontSize: 16,
-    color: colors.textPrimary,
-  },
-  statLabel: {
-    fontFamily: typography.sans,
-    fontSize: 9,
-    color: colors.textMuted,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  statDivider: {
-    width: 1,
-    height: 20,
-    backgroundColor: colors.border,
-  },
-  activityBadge: {
-    alignSelf: 'center',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 8,
-    marginTop: 4,
-  },
-  activityBadgeText: {
-    fontFamily: typography.mono,
-    fontSize: 8,
-    letterSpacing: 0.8,
-  },
-  activityBarBg: {
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: colors.surface,
-    overflow: 'hidden',
-    marginTop: 4,
-  },
-  activityBarFill: {
-    height: '100%',
-    borderRadius: 2,
-  },
-});

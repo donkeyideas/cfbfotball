@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -18,7 +18,7 @@ import { AuthGate } from '@/components/ui/AuthGate';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { SchoolBadge } from '@/components/ui/SchoolBadge';
 import { DynastyBadge } from '@/components/ui/DynastyBadge';
-import { colors } from '@/lib/theme/colors';
+import { useColors } from '@/lib/theme/ThemeProvider';
 import { typography } from '@/lib/theme/typography';
 import { timeAgo } from '@/lib/utils/timeAgo';
 
@@ -65,12 +65,100 @@ const BOOKMARK_SELECT = `
 `;
 
 export default function VaultScreen() {
+  const colors = useColors();
   const router = useRouter();
   const { session, userId } = useAuth();
   const { dark } = useSchoolTheme();
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.paper,
+    },
+    loaderContainer: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    counterRow: {
+      paddingHorizontal: 16,
+      paddingVertical: 8,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+    },
+    counterText: {
+      fontFamily: typography.mono,
+      fontSize: 11,
+      color: colors.textMuted,
+      letterSpacing: 1,
+      textTransform: 'uppercase',
+    },
+    listContent: {
+      padding: 16,
+      gap: 10,
+      paddingBottom: 40,
+    },
+    bookmarkCard: {
+      flexDirection: 'row',
+      backgroundColor: colors.surfaceRaised,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 10,
+      overflow: 'hidden',
+    },
+    colorStripe: {
+      width: 4,
+    },
+    bookmarkContent: {
+      flex: 1,
+      padding: 12,
+      gap: 8,
+    },
+    authorRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+    },
+    authorName: {
+      fontFamily: typography.sansSemiBold,
+      fontSize: 13,
+      color: colors.textPrimary,
+      flex: 1,
+    },
+    postPreview: {
+      fontFamily: typography.sans,
+      fontSize: 14,
+      color: colors.textSecondary,
+      lineHeight: 20,
+    },
+    statsRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+    },
+    stat: {
+      fontFamily: typography.mono,
+      fontSize: 10,
+      color: colors.textMuted,
+      letterSpacing: 0.5,
+    },
+    statDivider: {
+      fontFamily: typography.sans,
+      fontSize: 10,
+      color: colors.border,
+    },
+    spacer: {
+      flex: 1,
+    },
+    savedDate: {
+      fontFamily: typography.sans,
+      fontSize: 11,
+      color: colors.textMuted,
+    },
+  }), [colors]);
 
   const fetchBookmarks = useCallback(async () => {
     if (!userId) return;
@@ -114,7 +202,7 @@ export default function VaultScreen() {
 
   const validBookmarks = bookmarks.filter((b) => b.post != null);
 
-  const renderBookmark = ({ item }: { item: Bookmark }) => {
+  const renderBookmark = useCallback(({ item }: { item: Bookmark }) => {
     const post = item.post;
     if (!post) return null;
 
@@ -174,7 +262,7 @@ export default function VaultScreen() {
         </View>
       </Pressable>
     );
-  };
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -197,6 +285,10 @@ export default function VaultScreen() {
           data={validBookmarks}
           keyExtractor={(item) => item.id}
           renderItem={renderBookmark}
+          removeClippedSubviews
+          maxToRenderPerBatch={8}
+          initialNumToRender={6}
+          windowSize={5}
           contentContainerStyle={styles.listContent}
           refreshControl={
             <RefreshControl
@@ -216,92 +308,3 @@ export default function VaultScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.paper,
-  },
-  loaderContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  counterRow: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  counterText: {
-    fontFamily: typography.mono,
-    fontSize: 11,
-    color: colors.textMuted,
-    letterSpacing: 1,
-    textTransform: 'uppercase',
-  },
-  listContent: {
-    padding: 16,
-    gap: 10,
-    paddingBottom: 40,
-  },
-
-  // Bookmark card
-  bookmarkCard: {
-    flexDirection: 'row',
-    backgroundColor: colors.surfaceRaised,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 10,
-    overflow: 'hidden',
-  },
-  colorStripe: {
-    width: 4,
-  },
-  bookmarkContent: {
-    flex: 1,
-    padding: 12,
-    gap: 8,
-  },
-  authorRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  authorName: {
-    fontFamily: typography.sansSemiBold,
-    fontSize: 13,
-    color: colors.textPrimary,
-    flex: 1,
-  },
-  postPreview: {
-    fontFamily: typography.sans,
-    fontSize: 14,
-    color: colors.textSecondary,
-    lineHeight: 20,
-  },
-  statsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  stat: {
-    fontFamily: typography.mono,
-    fontSize: 10,
-    color: colors.textMuted,
-    letterSpacing: 0.5,
-  },
-  statDivider: {
-    fontFamily: typography.sans,
-    fontSize: 10,
-    color: colors.border,
-  },
-  spacer: {
-    flex: 1,
-  },
-  savedDate: {
-    fontFamily: typography.sans,
-    fontSize: 11,
-    color: colors.textMuted,
-  },
-});

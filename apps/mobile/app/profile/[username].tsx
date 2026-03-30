@@ -271,6 +271,11 @@ export default function ProfileScreen() {
     return <LoadingScreen />;
   }
 
+  const renderItem = useCallback(
+    ({ item }: { item: PostData }) => <PostCard post={item} />,
+    []
+  );
+
   const displayName = profile.display_name || profile.username;
   const schoolColor = profile.school?.primary_color;
 
@@ -374,7 +379,11 @@ export default function ProfileScreen() {
       <FlatList
         data={posts}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <PostCard post={item} />}
+        renderItem={renderItem}
+        removeClippedSubviews
+        maxToRenderPerBatch={8}
+        initialNumToRender={6}
+        windowSize={5}
         ListHeaderComponent={headerComponent}
         ListEmptyComponent={
           <EmptyState

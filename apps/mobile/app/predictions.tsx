@@ -102,7 +102,8 @@ export default function PredictionsScreen() {
     const { data, error } = await supabase
       .from('predictions')
       .select(PREDICTION_SELECT)
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false })
+      .limit(50);
 
     if (!error && data) {
       setPredictions(data as unknown as PredictionData[]);
@@ -121,6 +122,11 @@ export default function PredictionsScreen() {
     setRefreshing(true);
     fetchPredictions();
   };
+
+  const renderItem = useCallback(
+    ({ item }: { item: PredictionData }) => <PredictionCard prediction={item} />,
+    []
+  );
 
   const handleCreated = () => {
     fetchPredictions();
@@ -169,7 +175,11 @@ export default function PredictionsScreen() {
           <FlatList
             data={predictions}
             keyExtractor={(item) => item.id}
-            renderItem={({ item }) => <PredictionCard prediction={item} />}
+            renderItem={renderItem}
+            removeClippedSubviews
+            maxToRenderPerBatch={8}
+            initialNumToRender={6}
+            windowSize={5}
             contentContainerStyle={styles.listContent}
             refreshControl={
               <RefreshControl

@@ -94,7 +94,7 @@ export function FollowButton({ targetUserId }: FollowButtonProps) {
 
       // Insert FOLLOW notification
       await supabase.from('notifications').insert({
-        user_id: targetUserId,
+        recipient_id: targetUserId,
         actor_id: userId,
         type: 'FOLLOW',
       });

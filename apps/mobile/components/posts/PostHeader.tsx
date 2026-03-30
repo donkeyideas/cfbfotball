@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { memo, useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Avatar } from '@/components/ui/Avatar';
@@ -26,7 +26,7 @@ interface PostHeaderProps {
   invertColors?: boolean;
 }
 
-export function PostHeader({ author, createdAt, invertColors }: PostHeaderProps) {
+export const PostHeader = memo(function PostHeader({ author, createdAt, invertColors }: PostHeaderProps) {
   const colors = useColors();
   const router = useRouter();
   const displayName = author?.display_name || author?.username || 'Anonymous';
@@ -107,4 +107,4 @@ export function PostHeader({ author, createdAt, invertColors }: PostHeaderProps)
       </Text>
     </View>
   );
-}
+});

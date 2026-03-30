@@ -14,11 +14,7 @@ import { useSchoolTheme } from '@/lib/theme/SchoolThemeProvider';
 import { useColors } from '@/lib/theme/ThemeProvider';
 import { typography } from '@/lib/theme/typography';
 import { withAlpha } from '@/lib/theme/utils';
-
-const ESPN_URL =
-  'https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard';
-
-const REFRESH_INTERVAL = 60_000;
+import { ESPN_SCOREBOARD_URL, GAMES_REFRESH_MS } from '@/lib/constants';
 const SCROLL_SPEED = 30; // pixels per second
 const ITEM_WIDTH = 140;
 const ITEM_GAP = 8;
@@ -116,7 +112,7 @@ export function ScoresBanner() {
 
   const fetchScores = useCallback(async () => {
     try {
-      const res = await fetch(ESPN_URL);
+      const res = await fetch(ESPN_SCOREBOARD_URL);
       const json = await res.json();
       const events: EspnEvent[] = json.events ?? [];
 
@@ -145,7 +141,7 @@ export function ScoresBanner() {
 
   useEffect(() => {
     fetchScores();
-    intervalRef.current = setInterval(fetchScores, REFRESH_INTERVAL);
+    intervalRef.current = setInterval(fetchScores, GAMES_REFRESH_MS);
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };

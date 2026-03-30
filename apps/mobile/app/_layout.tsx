@@ -66,6 +66,9 @@ function AppShell() {
             <Stack.Screen name="receipts" options={{ headerShown: false }} />
             <Stack.Screen name="contact" options={{ headerShown: false }} />
             <Stack.Screen name="notifications" options={{ headerShown: false }} />
+            <Stack.Screen name="privacy" options={{ headerShown: false }} />
+            <Stack.Screen name="terms" options={{ headerShown: false }} />
+            <Stack.Screen name="delete-account" options={{ headerShown: false }} />
           </Stack>
         </View>
       </MenuProvider>

@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { View, StyleSheet, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { supabase } from '@/lib/supabase';
@@ -8,8 +8,9 @@ import { AppHeader } from '@/components/navigation/AppHeader';
 import { LiveScoreboard } from '@/components/war-room/LiveScoreboard';
 import { GameChat } from '@/components/war-room/GameChat';
 import { ChatInput } from '@/components/war-room/ChatInput';
-import { colors } from '@/lib/theme/colors';
+import { useColors } from '@/lib/theme/ThemeProvider';
 import { useSchoolTheme } from '@/lib/theme/SchoolThemeProvider';
+import { ESPN_SCOREBOARD_URL } from '@/lib/constants';
 
 const MESSAGE_SELECT = `
   *,
@@ -19,6 +20,7 @@ const MESSAGE_SELECT = `
 `;
 
 export default function GameThreadScreen() {
+  const colors = useColors();
   const { dark } = useSchoolTheme();
   const { gameId } = useLocalSearchParams<{ gameId: string }>();
   const { userId } = useAuth();
@@ -27,6 +29,21 @@ export default function GameThreadScreen() {
   const [gameName, setGameName] = useState('');
 
   const { messages, setMessages, viewerCount } = useRealtimeGameChat(threadId);
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.paper,
+    },
+    loaderContainer: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    chatContainer: {
+      flex: 1,
+    },
+  }), [colors]);
 
   // Find or create the game thread
   const findOrCreateThread = useCallback(async () => {
@@ -50,7 +67,7 @@ export default function GameThreadScreen() {
     // Fetch game info from ESPN to create thread
     try {
       const res = await fetch(
-        `https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard/${gameId}`
+        `${ESPN_SCOREBOARD_URL}/${gameId}`
       );
       const data = await res.json();
 
@@ -160,18 +177,3 @@ export default function GameThreadScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.paper,
-  },
-  loaderContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  chatContainer: {
-    flex: 1,
-  },
-});

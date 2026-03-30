@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -17,7 +17,7 @@ import { SectionLabel } from '@/components/ui/SectionLabel';
 import { AuthGate } from '@/components/ui/AuthGate';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { SchoolBadge } from '@/components/ui/SchoolBadge';
-import { colors } from '@/lib/theme/colors';
+import { useColors } from '@/lib/theme/ThemeProvider';
 import { typography } from '@/lib/theme/typography';
 
 interface ReceiptPost {
@@ -87,12 +87,134 @@ function daysRemaining(revisitDate: string): number {
 }
 
 export default function ReceiptsScreen() {
+  const colors = useColors();
   const router = useRouter();
   const { session, userId } = useAuth();
   const { dark } = useSchoolTheme();
   const [receipts, setReceipts] = useState<AgingTake[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.paper,
+    },
+    loaderContainer: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    counterRow: {
+      paddingHorizontal: 16,
+      paddingVertical: 8,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+    },
+    counterText: {
+      fontFamily: typography.mono,
+      fontSize: 11,
+      color: colors.textMuted,
+      letterSpacing: 1,
+      textTransform: 'uppercase',
+    },
+    listContent: {
+      padding: 16,
+      gap: 14,
+      paddingBottom: 40,
+    },
+    clipping: {
+      flexDirection: 'row',
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.borderStrong,
+      borderRadius: 2,
+      overflow: 'hidden',
+    },
+    colorStripe: {
+      width: 4,
+    },
+    clippingInner: {
+      flex: 1,
+      padding: 14,
+      gap: 6,
+    },
+    overline: {
+      fontFamily: typography.mono,
+      fontSize: 9,
+      color: colors.textMuted,
+      letterSpacing: 2,
+      textTransform: 'uppercase',
+    },
+    ruleLine: {
+      height: 1,
+      backgroundColor: colors.ink,
+      marginBottom: 2,
+    },
+    authorRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+    },
+    authorName: {
+      fontFamily: typography.sansSemiBold,
+      fontSize: 13,
+      color: colors.textSecondary,
+    },
+    headline: {
+      fontFamily: typography.serifBold,
+      fontSize: 15,
+      lineHeight: 21,
+      color: colors.ink,
+    },
+    statsRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      marginTop: 2,
+    },
+    stat: {
+      fontFamily: typography.mono,
+      fontSize: 11,
+      color: colors.textSecondary,
+      letterSpacing: 0.5,
+    },
+    statSep: {
+      fontFamily: typography.mono,
+      fontSize: 11,
+      color: colors.textMuted,
+    },
+    stampRow: {
+      alignItems: 'center',
+      marginTop: 6,
+    },
+    stamp: {
+      paddingHorizontal: 14,
+      paddingVertical: 5,
+      borderRadius: 2,
+    },
+    stampReady: {
+      backgroundColor: colors.ink,
+    },
+    stampPending: {
+      backgroundColor: 'transparent',
+      borderWidth: 1,
+      borderColor: colors.textMuted,
+      borderStyle: 'dashed',
+    },
+    stampText: {
+      fontFamily: typography.mono,
+      fontSize: 10,
+      letterSpacing: 1.5,
+      textTransform: 'uppercase',
+    },
+    stampReadyText: {
+      color: colors.textInverse,
+    },
+    stampPendingText: {
+      color: colors.textMuted,
+    },
+  }), [colors]);
 
   const fetchReceipts = useCallback(async () => {
     if (!userId) return;
@@ -135,7 +257,7 @@ export default function ReceiptsScreen() {
 
   const validReceipts = receipts.filter((r) => r.post != null);
 
-  const renderReceipt = ({ item }: { item: AgingTake }) => {
+  const renderReceipt = useCallback(({ item }: { item: AgingTake }) => {
     const post = item.post;
     if (!post) return null;
 
@@ -205,7 +327,7 @@ export default function ReceiptsScreen() {
         </View>
       </Pressable>
     );
-  };
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -228,6 +350,10 @@ export default function ReceiptsScreen() {
           data={validReceipts}
           keyExtractor={(item) => item.id}
           renderItem={renderReceipt}
+          removeClippedSubviews
+          maxToRenderPerBatch={8}
+          initialNumToRender={6}
+          windowSize={5}
           contentContainerStyle={styles.listContent}
           refreshControl={
             <RefreshControl
@@ -247,136 +373,3 @@ export default function ReceiptsScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.paper,
-  },
-  loaderContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  counterRow: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  counterText: {
-    fontFamily: typography.mono,
-    fontSize: 11,
-    color: colors.textMuted,
-    letterSpacing: 1,
-    textTransform: 'uppercase',
-  },
-  listContent: {
-    padding: 16,
-    gap: 14,
-    paddingBottom: 40,
-  },
-
-  // Newspaper clipping card
-  clipping: {
-    flexDirection: 'row',
-    backgroundColor: '#f0eacc',
-    borderWidth: 1,
-    borderColor: '#c8bf9e',
-    borderRadius: 2,
-    overflow: 'hidden',
-  },
-  colorStripe: {
-    width: 4,
-  },
-  clippingInner: {
-    flex: 1,
-    padding: 14,
-    gap: 6,
-  },
-
-  // Overline
-  overline: {
-    fontFamily: typography.mono,
-    fontSize: 9,
-    color: colors.textMuted,
-    letterSpacing: 2,
-    textTransform: 'uppercase',
-  },
-  ruleLine: {
-    height: 1,
-    backgroundColor: colors.ink,
-    marginBottom: 2,
-  },
-
-  // Author
-  authorRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  authorName: {
-    fontFamily: typography.sansSemiBold,
-    fontSize: 13,
-    color: colors.textSecondary,
-  },
-
-  // Headline
-  headline: {
-    fontFamily: typography.serifBold,
-    fontSize: 15,
-    lineHeight: 21,
-    color: colors.ink,
-  },
-
-  // Stats
-  statsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginTop: 2,
-  },
-  stat: {
-    fontFamily: typography.mono,
-    fontSize: 11,
-    color: colors.textSecondary,
-    letterSpacing: 0.5,
-  },
-  statSep: {
-    fontFamily: typography.mono,
-    fontSize: 11,
-    color: colors.textMuted,
-  },
-
-  // Receipt stamp
-  stampRow: {
-    alignItems: 'center',
-    marginTop: 6,
-  },
-  stamp: {
-    paddingHorizontal: 14,
-    paddingVertical: 5,
-    borderRadius: 2,
-  },
-  stampReady: {
-    backgroundColor: colors.ink,
-  },
-  stampPending: {
-    backgroundColor: 'transparent',
-    borderWidth: 1,
-    borderColor: colors.textMuted,
-    borderStyle: 'dashed',
-  },
-  stampText: {
-    fontFamily: typography.mono,
-    fontSize: 10,
-    letterSpacing: 1.5,
-    textTransform: 'uppercase',
-  },
-  stampReadyText: {
-    color: '#f0eacc',
-  },
-  stampPendingText: {
-    color: colors.textMuted,
-  },
-});

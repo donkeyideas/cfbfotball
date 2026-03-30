@@ -11,16 +11,20 @@ import { typography } from '@/lib/theme/typography';
 interface PostActionsProps {
   postId: string;
   postAuthorId: string;
+  onReport?: () => void;
+  /** Pre-fetched status to avoid per-post queries. undefined = not pre-fetched (will query). */
+  prefetchedReposted?: boolean;
+  prefetchedSaved?: boolean;
 }
 
-export function PostActions({ postId, postAuthorId }: PostActionsProps) {
+export function PostActions({ postId, postAuthorId, onReport, prefetchedReposted, prefetchedSaved }: PostActionsProps) {
   const colors = useColors();
   const { userId } = useAuth();
   const { dark } = useSchoolTheme();
   const router = useRouter();
   const { showAlert } = useThemedAlert();
-  const [reposted, setReposted] = useState(false);
-  const [saved, setSaved] = useState(false);
+  const [reposted, setReposted] = useState(prefetchedReposted ?? false);
+  const [saved, setSaved] = useState(prefetchedSaved ?? false);
   const [busy, setBusy] = useState(false);
   const mountedRef = useRef(true);
 
@@ -61,30 +65,35 @@ export function PostActions({ postId, postAuthorId }: PostActionsProps) {
     };
   }, []);
 
-  // Check existing repost/save status on mount
+  // Check existing repost/save status on mount (skip if pre-fetched)
   useEffect(() => {
     if (!userId) return;
+    if (prefetchedReposted !== undefined && prefetchedSaved !== undefined) return;
 
-    supabase
-      .from('reposts')
-      .select('id')
-      .eq('post_id', postId)
-      .eq('user_id', userId)
-      .maybeSingle()
-      .then(({ data }) => {
-        if (mountedRef.current && data) setReposted(true);
-      });
+    if (prefetchedReposted === undefined) {
+      supabase
+        .from('reposts')
+        .select('id')
+        .eq('post_id', postId)
+        .eq('user_id', userId)
+        .maybeSingle()
+        .then(({ data }) => {
+          if (mountedRef.current && data) setReposted(true);
+        });
+    }
 
-    supabase
-      .from('bookmarks')
-      .select('id')
-      .eq('post_id', postId)
-      .eq('user_id', userId)
-      .maybeSingle()
-      .then(({ data }) => {
-        if (mountedRef.current && data) setSaved(true);
-      });
-  }, [userId, postId]);
+    if (prefetchedSaved === undefined) {
+      supabase
+        .from('bookmarks')
+        .select('id')
+        .eq('post_id', postId)
+        .eq('user_id', userId)
+        .maybeSingle()
+        .then(({ data }) => {
+          if (mountedRef.current && data) setSaved(true);
+        });
+    }
+  }, [userId, postId, prefetchedReposted, prefetchedSaved]);
 
   const requireAuth = useCallback(
     (action: string): boolean => {
@@ -171,9 +180,12 @@ export function PostActions({ postId, postAuthorId }: PostActionsProps) {
 
   const handleFlag = useCallback(() => {
     if (!requireAuth('flag')) return;
-    // ReportModal will be wired later
-    showAlert('Under Review', 'Report functionality coming soon.');
-  }, [requireAuth]);
+    if (onReport) {
+      onReport();
+    } else {
+      showAlert('Flag', 'Report functionality coming soon.');
+    }
+  }, [requireAuth, onReport]);
 
   return (
     <View style={styles.container}>

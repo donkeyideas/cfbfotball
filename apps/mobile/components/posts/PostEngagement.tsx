@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { memo, useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useColors } from '@/lib/theme/ThemeProvider';
 import { typography } from '@/lib/theme/typography';
@@ -8,7 +8,7 @@ interface PostEngagementProps {
   fumbleCount: number;
 }
 
-export function PostEngagement({ touchdownCount, fumbleCount }: PostEngagementProps) {
+export const PostEngagement = memo(function PostEngagement({ touchdownCount, fumbleCount }: PostEngagementProps) {
   const colors = useColors();
 
   const styles = useMemo(() => StyleSheet.create({
@@ -44,4 +44,4 @@ export function PostEngagement({ touchdownCount, fumbleCount }: PostEngagementPr
       <Text style={styles.fmb}>{fumbleCount} FMB</Text>
     </View>
   );
-}
+});

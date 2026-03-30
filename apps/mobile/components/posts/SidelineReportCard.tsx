@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { memo, useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'expo-router';
@@ -14,7 +14,7 @@ interface SidelineReportCardProps {
   post: PostData;
 }
 
-export function SidelineReportCard({ post }: SidelineReportCardProps) {
+export const SidelineReportCard = memo(function SidelineReportCard({ post }: SidelineReportCardProps) {
   const colors = useColors();
   const router = useRouter();
   const [dotVisible, setDotVisible] = useState(true);
@@ -114,10 +114,11 @@ export function SidelineReportCard({ post }: SidelineReportCardProps) {
           authorId={post.author_id}
           initialTdCount={post.touchdown_count}
           initialFmCount={post.fumble_count}
+          prefetchedVote={post._userVote}
         />
 
-        <PostActions postId={post.id} postAuthorId={post.author_id} />
+        <PostActions postId={post.id} postAuthorId={post.author_id} prefetchedReposted={post._userReposted} prefetchedSaved={post._userSaved} />
       </View>
     </View>
   );
-}
+});

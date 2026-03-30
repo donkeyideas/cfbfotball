@@ -1,5 +1,6 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useMemo } from 'react';
 import { View, StyleSheet, Animated } from 'react-native';
+import { useColors } from '@/lib/theme/ThemeProvider';
 
 interface RivalryVoteBarProps {
   school1Color: string;
@@ -14,8 +15,22 @@ export function RivalryVoteBar({
   school1Pct,
   school2Pct,
 }: RivalryVoteBarProps) {
+  const colors = useColors();
   const animatedWidth1 = useRef(new Animated.Value(0)).current;
   const animatedWidth2 = useRef(new Animated.Value(0)).current;
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      flexDirection: 'row',
+      height: 8,
+      borderRadius: 4,
+      overflow: 'hidden',
+      backgroundColor: colors.surface,
+    },
+    segment: {
+      height: '100%',
+    },
+  }), [colors]);
 
   useEffect(() => {
     Animated.parallel([
@@ -65,16 +80,3 @@ export function RivalryVoteBar({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    height: 8,
-    borderRadius: 4,
-    overflow: 'hidden',
-    backgroundColor: '#e0d8cc',
-  },
-  segment: {
-    height: '100%',
-  },
-});
