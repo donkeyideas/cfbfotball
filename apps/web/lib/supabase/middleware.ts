@@ -48,28 +48,31 @@ export async function updateSession(request: NextRequest) {
 
     const { data: { user } } = await supabase.auth.getUser();
 
-    if (!user && !isAdminLogin) {
+    // Not logged in — redirect to feed (admin login is not public)
+    if (!user) {
       const url = request.nextUrl.clone();
-      url.pathname = '/admin/login';
+      url.pathname = '/feed';
       return NextResponse.redirect(url);
     }
 
-    if (user && !isAdminLogin) {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user.id)
-        .single();
+    // Logged in — check role
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single();
 
-      if (profile?.role !== 'ADMIN') {
-        await supabase.auth.signOut();
-        const url = request.nextUrl.clone();
-        url.pathname = '/admin/login';
-        return NextResponse.redirect(url);
-      }
+    const isAdmin = profile?.role === 'ADMIN';
+
+    // Non-admin users get redirected to feed (no sign-out, no admin login page)
+    if (!isAdmin) {
+      const url = request.nextUrl.clone();
+      url.pathname = '/feed';
+      return NextResponse.redirect(url);
     }
 
-    if (user && isAdminLogin) {
+    // Admin on login page — redirect to dashboard
+    if (isAdminLogin) {
       const url = request.nextUrl.clone();
       url.pathname = '/admin';
       return NextResponse.redirect(url);
