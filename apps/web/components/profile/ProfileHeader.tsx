@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import { FollowButton } from './FollowButton';
-import { ProfileEditButton } from './ProfileEditButton';
 import { SignOutButton } from './SignOutButton';
 
 interface ProfileHeaderProps {
@@ -9,6 +8,7 @@ interface ProfileHeaderProps {
     username: string;
     display_name: string | null;
     avatar_url: string | null;
+    banner_color?: string | null;
     banner_url?: string | null;
     bio: string | null;
     school?: {
@@ -47,9 +47,11 @@ export function ProfileHeader({ user, isOwnProfile = false }: ProfileHeaderProps
         style={{
           background: user.banner_url
             ? `url(${user.banner_url}) center/cover no-repeat`
-            : user.school
-              ? `linear-gradient(135deg, ${user.school.primary_color}, ${user.school.secondary_color})`
-              : 'var(--crimson)',
+            : user.banner_color
+              ? user.banner_color
+              : user.school
+                ? `linear-gradient(135deg, ${user.school.primary_color}, ${user.school.secondary_color})`
+                : 'var(--crimson)',
         }}
       />
 

@@ -4,18 +4,28 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import type { SchoolRow } from '@cfb-social/types';
 import { NotificationPreferences } from '@/components/notifications/NotificationPreferences';
+
+interface School {
+  id: string;
+  name: string;
+  primary_color: string;
+  secondary_color: string;
+}
 
 export function SettingsClient() {
   const router = useRouter();
   const supabase = createClient();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [username, setUsername] = useState('');
   const [displayName, setDisplayName] = useState('');
   const [bio, setBio] = useState('');
   const [schoolId, setSchoolId] = useState('');
-  const [schools, setSchools] = useState<SchoolRow[]>([]);
+  const [bannerColor, setBannerColor] = useState('');
+  const [schools, setSchools] = useState<School[]>([]);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   useEffect(() => {
@@ -28,13 +38,18 @@ export function SettingsClient() {
 
       const [profileResult, schoolsResult] = await Promise.all([
         supabase.from('profiles').select('*').eq('id', authUser.id).single(),
-        supabase.from('schools').select('*').eq('is_active', true).order('name'),
+        supabase.from('schools').select('id, name, primary_color, secondary_color').eq('is_active', true).order('name'),
       ]);
 
       if (profileResult.data) {
+        setUsername(profileResult.data.username ?? '');
         setDisplayName(profileResult.data.display_name ?? '');
         setBio(profileResult.data.bio ?? '');
         setSchoolId(profileResult.data.school_id ?? '');
+        setBannerColor(profileResult.data.banner_color ?? '');
+        if (profileResult.data.avatar_url) {
+          setAvatarPreview(profileResult.data.avatar_url);
+        }
       }
 
       if (schoolsResult.data) {
@@ -47,6 +62,14 @@ export function SettingsClient() {
     loadProfile();
   }, [supabase, router]);
 
+  // Get current school colors for preview
+  const selectedSchool = schools.find((s) => s.id === schoolId);
+  const previewBannerStyle = bannerColor
+    ? { background: bannerColor }
+    : selectedSchool
+      ? { background: `linear-gradient(135deg, ${selectedSchool.primary_color}, ${selectedSchool.secondary_color})` }
+      : { background: 'var(--crimson)' };
+
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
@@ -55,13 +78,42 @@ export function SettingsClient() {
     const { data: { user: authUser } } = await supabase.auth.getUser();
     if (!authUser) return;
 
+    // Upload avatar if selected
+    let avatarUrl: string | undefined;
+    if (avatarFile) {
+      const fileExt = avatarFile.name.split('.').pop();
+      const filePath = `${authUser.id}/avatar.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, avatarFile, { upsert: true, contentType: avatarFile.type });
+
+      if (uploadError) {
+        setMessage({ type: 'error', text: 'Failed to upload avatar: ' + uploadError.message });
+        setSaving(false);
+        return;
+      }
+
+      const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(filePath);
+      avatarUrl = urlData.publicUrl;
+    }
+
+    const updatePayload: Record<string, unknown> = {
+      username,
+      display_name: displayName || null,
+      bio: bio || null,
+      school_id: schoolId || null,
+      banner_color: bannerColor || null,
+      updated_at: new Date().toISOString(),
+    };
+
+    if (avatarUrl) {
+      updatePayload.avatar_url = avatarUrl;
+    }
+
     const { error } = await supabase
       .from('profiles')
-      .update({
-        display_name: displayName || null,
-        bio: bio || null,
-        school_id: schoolId || null,
-      })
+      .update(updatePayload)
       .eq('id', authUser.id);
 
     if (error) {
@@ -80,7 +132,7 @@ export function SettingsClient() {
         <h1 className="font-serif text-3xl font-bold">Settings</h1>
         <div className="gridiron-card p-6">
           <div className="space-y-4">
-            {Array.from({ length: 4 }).map((_, i) => (
+            {Array.from({ length: 6 }).map((_, i) => (
               <div key={i} className="skeleton h-10 w-full" />
             ))}
           </div>
@@ -93,7 +145,10 @@ export function SettingsClient() {
     <div className="space-y-6">
       <h1 className="font-serif text-3xl font-bold">Settings</h1>
 
+      {/* Profile */}
       <div className="gridiron-card p-6">
+        <h2 className="mb-4 font-serif text-lg font-semibold">Profile</h2>
+
         {message && (
           <div
             className={`mb-4 rounded-md p-3 text-sm ${
@@ -106,7 +161,57 @@ export function SettingsClient() {
           </div>
         )}
 
-        <form onSubmit={handleSave} className="space-y-4">
+        <form onSubmit={handleSave} className="space-y-5">
+          {/* Banner preview */}
+          <div>
+            <label className="mb-1 block text-sm font-medium text-[var(--text-secondary)]">
+              Profile Banner
+            </label>
+            <div
+              className="h-20 rounded-md"
+              style={previewBannerStyle}
+            />
+            <div className="mt-2 flex items-center gap-3">
+              <input
+                type="color"
+                value={bannerColor || (selectedSchool?.primary_color ?? '#8b1a1a')}
+                onChange={(e) => setBannerColor(e.target.value)}
+                className="h-8 w-12 cursor-pointer rounded border border-[var(--border)] p-0"
+              />
+              <span className="text-xs text-[var(--text-muted)]">
+                {bannerColor ? bannerColor : 'Using school colors'}
+              </span>
+              {bannerColor && (
+                <button
+                  type="button"
+                  onClick={() => setBannerColor('')}
+                  className="text-xs text-[var(--text-muted)] hover:text-ink"
+                >
+                  Reset to school colors
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Username */}
+          <div>
+            <label htmlFor="username" className="mb-1 block text-sm font-medium text-[var(--text-secondary)]">
+              Username
+            </label>
+            <input
+              id="username"
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+              minLength={3}
+              maxLength={24}
+              pattern="^[a-zA-Z0-9_]+$"
+              className="gridiron-input w-full"
+            />
+          </div>
+
+          {/* Display Name */}
           <div>
             <label htmlFor="displayName" className="mb-1 block text-sm font-medium text-[var(--text-secondary)]">
               Display Name
@@ -121,6 +226,7 @@ export function SettingsClient() {
             />
           </div>
 
+          {/* Bio */}
           <div>
             <label htmlFor="bio" className="mb-1 block text-sm font-medium text-[var(--text-secondary)]">
               Bio
@@ -132,13 +238,15 @@ export function SettingsClient() {
               maxLength={280}
               rows={3}
               className="gridiron-input w-full resize-none"
+              placeholder="Tell the conference about yourself..."
             />
-            <p className="mt-1 text-xs text-[var(--text-muted)]">{bio.length}/280</p>
+            <p className="mt-1 text-right text-xs text-[var(--text-muted)]">{bio.length}/280</p>
           </div>
 
+          {/* School */}
           <div>
             <label htmlFor="school" className="mb-1 block text-sm font-medium text-[var(--text-secondary)]">
-              School
+              School Affiliation
             </label>
             <select
               id="school"
@@ -155,23 +263,38 @@ export function SettingsClient() {
             </select>
           </div>
 
-          <hr className="gridiron-divider" />
-
-          <div className="flex items-center gap-4">
-            <button
-              type="submit"
-              disabled={saving}
-              className="btn-crimson px-6 py-2 disabled:opacity-50"
-            >
-              {saving ? 'Saving...' : 'Save Changes'}
-            </button>
-            <Link
-              href="/settings/profile"
-              className="text-sm font-medium text-[var(--text-secondary)] hover:text-ink"
-            >
-              Full Profile Editor
-            </Link>
+          {/* Avatar */}
+          <div>
+            <label htmlFor="avatar" className="mb-1 block text-sm font-medium text-[var(--text-secondary)]">
+              Avatar
+            </label>
+            <div className="flex items-center gap-4">
+              {avatarPreview && (
+                <img src={avatarPreview} alt="Avatar" className="h-12 w-12 rounded-full object-cover" />
+              )}
+              <input
+                id="avatar"
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0] ?? null;
+                  setAvatarFile(file);
+                  if (file) {
+                    setAvatarPreview(URL.createObjectURL(file));
+                  }
+                }}
+                className="gridiron-input flex-1 text-sm file:mr-3 file:rounded-md file:border-0 file:bg-[var(--surface)] file:px-3 file:py-1 file:text-sm file:font-medium"
+              />
+            </div>
           </div>
+
+          <button
+            type="submit"
+            disabled={saving}
+            className="btn-crimson w-full py-3 disabled:opacity-50"
+          >
+            {saving ? 'Saving...' : 'Save Changes'}
+          </button>
         </form>
       </div>
 
