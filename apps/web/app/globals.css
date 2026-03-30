@@ -667,12 +667,18 @@ html.dark .skeleton {
    Base Styles
    ============================================================ */
 
+html {
+  overflow-x: hidden;
+}
+
 body {
   font-family: var(--sans);
   color: var(--ink);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  max-width: 100vw;
   background-color: var(--aged-paper);
   background-image:
     repeating-linear-gradient(
@@ -907,6 +913,8 @@ h1, h2, h3, h4, h5, h6,
 .masthead-brand {
   text-align: center;
   flex: 1;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .masthead-title {
@@ -1166,6 +1174,7 @@ h1, h2, h3, h4, h5, h6,
   padding: 20px 24px;
   border-right: 1px solid rgba(59,47,30,0.15);
   min-height: 0;
+  min-width: 0;
 }
 
 .col-right {
@@ -1825,6 +1834,7 @@ html.dark .sideline-field {
   margin-bottom: 14px;
   white-space: pre-wrap;
   word-break: break-word;
+  overflow-wrap: anywhere;
 }
 
 .post-body-link {
@@ -3124,6 +3134,7 @@ html.dark .aging-footer {
   }
   .main-layout {
     grid-template-columns: 1fr;
+    overflow-x: hidden;
   }
 
   .col-left,
@@ -3134,10 +3145,16 @@ html.dark .aging-footer {
   .col-center {
     border-right: none;
     padding: 16px;
+    max-width: 100vw;
+    box-sizing: border-box;
   }
 
   .masthead {
     padding: 12px 16px 10px;
+  }
+
+  .masthead-inner {
+    gap: 8px;
   }
 
   .masthead-title {
@@ -3155,6 +3172,8 @@ html.dark .aging-footer {
 
   .masthead-actions {
     width: auto;
+    min-width: 0;
+    flex-shrink: 1;
   }
 
   .feed-header {
@@ -3165,6 +3184,59 @@ html.dark .aging-footer {
   .feed-tabs {
     flex-wrap: wrap;
     gap: 10px;
+  }
+
+  .composer {
+    margin-left: 0;
+    margin-right: 0;
+  }
+}
+
+/* Small phones */
+@media (max-width: 480px) {
+  .col-center {
+    padding: 10px;
+  }
+
+  .masthead {
+    padding: 10px 10px 8px;
+  }
+
+  .masthead-title {
+    font-size: 1.4rem;
+    letter-spacing: 2px;
+  }
+
+  .masthead-actions {
+    gap: 6px;
+  }
+
+  .feed-title {
+    font-size: 1.2rem;
+  }
+
+  .feed-tabs {
+    gap: 6px;
+  }
+
+  .feed-tab {
+    font-size: 0.65rem;
+    letter-spacing: 1px;
+  }
+
+  .composer {
+    padding: 12px;
+  }
+
+  .composer-tools {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .post-classic {
+    margin-left: 0;
+    margin-right: 0;
+    border-radius: 0;
   }
 }
 
