@@ -1,10 +1,12 @@
 import OpenAI from 'openai';
 import { createAdminClient } from '@/lib/admin/supabase/admin';
 
-const client = new OpenAI({
-  apiKey: process.env.DEEPSEEK_API_KEY,
-  baseURL: process.env.DEEPSEEK_BASE_URL ?? 'https://api.deepseek.com',
-});
+function getClient() {
+  return new OpenAI({
+    apiKey: process.env.DEEPSEEK_API_KEY || 'missing',
+    baseURL: process.env.DEEPSEEK_BASE_URL ?? 'https://api.deepseek.com',
+  });
+}
 
 // DeepSeek pricing per 1M tokens (USD)
 const COST_PER_1M_INPUT = 0.14;
@@ -24,7 +26,7 @@ export async function aiChat(
   let totalTokens = 0;
 
   try {
-    const response = await client.chat.completions.create({
+    const response = await getClient().chat.completions.create({
       model,
       messages: [{ role: 'user', content: prompt }],
       temperature: opts?.temperature ?? 0.7,
