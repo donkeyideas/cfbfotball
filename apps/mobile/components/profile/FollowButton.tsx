@@ -1,0 +1,141 @@
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { Pressable, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/lib/auth/AuthProvider';
+import { useSchoolTheme } from '@/lib/theme/SchoolThemeProvider';
+import { useColors } from '@/lib/theme/ThemeProvider';
+import { typography } from '@/lib/theme/typography';
+
+interface FollowButtonProps {
+  targetUserId: string;
+}
+
+export function FollowButton({ targetUserId }: FollowButtonProps) {
+  const colors = useColors();
+  const { userId } = useAuth();
+  const { dark } = useSchoolTheme();
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [toggling, setToggling] = useState(false);
+
+  const styles = useMemo(() => StyleSheet.create({
+    button: {
+      paddingHorizontal: 24,
+      paddingVertical: 10,
+      borderRadius: 8,
+      alignItems: 'center',
+      justifyContent: 'center',
+      minWidth: 100,
+    },
+    followButton: {
+      backgroundColor: colors.crimson,
+    },
+    followingButton: {
+      backgroundColor: 'transparent',
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    buttonText: {
+      fontFamily: typography.sansSemiBold,
+      fontSize: 14,
+    },
+    followText: {
+      color: colors.paper,
+    },
+    followingText: {
+      color: colors.ink,
+    },
+  }), [colors]);
+
+  const checkFollowing = useCallback(async () => {
+    if (!userId || userId === targetUserId) {
+      setLoading(false);
+      return;
+    }
+
+    const { data } = await supabase
+      .from('follows')
+      .select('id')
+      .eq('follower_id', userId)
+      .eq('following_id', targetUserId)
+      .maybeSingle();
+
+    setIsFollowing(!!data);
+    setLoading(false);
+  }, [userId, targetUserId]);
+
+  useEffect(() => {
+    checkFollowing();
+  }, [checkFollowing]);
+
+  // Don't show on own profile
+  if (!userId || userId === targetUserId) {
+    return null;
+  }
+
+  async function handleToggle() {
+    if (toggling || !userId) return;
+    setToggling(true);
+
+    if (isFollowing) {
+      // Unfollow
+      await supabase
+        .from('follows')
+        .delete()
+        .eq('follower_id', userId)
+        .eq('following_id', targetUserId);
+      setIsFollowing(false);
+    } else {
+      // Follow
+      await supabase.from('follows').insert({
+        follower_id: userId,
+        following_id: targetUserId,
+      });
+
+      // Insert FOLLOW notification
+      await supabase.from('notifications').insert({
+        user_id: targetUserId,
+        actor_id: userId,
+        type: 'FOLLOW',
+      });
+      setIsFollowing(true);
+    }
+
+    setToggling(false);
+  }
+
+  if (loading) {
+    return (
+      <Pressable style={[styles.button, styles.followingButton]} disabled>
+        <ActivityIndicator size="small" color={colors.textMuted} />
+      </Pressable>
+    );
+  }
+
+  return (
+    <Pressable
+      style={[
+        styles.button,
+        isFollowing ? styles.followingButton : { backgroundColor: dark },
+      ]}
+      onPress={handleToggle}
+      disabled={toggling}
+    >
+      {toggling ? (
+        <ActivityIndicator
+          size="small"
+          color={isFollowing ? colors.ink : colors.paper}
+        />
+      ) : (
+        <Text
+          style={[
+            styles.buttonText,
+            isFollowing ? styles.followingText : styles.followText,
+          ]}
+        >
+          {isFollowing ? 'Following' : 'Follow'}
+        </Text>
+      )}
+    </Pressable>
+  );
+}

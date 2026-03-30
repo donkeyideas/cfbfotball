@@ -3,6 +3,8 @@ import { PredictionCard } from '@/components/predictions/PredictionCard';
 import { CreatePrediction } from '@/components/predictions/CreatePrediction';
 import { PredictionLeaderboard } from '@/components/predictions/PredictionLeaderboard';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata = {
   title: 'Predictions | College Football Takes & Receipts',
   description: 'File your college football predictions and put your takes on record. See who has the best prediction track record across CFB.',

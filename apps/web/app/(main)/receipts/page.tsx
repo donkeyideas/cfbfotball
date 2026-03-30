@@ -1,6 +1,8 @@
 import { Suspense } from 'react';
 import Link from 'next/link';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata = {
   title: 'My Receipts | CFB Social',
   description: 'Posts you filed receipts on. Track your predictions and revisit them when the time comes.',

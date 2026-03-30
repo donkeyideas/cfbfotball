@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 360" width="300" height="360">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&amp;display=swap');
+    </style>
+    <clipPath id="shield">
+      <path d="M150 10 L280 60 L280 180 Q280 300 150 350 Q20 300 20 180 L20 60 Z"/>
+    </clipPath>
+  </defs>
+
+  <!-- Shield outline -->
+  <path d="M150 10 L280 60 L280 180 Q280 300 150 350 Q20 300 20 180 L20 60 Z" fill="#3b2f1e"/>
+  <!-- Inner shield -->
+  <path d="M150 22 L270 68 L270 180 Q270 292 150 338 Q30 292 30 180 L30 68 Z" fill="#f4efe4"/>
+  <!-- Inner border -->
+  <path d="M150 32 L260 74 L260 180 Q260 284 150 328 Q40 284 40 180 L40 74 Z" fill="none" stroke="#c49a2f" stroke-width="2"/>
+
+  <!-- Horizontal band -->
+  <rect x="40" y="120" width="220" height="70" fill="#8b1a1a" clip-path="url(#shield)"/>
+
+  <!-- CFB monogram -->
+  <text x="150" y="172" text-anchor="middle" font-family="'Playfair Display', Georgia, serif" font-weight="900" font-size="42" fill="#f4efe4" letter-spacing="6">CFB</text>
+
+  <!-- Top text -->
+  <text x="150" y="80" text-anchor="middle" font-family="'Playfair Display', Georgia, serif" font-weight="700" font-size="14" fill="#3b2f1e" letter-spacing="3">COLLEGE FOOTBALL</text>
+  <text x="150" y="112" text-anchor="middle" font-family="'Playfair Display', Georgia, serif" font-weight="900" font-size="24" fill="#3b2f1e" letter-spacing="5">SOCIAL</text>
+
+  <!-- Bottom text -->
+  <text x="150" y="220" text-anchor="middle" font-family="'Playfair Display', Georgia, serif" font-weight="700" font-size="11" fill="#3b2f1e" letter-spacing="3">EST. 2026</text>
+
+  <!-- Stars -->
+  <polygon points="110,240 113,248 121,248 115,253 117,261 110,256 103,261 105,253 99,248 107,248" fill="#c49a2f"/>
+  <polygon points="150,245 153,253 161,253 155,258 157,266 150,261 143,266 145,258 139,253 147,253" fill="#c49a2f"/>
+  <polygon points="190,240 193,248 201,248 195,253 197,261 190,256 183,261 185,253 179,248 187,248" fill="#c49a2f"/>
+
+  <!-- Football at bottom of shield -->
+  <ellipse cx="150" cy="295" rx="18" ry="11" fill="none" stroke="#3b2f1e" stroke-width="2"/>
+  <line x1="141" y1="295" x2="159" y2="295" stroke="#3b2f1e" stroke-width="1.5"/>
+  <line x1="145" y1="287" x2="145" y2="303" stroke="#3b2f1e" stroke-width="1"/>
+  <line x1="150" y1="286" x2="150" y2="304" stroke="#3b2f1e" stroke-width="1"/>
+  <line x1="155" y1="287" x2="155" y2="303" stroke="#3b2f1e" stroke-width="1"/>
+</svg>

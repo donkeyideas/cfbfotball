@@ -1,0 +1,2186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CFB Social -- Florida Gators</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Source+Sans+Pro:wght@300;400;600;700&family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+/* ===== RESET & PAGE ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Source Sans Pro', -apple-system, sans-serif;
+  background: #e0e4e8;
+  background-image:
+    radial-gradient(ellipse at 20% 50%, rgba(0,33,165,0.03) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(0,26,122,0.04) 0%, transparent 50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  padding: 24px 16px;
+}
+
+h1, h2, h3, h4 {
+  font-family: 'Playfair Display', Georgia, serif;
+  line-height: 1.2;
+}
+
+/* ===== PAGE HEADER ===== */
+.page-header {
+  text-align: center;
+  margin-bottom: 28px;
+  max-width: 600px;
+}
+.page-header h1 {
+  font-size: 1.8rem;
+  color: #001A7A;
+  margin-bottom: 8px;
+  font-family: 'Playfair Display', Georgia, serif;
+}
+.page-header p {
+  color: #7a6e5f;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+/* ===== SCREEN SELECTOR PILLS ===== */
+.screen-nav {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.screen-nav button {
+  padding: 8px 20px;
+  border: 2px solid #001A7A;
+  background: #f4efe4;
+  border-radius: 999px;
+  font-family: 'Source Sans Pro', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #001A7A;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.screen-nav button:hover {
+  border-color: #0021A5;
+  color: #0021A5;
+}
+.screen-nav button.active {
+  background: #0021A5;
+  border-color: #0021A5;
+  color: #f4efe4;
+}
+
+/* ===== PHONE FRAME ===== */
+.phone-frame {
+  width: 375px;
+  height: 812px;
+  border-radius: 44px;
+  background: #000;
+  padding: 12px;
+  box-shadow: 0 25px 80px rgba(0,0,0,0.25), 0 0 0 2px #333;
+  position: relative;
+}
+.phone-inner {
+  width: 100%;
+  height: 100%;
+  border-radius: 34px;
+  overflow: hidden;
+  position: relative;
+  background: #f4efe4;
+}
+
+/* Notch */
+.phone-notch {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 126px;
+  height: 34px;
+  background: #000;
+  border-radius: 0 0 20px 20px;
+  z-index: 100;
+}
+
+/* Status bar */
+.status-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 54px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 0 28px 8px;
+  z-index: 99;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #001A7A;
+}
+.status-bar .time { font-size: 0.8rem; font-weight: 700; }
+.status-bar .icons { display: flex; gap: 5px; align-items: center; font-size: 0.7rem; }
+
+/* Home indicator */
+.home-indicator {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 134px;
+  height: 5px;
+  background: rgba(0,26,122,0.25);
+  border-radius: 3px;
+  z-index: 100;
+}
+
+/* ===== SCREENS ===== */
+.screen {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease, transform 0.35s ease;
+  transform: scale(0.97);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.screen.active {
+  opacity: 1;
+  pointer-events: all;
+  transform: scale(1);
+}
+.screen::-webkit-scrollbar { display: none; }
+
+/* ===== AGED PAPER TEXTURE ===== */
+.paper-bg {
+  background-color: #f4efe4;
+  background-image:
+    url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+}
+
+/* =========================================================
+   SCREEN 1: SPLASH
+   ========================================================= */
+.splash-screen {
+  background: linear-gradient(160deg, #001A7A 0%, #001260 40%, #000d45 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: #f4efe4;
+}
+.splash-screen .status-bar { color: #f4efe4; }
+
+.splash-shield {
+  width: 100px;
+  height: 100px;
+  margin-bottom: 28px;
+  animation: shield-pulse 2s ease-in-out infinite;
+}
+@keyframes shield-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.04); }
+}
+
+.splash-brand {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.4rem;
+  font-weight: 900;
+  letter-spacing: 6px;
+  text-transform: uppercase;
+  color: #f4efe4;
+  margin-bottom: 12px;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+/* Ornamental vintage divider */
+.splash-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  width: 200px;
+}
+.splash-divider::before,
+.splash-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #FA4616 30%, #FA4616 70%, transparent);
+}
+.splash-divider-diamond {
+  width: 8px;
+  height: 8px;
+  background: #FA4616;
+  transform: rotate(45deg);
+  flex-shrink: 0;
+}
+
+.splash-tagline {
+  font-family: 'Source Sans Pro', sans-serif;
+  font-size: 0.85rem;
+  opacity: 0.7;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.splash-est {
+  font-family: 'Source Sans Pro', sans-serif;
+  font-size: 0.7rem;
+  opacity: 0.5;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+.splash-loader {
+  position: absolute;
+  bottom: 100px;
+  display: flex;
+  gap: 8px;
+}
+.splash-loader span {
+  width: 8px;
+  height: 8px;
+  background: rgba(250,70,22,0.5);
+  border-radius: 50%;
+  animation: dot-bounce 1.4s ease-in-out infinite;
+}
+.splash-loader span:nth-child(2) { animation-delay: 0.16s; }
+.splash-loader span:nth-child(3) { animation-delay: 0.32s; }
+@keyframes dot-bounce {
+  0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+  40% { transform: scale(1); opacity: 1; }
+}
+
+.splash-version {
+  position: absolute;
+  bottom: 60px;
+  font-size: 0.7rem;
+  opacity: 0.4;
+  font-family: 'Special Elite', monospace;
+  letter-spacing: 1px;
+}
+
+/* =========================================================
+   SCREEN 2: LOGIN
+   ========================================================= */
+.login-screen {
+  background-color: #f4efe4;
+  background-image:
+    url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  padding: 54px 0 0;
+}
+.login-header {
+  text-align: center;
+  padding: 36px 28px 0;
+}
+.login-logo-small {
+  width: 56px;
+  height: 56px;
+  background: #001A7A;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+}
+.login-logo-small svg { width: 30px; height: 30px; }
+.login-header h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.45rem;
+  color: #001A7A;
+  margin-bottom: 6px;
+}
+.login-header p {
+  font-size: 0.85rem;
+  color: #7a6e5f;
+}
+
+.login-form {
+  padding: 28px 28px 0;
+}
+.form-group {
+  margin-bottom: 16px;
+}
+.form-group label {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #001A7A;
+  margin-bottom: 6px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.form-group input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1.5px solid #c9b99a;
+  border-radius: 6px;
+  background: #faf7f0;
+  font-family: 'Source Sans Pro', sans-serif;
+  font-size: 0.9rem;
+  color: #001A7A;
+  transition: border-color 0.2s;
+}
+.form-group input:focus {
+  outline: none;
+  border-color: #0021A5;
+}
+.form-group input::placeholder {
+  color: #b5a99a;
+}
+
+.btn-signin {
+  width: 100%;
+  padding: 14px;
+  background: #0021A5;
+  border: none;
+  border-radius: 8px;
+  color: #f4efe4;
+  font-family: 'Source Sans Pro', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-top: 4px;
+}
+.btn-signin:hover { background: #0029cc; }
+
+.login-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0;
+  padding: 0 28px;
+}
+.login-divider::before,
+.login-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: repeating-linear-gradient(90deg, #c9b99a, #c9b99a 4px, transparent 4px, transparent 8px);
+}
+.login-divider span {
+  font-size: 0.78rem;
+  color: #9a8e7f;
+  font-weight: 600;
+}
+
+.btn-google {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: calc(100% - 56px);
+  margin: 0 28px;
+  padding: 12px;
+  background: transparent;
+  border: 1.5px solid #c9b99a;
+  border-radius: 8px;
+  font-family: 'Source Sans Pro', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #001A7A;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+.btn-google:hover { border-color: #001A7A; }
+.btn-google svg { width: 18px; height: 18px; }
+
+.login-link {
+  text-align: center;
+  padding: 20px 28px;
+  font-size: 0.85rem;
+  color: #7a6e5f;
+}
+.login-link a {
+  color: #0021A5;
+  font-weight: 700;
+  text-decoration: none;
+}
+.login-link a:hover { text-decoration: underline; }
+
+/* =========================================================
+   SCREEN 3: FEED
+   ========================================================= */
+.feed-screen {
+  background-color: #f4efe4;
+  background-image:
+    url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  padding: 54px 0 16px;
+}
+
+/* App Header */
+.app-header {
+  text-align: center;
+  padding: 10px 20px 0;
+}
+.header-overline {
+  font-family: 'Source Sans Pro', sans-serif;
+  font-size: 9px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: #FA4616;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+.header-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 24px;
+  font-weight: 900;
+  color: #001A7A;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  line-height: 1.1;
+}
+
+/* Vintage ornament underline */
+.ornament-line {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 0 20px;
+}
+.ornament-line::before,
+.ornament-line::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #001A7A 20%, #001A7A 80%, transparent);
+}
+.ornament-diamond {
+  width: 8px;
+  height: 8px;
+  background: #FA4616;
+  transform: rotate(45deg);
+  flex-shrink: 0;
+}
+.ornament-diamond.small {
+  width: 5px;
+  height: 5px;
+  background: #001A7A;
+}
+
+/* Scores Banner */
+.scores-banner {
+  background: #001A7A;
+  background-image:
+    linear-gradient(135deg, rgba(255,255,255,0.03) 25%, transparent 25%),
+    linear-gradient(225deg, rgba(255,255,255,0.03) 25%, transparent 25%),
+    linear-gradient(315deg, rgba(255,255,255,0.03) 25%, transparent 25%),
+    linear-gradient(45deg, rgba(255,255,255,0.03) 25%, transparent 25%);
+  background-size: 8px 8px;
+  margin: 12px 0 0;
+  padding: 10px 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  position: relative;
+  overflow: hidden;
+}
+.scores-banner::before,
+.scores-banner::after {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 8px;
+  background: repeating-linear-gradient(0deg, transparent, transparent 4px, rgba(244,239,228,0.15) 4px, rgba(244,239,228,0.15) 5px);
+}
+.scores-banner::before { left: 0; }
+.scores-banner::after { right: 0; }
+.score-item {
+  font-family: 'Special Elite', 'Courier New', monospace;
+  font-size: 12px;
+  color: #f4efe4;
+  letter-spacing: 1px;
+  white-space: nowrap;
+}
+.score-divider {
+  width: 4px;
+  height: 4px;
+  background: #FA4616;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Feed */
+.feed {
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.feed-section-label {
+  font-family: 'Playfair Display', serif;
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #7a6e5f;
+  text-align: center;
+}
+.feed-section-label::before,
+.feed-section-label::after {
+  content: '~';
+  margin: 0 8px;
+  color: #b5a99a;
+}
+
+/* Post Card Base */
+.post-card {
+  background: #f9f6f0;
+  border: 1px solid #d4c9b8;
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 1px 3px rgba(0,26,122,0.08), 0 4px 12px rgba(0,26,122,0.04);
+}
+.post-card::before {
+  content: '';
+  position: absolute;
+  top: 0; right: 0;
+  width: 30px; height: 30px;
+  background: linear-gradient(225deg, rgba(0,26,122,0.04) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.post-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px 8px;
+}
+.post-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid #d4c9b8;
+  background: #e8e0d4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  font-size: 14px;
+  color: #001A7A;
+  flex-shrink: 0;
+}
+.post-meta { flex: 1; min-width: 0; }
+.post-author-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.post-handle {
+  font-family: 'Special Elite', monospace;
+  font-size: 13px;
+  color: #001A7A;
+  font-weight: 700;
+}
+.pennant-flair {
+  display: inline-flex;
+  align-items: center;
+  background: #0021A5;
+  color: #f4efe4;
+  font-family: 'Source Sans Pro', sans-serif;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 2px 8px 2px 6px;
+  clip-path: polygon(0 0, 100% 0, 92% 50%, 100% 100%, 0 100%);
+  line-height: 1.4;
+}
+.pennant-flair.alt { background: #001A7A; }
+.badge-flair {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10px;
+  color: #FA4616;
+  font-weight: 600;
+  background: rgba(250,70,22,0.08);
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-family: 'Source Sans Pro', sans-serif;
+}
+.post-timestamp {
+  font-size: 11px;
+  color: #9a8e7f;
+  font-family: 'Source Sans Pro', sans-serif;
+  margin-top: 1px;
+}
+.post-body { padding: 4px 14px 10px; }
+.post-text {
+  font-family: 'Source Sans Pro', sans-serif;
+  font-size: 14px;
+  line-height: 1.55;
+  color: #001A7A;
+}
+.post-text strong { font-weight: 700; color: #000d45; }
+
+/* Post 1 - Ticket Stub */
+.post-ticket { border-left: none; position: relative; }
+.post-ticket .ticket-border {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 6px;
+  background: #0021A5;
+}
+.post-ticket .ticket-border::after {
+  content: '';
+  position: absolute;
+  top: 0; right: -4px; bottom: 0;
+  width: 8px;
+  background-image: radial-gradient(circle 3px at 4px 0, #f9f6f0 3px, transparent 3px);
+  background-size: 8px 12px;
+  background-position: 0 6px;
+}
+.post-ticket .post-header,
+.post-ticket .post-body,
+.post-ticket .post-actions,
+.post-ticket .engagement-row { margin-left: 8px; }
+
+.engagement-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 4px 14px 8px;
+  font-family: 'Special Elite', monospace;
+  font-size: 12px;
+  color: #7a6e5f;
+}
+.engagement-item { display: flex; align-items: center; gap: 4px; }
+.engagement-item .label { font-weight: 700; }
+.engagement-item.positive .label { color: #2d6a2e; }
+.engagement-item.negative .label { color: #0021A5; }
+
+.post-actions {
+  display: flex;
+  align-items: center;
+  border-top: 1px dashed #d4c9b8;
+  margin: 0 14px;
+}
+.action-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 9px 4px;
+  font-family: 'Source Sans Pro', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  color: #7a6e5f;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: color 0.2s, background 0.2s;
+  border: none;
+  background: none;
+  text-transform: uppercase;
+}
+.action-btn:hover { color: #001A7A; background: rgba(0,26,122,0.04); }
+.action-divider {
+  width: 1px;
+  height: 20px;
+  background: #d4c9b8;
+}
+
+/* Post 2 - Newspaper Clipping */
+.post-clipping {
+  background: #f0eacc;
+  border: 1px solid #c9bf9e;
+  transform: rotate(-0.6deg);
+  box-shadow: 0 2px 8px rgba(0,26,122,0.12), 0 1px 2px rgba(0,26,122,0.08);
+}
+.post-clipping::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,26,122,0.015) 3px, rgba(0,26,122,0.015) 4px);
+  pointer-events: none;
+}
+.clipping-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 2px solid #001A7A;
+  margin: 12px 14px 0;
+  padding: 0 0 4px;
+}
+.clipping-dateline {
+  font-family: 'Special Elite', monospace;
+  font-size: 10px;
+  color: #7a6e5f;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.receipt-stamp {
+  display: inline-flex;
+  align-items: center;
+  background: #001A7A;
+  color: #f0eacc;
+  font-family: 'Special Elite', monospace;
+  font-size: 10px;
+  padding: 3px 10px;
+  letter-spacing: 1px;
+  transform: rotate(-2deg);
+  border-radius: 2px;
+}
+
+/* Post 3 - Penalty Flag */
+.post-penalty {
+  background: #f5e6a0;
+  border: 2px solid #8b6914;
+  border-radius: 4px;
+  overflow: visible;
+}
+.penalty-stripe {
+  height: 4px;
+  background: repeating-linear-gradient(90deg, #5a3e0a 0px, #5a3e0a 8px, #f5e6a0 8px, #f5e6a0 16px);
+}
+.penalty-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px 4px;
+}
+.penalty-flag-icon {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+}
+.penalty-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 13px;
+  font-weight: 900;
+  color: #5a3e0a;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+.penalty-body {
+  padding: 4px 14px 8px;
+  font-family: 'Source Sans Pro', sans-serif;
+  font-size: 13px;
+  color: #5a3e0a;
+  line-height: 1.5;
+}
+.penalty-subtext {
+  font-size: 12px;
+  color: #8b6914;
+  font-style: italic;
+  margin-top: 4px;
+}
+.penalty-appeal {
+  display: block;
+  padding: 6px 14px 10px;
+  font-family: 'Source Sans Pro', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: #0021A5;
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+}
+
+/* Post 4 - Sideline Report */
+.post-sideline {
+  background: #f9f6f0;
+  border: 1px solid #d4c9b8;
+  font-family: 'Special Elite', 'Courier New', monospace;
+}
+.sideline-header-bar {
+  background: #001A7A;
+  padding: 6px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.sideline-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #FA4616;
+  animation: blink-dot 1.5s infinite;
+}
+@keyframes blink-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+.sideline-label {
+  font-family: 'Source Sans Pro', sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #f4efe4;
+}
+.sideline-game-info {
+  padding: 10px 14px 4px;
+  font-size: 13px;
+  color: #001A7A;
+  letter-spacing: 0.5px;
+  line-height: 1.6;
+}
+.sideline-game-info .quarter { color: #FA4616; font-weight: 700; }
+.sideline-body {
+  padding: 4px 14px 8px;
+  font-size: 12px;
+  color: #5a4a38;
+  line-height: 1.7;
+  letter-spacing: 0.3px;
+}
+.sideline-verified {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin: 4px 14px 10px;
+  padding: 4px 10px;
+  background: rgba(45,106,46,0.1);
+  border: 1px solid rgba(45,106,46,0.25);
+  border-radius: 3px;
+  font-family: 'Special Elite', monospace;
+  font-size: 11px;
+  color: #2d6a2e;
+  letter-spacing: 1px;
+}
+
+/* Dynasty Widget */
+.dynasty-widget {
+  margin: 8px 16px 16px;
+  background: linear-gradient(180deg, #f9f6f0 0%, #f0ebe0 100%);
+  border: 2px solid #001A7A;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: inset 0 0 0 3px #f4efe4, inset 0 0 0 4px #d4c9b8, 0 4px 12px rgba(0,26,122,0.12);
+}
+.dynasty-plaque-top {
+  background: #001A7A;
+  padding: 6px 14px;
+  text-align: center;
+}
+.dynasty-plaque-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #FA4616;
+}
+.dynasty-body {
+  padding: 12px 14px;
+  text-align: center;
+}
+.dynasty-level {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px;
+  font-weight: 900;
+  color: #001A7A;
+  margin-bottom: 6px;
+}
+.dynasty-xp-bar-container {
+  width: 100%;
+  height: 10px;
+  background: #e8e0d4;
+  border-radius: 5px;
+  overflow: hidden;
+  border: 1px solid #d4c9b8;
+  margin-bottom: 6px;
+}
+.dynasty-xp-bar {
+  width: 65%;
+  height: 100%;
+  background: linear-gradient(90deg, #0021A5, #0029cc);
+  border-radius: 5px;
+}
+.dynasty-xp-text {
+  font-family: 'Special Elite', monospace;
+  font-size: 11px;
+  color: #7a6e5f;
+}
+
+/* =========================================================
+   SCREEN 4: RIVALRY RING
+   ========================================================= */
+.rivalry-screen {
+  background-color: #f4efe4;
+  background-image:
+    url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  padding: 54px 0 16px;
+}
+
+.rivalry-header {
+  text-align: center;
+  padding: 12px 20px 0;
+}
+.rivalry-header h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  font-weight: 900;
+  color: #001A7A;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.fight-card {
+  margin: 16px 16px 0;
+  border: 3px solid #0021A5;
+  border-radius: 4px;
+  overflow: hidden;
+  background: #f9f6f0;
+  box-shadow: 0 4px 16px rgba(0,33,165,0.15);
+}
+.fight-card-top {
+  background: #0021A5;
+  padding: 8px 16px;
+  text-align: center;
+}
+.fight-card-top span {
+  font-family: 'Source Sans Pro', sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #f4efe4;
+}
+.fight-card-matchup {
+  text-align: center;
+  padding: 16px 16px 8px;
+}
+.fight-card-matchup h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px;
+  font-weight: 900;
+  color: #001A7A;
+  margin-bottom: 4px;
+}
+.fight-card-matchup .subtitle {
+  font-family: 'Special Elite', monospace;
+  font-size: 11px;
+  color: #FA4616;
+  letter-spacing: 1px;
+}
+.fight-card-votes {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 20px 16px;
+}
+.vote-corner {
+  text-align: center;
+}
+.vote-corner .team-name {
+  font-family: 'Source Sans Pro', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #5a4a38;
+  margin-bottom: 4px;
+}
+.vote-corner .vote-pct {
+  font-family: 'Playfair Display', serif;
+  font-size: 28px;
+  font-weight: 900;
+  color: #001A7A;
+}
+.vote-corner .vote-pct span {
+  font-size: 14px;
+  color: #7a6e5f;
+}
+.fight-card-bar {
+  height: 6px;
+  display: flex;
+  margin: 0 20px 16px;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.fight-card-bar .left {
+  background: #0021A5;
+  width: 56%;
+}
+.fight-card-bar .right {
+  background: #FA4616;
+  width: 44%;
+}
+
+/* Debate takes */
+.debate-takes {
+  padding: 0 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.debate-take {
+  background: #f0eacc;
+  border: 1px solid #c9bf9e;
+  padding: 10px 12px;
+  border-radius: 3px;
+  font-family: 'Source Sans Pro', sans-serif;
+  font-size: 13px;
+  color: #001A7A;
+  line-height: 1.5;
+  position: relative;
+}
+.debate-take .take-author {
+  font-family: 'Special Elite', monospace;
+  font-size: 11px;
+  color: #7a6e5f;
+  margin-bottom: 4px;
+}
+
+.btn-ring {
+  display: block;
+  width: calc(100% - 32px);
+  margin: 0 16px 14px;
+  padding: 12px;
+  background: #0021A5;
+  border: none;
+  border-radius: 6px;
+  color: #f4efe4;
+  font-family: 'Source Sans Pro', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  text-align: center;
+  cursor: pointer;
+}
+
+/* Telegram dispatches */
+.past-results {
+  padding: 0 16px 16px;
+}
+.past-results-label {
+  font-family: 'Playfair Display', serif;
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #7a6e5f;
+  text-align: center;
+  margin-bottom: 10px;
+}
+.telegram-dispatch {
+  border-left: 3px solid #001A7A;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  background: rgba(0,26,122,0.03);
+}
+.telegram-dispatch .dispatch-label {
+  font-family: 'Special Elite', monospace;
+  font-size: 9px;
+  color: #FA4616;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+.telegram-dispatch .dispatch-text {
+  font-family: 'Special Elite', monospace;
+  font-size: 12px;
+  color: #001A7A;
+  line-height: 1.5;
+}
+
+/* =========================================================
+   SCREEN 5: PORTAL WIRE
+   ========================================================= */
+.portal-screen {
+  background-color: #f4efe4;
+  background-image:
+    url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  padding: 54px 0 16px;
+}
+
+.portal-header {
+  text-align: center;
+  padding: 12px 20px 0;
+}
+.portal-header h2 {
+  font-family: 'Special Elite', 'Courier New', monospace;
+  font-size: 18px;
+  color: #001A7A;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+/* Stock ticker */
+.portal-ticker {
+  background: #001A7A;
+  margin-top: 12px;
+  padding: 8px 0;
+  overflow: hidden;
+  position: relative;
+}
+.portal-ticker-inner {
+  display: flex;
+  white-space: nowrap;
+  animation: ticker-scroll 20s linear infinite;
+}
+@keyframes ticker-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.portal-ticker-inner span {
+  font-family: 'Special Elite', monospace;
+  font-size: 11px;
+  color: #FA4616;
+  letter-spacing: 1px;
+  margin-right: 32px;
+}
+.portal-ticker-inner .dot {
+  color: #0021A5;
+  margin-right: 32px;
+}
+
+/* Portal Cards */
+.portal-cards {
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.portal-card {
+  background: #f9f6f0;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,26,122,0.08);
+  position: relative;
+}
+.portal-card-accent {
+  height: 4px;
+}
+.portal-card-accent.crimson { background: #0021A5; }
+.portal-card-accent.gold { background: #FA4616; }
+.portal-card-accent.brown { background: #001A7A; }
+
+.portal-card-body {
+  padding: 12px 14px;
+}
+.portal-flash {
+  font-family: 'Special Elite', monospace;
+  font-size: 10px;
+  color: #FA4616;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.portal-player-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 16px;
+  font-weight: 900;
+  color: #001A7A;
+  margin-bottom: 2px;
+}
+.portal-school {
+  font-family: 'Source Sans Pro', sans-serif;
+  font-size: 12px;
+  color: #7a6e5f;
+  margin-bottom: 6px;
+}
+.portal-star-rating {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  background: rgba(250,70,22,0.15);
+  border: 1px solid rgba(250,70,22,0.3);
+  border-radius: 3px;
+  font-family: 'Source Sans Pro', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  color: #8b6914;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+.portal-claim-btn {
+  width: 100%;
+  padding: 9px;
+  background: #0021A5;
+  border: none;
+  border-radius: 4px;
+  color: #f4efe4;
+  font-family: 'Source Sans Pro', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+/* =========================================================
+   SCREEN 6: HALL OF FAME (Profile)
+   ========================================================= */
+.profile-screen {
+  background-color: #f4efe4;
+  background-image:
+    url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  padding: 54px 0 16px;
+}
+
+.profile-header-section {
+  text-align: center;
+  padding: 12px 20px 0;
+}
+.profile-header-section h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  font-weight: 900;
+  color: #001A7A;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+/* Framed portrait */
+.profile-portrait-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 18px 0 8px;
+}
+.profile-portrait {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background: #e8e0d4;
+  border: 3px solid #001A7A;
+  outline: 3px solid #d4c9b8;
+  outline-offset: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.profile-portrait svg { width: 40px; height: 40px; }
+
+.profile-info {
+  text-align: center;
+  padding: 8px 20px 0;
+}
+.profile-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px;
+  font-weight: 900;
+  color: #001A7A;
+}
+.profile-handle {
+  font-family: 'Special Elite', monospace;
+  font-size: 13px;
+  color: #7a6e5f;
+  margin-bottom: 4px;
+}
+.profile-school {
+  display: inline-flex;
+  align-items: center;
+  background: #0021A5;
+  color: #f4efe4;
+  font-family: 'Source Sans Pro', sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 3px;
+}
+
+/* Dynasty plaque */
+.profile-dynasty {
+  margin: 16px 16px 0;
+  background: linear-gradient(180deg, #f9f6f0 0%, #f0ebe0 100%);
+  border: 2px solid #001A7A;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: inset 0 0 0 3px #f4efe4, inset 0 0 0 4px #d4c9b8;
+}
+.profile-dynasty-header {
+  background: #001A7A;
+  padding: 6px 14px;
+  text-align: center;
+}
+.profile-dynasty-header span {
+  font-family: 'Playfair Display', serif;
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #FA4616;
+}
+.profile-dynasty-body {
+  padding: 12px 16px;
+}
+.profile-stat-row {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 10px;
+}
+.profile-stat {
+  text-align: center;
+}
+.profile-stat .stat-value {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  font-weight: 900;
+  color: #001A7A;
+}
+.profile-stat .stat-label {
+  font-family: 'Source Sans Pro', sans-serif;
+  font-size: 10px;
+  color: #7a6e5f;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.profile-xp-row {
+  margin-top: 8px;
+}
+.profile-xp-label {
+  font-family: 'Special Elite', monospace;
+  font-size: 11px;
+  color: #7a6e5f;
+  margin-bottom: 4px;
+}
+.profile-xp-bar-bg {
+  width: 100%;
+  height: 8px;
+  background: #e8e0d4;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid #d4c9b8;
+}
+.profile-xp-bar {
+  width: 72%;
+  height: 100%;
+  background: linear-gradient(90deg, #0021A5, #0029cc);
+  border-radius: 4px;
+}
+
+/* Achievement Badges */
+.profile-badges {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  padding: 16px 16px 0;
+}
+.badge-medal {
+  width: 72px;
+  text-align: center;
+}
+.badge-medal-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 2px solid #001A7A;
+  background: linear-gradient(135deg, #f9f6f0, #e8e0d4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 6px;
+  box-shadow: inset 0 0 0 2px #f4efe4, inset 0 0 0 3px #d4c9b8;
+}
+.badge-medal-icon svg { width: 24px; height: 24px; }
+.badge-medal-label {
+  font-family: 'Source Sans Pro', sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  color: #001A7A;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+/* Your Legacy */
+.profile-legacy {
+  padding: 16px 16px 0;
+}
+.profile-legacy-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 14px;
+  font-weight: 900;
+  color: #001A7A;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+}
+.legacy-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px dashed #d4c9b8;
+}
+.legacy-item:last-child { border-bottom: none; }
+.legacy-marker {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #FA4616;
+  margin-top: 6px;
+  flex-shrink: 0;
+}
+.legacy-text {
+  font-family: 'Source Sans Pro', sans-serif;
+  font-size: 13px;
+  color: #001A7A;
+  line-height: 1.4;
+}
+.legacy-time {
+  font-size: 11px;
+  color: #9a8e7f;
+}
+
+.btn-edit-inscription {
+  display: block;
+  width: calc(100% - 32px);
+  margin: 16px 16px;
+  padding: 11px;
+  background: transparent;
+  border: 2px solid #001A7A;
+  border-radius: 6px;
+  color: #001A7A;
+  font-family: 'Source Sans Pro', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  text-align: center;
+  cursor: pointer;
+}
+.btn-edit-inscription:hover {
+  background: rgba(0,26,122,0.05);
+}
+
+/* Floating Toggle Menu */
+.menu-toggle-btn {
+  position: absolute;
+  bottom: 24px;
+  right: 16px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #0021A5;
+  border: none;
+  cursor: pointer;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  transition: transform 0.2s;
+}
+.menu-toggle-btn:hover { transform: scale(1.05); }
+.menu-toggle-btn .bar {
+  width: 22px;
+  height: 2.5px;
+  border-radius: 2px;
+  background: #FA4616;
+  transition: all 0.3s;
+}
+.menu-toggle-btn.open .bar:nth-child(1) { transform: translateY(7.5px) rotate(45deg); }
+.menu-toggle-btn.open .bar:nth-child(2) { opacity: 0; }
+.menu-toggle-btn.open .bar:nth-child(3) { transform: translateY(-7.5px) rotate(-45deg); }
+
+.menu-overlay {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  background: rgba(0,33,165,0.95);
+  z-index: 55;
+  border-radius: 20px 20px 0 0;
+  padding: 32px 24px 40px;
+  transform: translateY(100%);
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+}
+.menu-overlay.open {
+  transform: translateY(0);
+  pointer-events: all;
+}
+.menu-overlay-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.15);
+  color: #fff;
+  font-family: 'Playfair Display', serif;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  background: none;
+  border-left: none;
+  border-right: none;
+  border-top: none;
+  width: 100%;
+  text-align: left;
+}
+.menu-overlay-item:hover { opacity: 0.8; }
+.menu-overlay-item:last-child { border-bottom: none; }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 420px) {
+  .phone-frame {
+    width: 100vw;
+    height: 100vh;
+    border-radius: 0;
+    padding: 0;
+    box-shadow: none;
+  }
+  .phone-inner { border-radius: 0; }
+  .phone-notch { display: none; }
+  .page-header, .screen-nav { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <h1>CFB Social -- Florida Gators</h1>
+  <p>Gator Nation theme -- Interactive UI preview</p>
+</div>
+
+<!-- SCREEN NAVIGATION PILLS -->
+<div class="screen-nav">
+  <button class="active" onclick="showScreen('splash')">Splash</button>
+  <button onclick="showScreen('login')">Login</button>
+  <button onclick="showScreen('feed')">Feed</button>
+  <button onclick="showScreen('rivalry')">Rivalry Ring</button>
+  <button onclick="showScreen('portal')">Portal Wire</button>
+  <button onclick="showScreen('profile')">Hall of Fame</button>
+</div>
+
+<!-- PHONE FRAME -->
+<div class="phone-frame">
+  <div class="phone-notch"></div>
+  <div class="phone-inner" id="phoneInner">
+
+    <!-- Status Bar (shared) -->
+    <div class="status-bar" id="statusBar">
+      <span class="time">9:41</span>
+      <span class="icons">
+        <svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor"><rect x="0" y="6" width="3" height="6" rx="1"/><rect x="4.5" y="4" width="3" height="8" rx="1"/><rect x="9" y="2" width="3" height="10" rx="1"/><rect x="13.5" y="0" width="3" height="12" rx="1" opacity="0.3"/></svg>
+        <svg width="16" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><circle cx="12" cy="20" r="1" fill="currentColor"/></svg>
+        <svg width="24" height="12" viewBox="0 0 28 14" fill="currentColor"><rect x="0" y="1" width="24" height="12" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="2.5" y="3.5" width="16" height="7" rx="1.5" fill="currentColor"/><rect x="25.5" y="4.5" width="2" height="5" rx="1" opacity="0.4"/></svg>
+      </span>
+    </div>
+
+    <!-- Home Indicator -->
+    <div class="home-indicator" id="homeIndicator"></div>
+
+    <!-- Toggle Menu Button -->
+    <button class="menu-toggle-btn" id="menuToggle" onclick="toggleMenu()">
+      <span class="bar"></span>
+      <span class="bar"></span>
+      <span class="bar"></span>
+    </button>
+
+    <!-- Menu Overlay -->
+    <div class="menu-overlay" id="menuOverlay">
+      <button class="menu-overlay-item" onclick="navTo('feed')">Feed</button>
+      <button class="menu-overlay-item" onclick="navTo('rivalry')">Rivalry Ring</button>
+      <button class="menu-overlay-item" onclick="navTo('portal')">Portal Wire</button>
+      <button class="menu-overlay-item" onclick="navTo('profile')">Hall of Fame</button>
+    </div>
+
+    <!-- ==================== SCREEN 1: SPLASH ==================== -->
+    <div class="screen splash-screen active" id="screen-splash">
+      <!-- Vintage Football Shield SVG -->
+      <div class="splash-shield">
+        <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Shield shape -->
+          <path d="M50 5 L90 20 L90 55 C90 75 70 92 50 97 C30 92 10 75 10 55 L10 20 Z" stroke="#FA4616" stroke-width="2.5" fill="none"/>
+          <path d="M50 12 L84 25 L84 55 C84 72 67 86 50 91 C33 86 16 72 16 55 L16 25 Z" stroke="#FA4616" stroke-width="1" fill="rgba(250,70,22,0.08)"/>
+          <!-- Football shape inside -->
+          <ellipse cx="50" cy="50" rx="18" ry="12" stroke="#f4efe4" stroke-width="2" fill="none" transform="rotate(-30 50 50)"/>
+          <line x1="42" y1="41" x2="58" y2="59" stroke="#f4efe4" stroke-width="1.5" transform="rotate(-30 50 50)"/>
+          <line x1="44" y1="47" x2="50" y2="47" stroke="#f4efe4" stroke-width="1" transform="rotate(-30 50 50)"/>
+          <line x1="46" y1="50" x2="52" y2="50" stroke="#f4efe4" stroke-width="1" transform="rotate(-30 50 50)"/>
+          <line x1="48" y1="53" x2="54" y2="53" stroke="#f4efe4" stroke-width="1" transform="rotate(-30 50 50)"/>
+          <!-- Stars -->
+          <circle cx="30" cy="30" r="2" fill="#FA4616" opacity="0.6"/>
+          <circle cx="70" cy="30" r="2" fill="#FA4616" opacity="0.6"/>
+          <circle cx="50" cy="78" r="2" fill="#FA4616" opacity="0.6"/>
+        </svg>
+      </div>
+      <div class="splash-brand">THE GRIDIRON</div>
+      <div class="splash-divider">
+        <span class="splash-divider-diamond"></span>
+      </div>
+      <div class="splash-tagline">Gator Nation's Social Home</div>
+      <div class="splash-est">Est. 2026</div>
+      <div class="splash-loader">
+        <span></span><span></span><span></span>
+      </div>
+      <div class="splash-version">v1.0.0</div>
+    </div>
+
+    <!-- ==================== SCREEN 2: LOGIN ==================== -->
+    <div class="screen login-screen" id="screen-login">
+      <div class="login-header">
+        <div class="login-logo-small">
+          <svg viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <ellipse cx="15" cy="15" rx="10" ry="7" stroke="#f4efe4" stroke-width="2" fill="none" transform="rotate(-30 15 15)"/>
+            <line x1="11" y1="11" x2="19" y2="19" stroke="#f4efe4" stroke-width="1.5" transform="rotate(-30 15 15)"/>
+          </svg>
+        </div>
+        <h2>Welcome to The Gridiron</h2>
+        <p>Sign in to continue</p>
+      </div>
+
+      <div class="login-form">
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" placeholder="your@email.com">
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" placeholder="Enter password">
+        </div>
+        <button class="btn-signin" onclick="showScreen('feed')">Sign In</button>
+      </div>
+
+      <div class="login-divider">
+        <span>or</span>
+      </div>
+
+      <button class="btn-google">
+        <svg viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
+          <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 01-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
+          <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.26c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z" fill="#34A853"/>
+          <path d="M3.964 10.71A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/>
+          <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/>
+        </svg>
+        Continue with Google
+      </button>
+
+      <div class="login-link">
+        New member? <a href="javascript:void(0)">Join The Gridiron</a>
+      </div>
+    </div>
+
+    <!-- ==================== SCREEN 3: FEED ==================== -->
+    <div class="screen feed-screen" id="screen-feed">
+      <!-- App Header -->
+      <div class="app-header">
+        <div class="header-overline">Gator Nation Presents</div>
+        <h1 class="header-title">The Gridiron</h1>
+        <div class="ornament-line">
+          <span class="ornament-diamond small"></span>
+          <span class="ornament-diamond"></span>
+          <span class="ornament-diamond small"></span>
+        </div>
+      </div>
+
+      <!-- Scores Banner -->
+      <div class="scores-banner">
+        <span class="score-item">UF 31 - UGA 24</span>
+        <span class="score-divider"></span>
+        <span class="score-item">UF 28 - FSU 21</span>
+      </div>
+
+      <!-- Feed -->
+      <div class="feed">
+        <div class="feed-section-label">Today's Dispatches</div>
+
+        <!-- POST 1: Ticket Stub -->
+        <article class="post-card post-ticket">
+          <div class="ticket-border"></div>
+          <div class="post-header">
+            <div class="post-avatar">GN</div>
+            <div class="post-meta">
+              <div class="post-author-row">
+                <span class="post-handle">@GatorNation</span>
+                <span class="pennant-flair">Florida</span>
+                <span class="badge-flair">Heisman</span>
+              </div>
+              <div class="post-timestamp">3 hours ago</div>
+            </div>
+          </div>
+          <div class="post-body">
+            <p class="post-text"><strong>Travis Hunter = greatest two-way player since Deion.</strong> The man plays 120 snaps a game and still looks like the best player on the field on both sides. Generational.</p>
+          </div>
+          <div class="engagement-row">
+            <div class="engagement-item positive">
+              <span>&#x2713;</span>
+              <span class="label">TD:</span>
+              <span>342</span>
+            </div>
+            <div class="engagement-item negative">
+              <span>&#x2717;</span>
+              <span class="label">FUM:</span>
+              <span>89</span>
+            </div>
+          </div>
+          <div class="post-actions">
+            <button class="action-btn">FACT CHECK</button>
+            <span class="action-divider"></span>
+            <button class="action-btn">CHALLENGE</button>
+            <span class="action-divider"></span>
+            <button class="action-btn">REVISIT</button>
+          </div>
+        </article>
+
+        <!-- POST 2: Newspaper Clipping / Receipt -->
+        <article class="post-card post-clipping">
+          <div class="post-header">
+            <div class="post-avatar">SL</div>
+            <div class="post-meta">
+              <div class="post-author-row">
+                <span class="post-handle">@SwampLife</span>
+                <span class="pennant-flair alt">Florida</span>
+              </div>
+              <div class="post-timestamp">6 hours ago</div>
+            </div>
+          </div>
+          <div class="clipping-header">
+            <span class="clipping-dateline">The Saturday Edition</span>
+          </div>
+          <div class="post-body">
+            <p class="post-text" style="font-family:'Playfair Display',serif; font-size:15px; font-weight:700; line-height:1.5; margin-bottom:4px;">Florida finishes 11-1. Only loss in Baton Rouge.</p>
+            <p class="post-text" style="font-size:12px; color:#5a4a38;">A season to remember for the Gators. One game in LSU territory separating them from perfection.</p>
+          </div>
+          <div style="padding:8px 14px 12px; display:flex; justify-content:flex-end;">
+            <span class="receipt-stamp">RECEIPT FILED -- Week 12</span>
+          </div>
+        </article>
+
+        <!-- POST 3: Penalty Flag -->
+        <article class="post-card post-penalty">
+          <div class="penalty-stripe"></div>
+          <div class="penalty-header">
+            <!-- Penalty flag SVG icon -->
+            <svg class="penalty-flag-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="4" y="2" width="2" height="20" rx="1" fill="#5a3e0a"/>
+              <path d="M6 3 L20 3 L17 9 L20 15 L6 15 Z" fill="#8b6914" stroke="#5a3e0a" stroke-width="1"/>
+            </svg>
+            <span class="penalty-title">Penalty -- Unsportsmanlike Conduct</span>
+          </div>
+          <div class="penalty-body">
+            <p>Off-topic political content flagged by AI moderation. This post has been assessed a 15-yard penalty and loss of visibility.</p>
+            <p class="penalty-subtext">Repeated violations may result in ejection from the thread.</p>
+          </div>
+          <a class="penalty-appeal" href="javascript:void(0)">Appeal to the Booth --></a>
+          <div class="penalty-stripe"></div>
+        </article>
+
+        <!-- POST 4: Sideline Report -->
+        <article class="post-card post-sideline">
+          <div class="sideline-header-bar">
+            <span class="sideline-dot"></span>
+            <span class="sideline-label">Live Sideline Report</span>
+          </div>
+          <div class="sideline-game-info">
+            <strong>SIDELINE:</strong> <span class="quarter">Q1 4:32</span> -- Florida vs Georgia
+          </div>
+          <div class="sideline-body">
+            Gators defense dominant early. Three sacks in the first quarter. Georgia offense struggling to find rhythm against the Florida front seven.
+          </div>
+          <div class="sideline-verified">VERIFIED -- Press Box Confirmed</div>
+        </article>
+      </div>
+
+      <!-- Dynasty Widget -->
+      <div class="dynasty-widget">
+        <div class="dynasty-plaque-top">
+          <span class="dynasty-plaque-title">Dynasty Status</span>
+        </div>
+        <div class="dynasty-body">
+          <div class="dynasty-level">Level 12 -- 2,450 XP</div>
+          <div class="dynasty-xp-bar-container">
+            <div class="dynasty-xp-bar"></div>
+          </div>
+          <div class="dynasty-xp-text">2,450 / 3,800 XP to next level</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ==================== SCREEN 4: RIVALRY RING ==================== -->
+    <div class="screen rivalry-screen" id="screen-rivalry">
+      <div class="rivalry-header">
+        <h2>The Rivalry Ring</h2>
+        <div class="ornament-line" style="margin-top:8px;">
+          <span class="ornament-diamond small"></span>
+          <span class="ornament-diamond"></span>
+          <span class="ornament-diamond small"></span>
+        </div>
+      </div>
+
+      <!-- Featured Fight Card -->
+      <div class="fight-card">
+        <div class="fight-card-top">
+          <span>Featured Rivalry</span>
+        </div>
+        <div class="fight-card-matchup">
+          <h3>Florida vs Florida State</h3>
+          <div class="subtitle">The Sunshine Showdown</div>
+        </div>
+        <div class="fight-card-votes">
+          <div class="vote-corner">
+            <div class="team-name">GATORS</div>
+            <div class="vote-pct">56<span>%</span></div>
+          </div>
+          <div style="font-family:'Playfair Display',serif; font-size:16px; font-weight:900; color:#FA4616; align-self:center;">VS</div>
+          <div class="vote-corner">
+            <div class="team-name">NOLES</div>
+            <div class="vote-pct">44<span>%</span></div>
+          </div>
+        </div>
+        <div class="fight-card-bar">
+          <div class="left"></div>
+          <div class="right"></div>
+        </div>
+      </div>
+
+      <!-- Debate Takes -->
+      <div class="debate-takes" style="margin-top:14px;">
+        <div class="debate-take">
+          <div class="take-author">@GatorGreatness</div>
+          Florida owns this rivalry for the next decade. The Swamp is the toughest place to play in the SEC. Blue and orange forever.
+        </div>
+        <div class="debate-take">
+          <div class="take-author">@SwampKing86</div>
+          UF has the momentum. One bad year for FSU doesn't mean we let up. The Gators keep the streak alive.
+        </div>
+        <div class="debate-take">
+          <div class="take-author">@CFBHistorian</div>
+          This rivalry has produced more iconic moments per decade than any other. Both fanbases are delusional and that's what makes it perfect.
+        </div>
+      </div>
+
+      <button class="btn-ring">Enter the Ring</button>
+
+      <!-- Past Results -->
+      <div class="past-results">
+        <div class="past-results-label">Past Dispatches</div>
+        <div class="telegram-dispatch">
+          <div class="dispatch-label">Result</div>
+          <div class="dispatch-text">Florida 35 - FSU 28 // Nov 30 // Sunshine Showdown decided the state bragging rights.</div>
+        </div>
+        <div class="telegram-dispatch">
+          <div class="dispatch-label">Result</div>
+          <div class="dispatch-text">Florida 31 - Georgia 27 // World's Largest Outdoor Cocktail Party // 4th-quarter comeback in Jacksonville.</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ==================== SCREEN 5: PORTAL WIRE ==================== -->
+    <div class="screen portal-screen" id="screen-portal">
+      <div class="portal-header">
+        <h2>Transfer Portal Wire</h2>
+        <div class="ornament-line" style="margin-top:8px;">
+          <span class="ornament-diamond small"></span>
+          <span class="ornament-diamond"></span>
+          <span class="ornament-diamond small"></span>
+        </div>
+      </div>
+
+      <!-- Stock Ticker -->
+      <div class="portal-ticker">
+        <div class="portal-ticker-inner">
+          <span>BREAKING: QB Marcus Webb enters portal from USC</span>
+          <span class="dot">//</span>
+          <span>WR Jaylen Brooks 5-STAR available</span>
+          <span class="dot">//</span>
+          <span>DL commits to Florida from portal</span>
+          <span class="dot">//</span>
+          <span>RB transfer to Florida confirmed</span>
+          <span class="dot">//</span>
+          <span>BREAKING: QB Marcus Webb enters portal from USC</span>
+          <span class="dot">//</span>
+          <span>WR Jaylen Brooks 5-STAR available</span>
+          <span class="dot">//</span>
+          <span>DL commits to Florida from portal</span>
+          <span class="dot">//</span>
+          <span>RB transfer to Florida confirmed</span>
+          <span class="dot">//</span>
+        </div>
+      </div>
+
+      <!-- Portal Cards -->
+      <div class="portal-cards">
+        <!-- Card 1 -->
+        <div class="portal-card">
+          <div class="portal-card-accent crimson"></div>
+          <div class="portal-card-body">
+            <div class="portal-flash">FLASH</div>
+            <div class="portal-player-name">Marcus Webb, QB</div>
+            <div class="portal-school">Enters portal from USC -- 3,200 yds, 28 TD</div>
+            <div class="portal-star-rating">5-STAR</div>
+            <button class="portal-claim-btn">Claim for Your Roster</button>
+          </div>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="portal-card">
+          <div class="portal-card-accent gold"></div>
+          <div class="portal-card-body">
+            <div class="portal-flash">FLASH</div>
+            <div class="portal-player-name">Jaylen Brooks, WR</div>
+            <div class="portal-school">Enters portal from FSU -- 1,100 yds, 12 TD</div>
+            <div class="portal-star-rating">4-STAR</div>
+            <button class="portal-claim-btn">Claim for Your Roster</button>
+          </div>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="portal-card">
+          <div class="portal-card-accent brown"></div>
+          <div class="portal-card-body">
+            <div class="portal-flash">FLASH</div>
+            <div class="portal-player-name">DeShawn Carter, DL</div>
+            <div class="portal-school">Enters portal from Tennessee -- 14.5 sacks</div>
+            <div class="portal-star-rating">4-STAR</div>
+            <button class="portal-claim-btn">Claim for Your Roster</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ==================== SCREEN 6: HALL OF FAME (Profile) ==================== -->
+    <div class="screen profile-screen" id="screen-profile">
+      <div class="profile-header-section">
+        <h2>Hall of Fame</h2>
+        <div class="ornament-line" style="margin-top:8px;">
+          <span class="ornament-diamond small"></span>
+          <span class="ornament-diamond"></span>
+          <span class="ornament-diamond small"></span>
+        </div>
+      </div>
+
+      <!-- Framed Portrait -->
+      <div class="profile-portrait-wrap">
+        <div class="profile-portrait">
+          <svg viewBox="0 0 40 40" fill="none" stroke="#001A7A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="20" cy="14" r="7"/>
+            <path d="M6 36v-4a10 10 0 0 1 10-10h8a10 10 0 0 1 10 10v4"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Profile Info -->
+      <div class="profile-info">
+        <div class="profile-name">Jake "The Snake" Morrison</div>
+        <div class="profile-handle">@GatorJake</div>
+        <div class="profile-school">FLORIDA GATORS</div>
+      </div>
+
+      <!-- Dynasty Plaque -->
+      <div class="profile-dynasty">
+        <div class="profile-dynasty-header">
+          <span>Dynasty Status</span>
+        </div>
+        <div class="profile-dynasty-body">
+          <div class="profile-stat-row">
+            <div class="profile-stat">
+              <div class="stat-value">12</div>
+              <div class="stat-label">Level</div>
+            </div>
+            <div class="profile-stat">
+              <div class="stat-value">847</div>
+              <div class="stat-label">Wins</div>
+            </div>
+            <div class="profile-stat">
+              <div class="stat-value">91%</div>
+              <div class="stat-label">Accuracy</div>
+            </div>
+          </div>
+          <div class="profile-xp-row">
+            <div class="profile-xp-label">2,880 / 4,000 XP</div>
+            <div class="profile-xp-bar-bg">
+              <div class="profile-xp-bar"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Achievement Badges -->
+      <div class="profile-badges">
+        <div class="badge-medal">
+          <div class="badge-medal-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#001A7A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="9" r="6"/>
+              <path d="M8.5 15L7 22l5-3 5 3-1.5-7"/>
+              <path d="M12 3v2M9 5.5l-1-1.7M15 5.5l1-1.7"/>
+            </svg>
+          </div>
+          <div class="badge-medal-label">Iron Analyst</div>
+        </div>
+        <div class="badge-medal">
+          <div class="badge-medal-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#0021A5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5C7 4 7 7 7 7"/>
+              <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5C17 4 17 7 17 7"/>
+              <path d="M4 22h16"/>
+              <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/>
+              <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/>
+              <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>
+            </svg>
+          </div>
+          <div class="badge-medal-label">Bowl Champ</div>
+        </div>
+        <div class="badge-medal">
+          <div class="badge-medal-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#FA4616" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/>
+            </svg>
+          </div>
+          <div class="badge-medal-label">5-Star Scout</div>
+        </div>
+      </div>
+
+      <!-- Your Legacy -->
+      <div class="profile-legacy">
+        <div class="profile-legacy-title">Your Legacy</div>
+        <div class="legacy-item">
+          <div class="legacy-marker"></div>
+          <div>
+            <div class="legacy-text">"UF goes 13-0 this season" -- VERIFIED CORRECT</div>
+            <div class="legacy-time">3 weeks ago</div>
+          </div>
+        </div>
+        <div class="legacy-item">
+          <div class="legacy-marker"></div>
+          <div>
+            <div class="legacy-text">"Travis Hunter wins Heisman by largest margin ever"</div>
+            <div class="legacy-time">1 month ago</div>
+          </div>
+        </div>
+        <div class="legacy-item">
+          <div class="legacy-marker"></div>
+          <div>
+            <div class="legacy-text">"Florida upsets Georgia in the World's Largest Outdoor Cocktail Party"</div>
+            <div class="legacy-time">2 months ago</div>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-edit-inscription">Edit Inscription</button>
+
+    </div>
+
+  </div><!-- /phone-inner -->
+</div><!-- /phone-frame -->
+
+<script>
+// Screen management
+const screens = ['splash', 'login', 'feed', 'rivalry', 'portal', 'profile'];
+let currentScreen = 'splash';
+
+function showScreen(name) {
+  // Hide all screens
+  screens.forEach(s => {
+    const el = document.getElementById('screen-' + s);
+    if (el) el.classList.remove('active');
+  });
+
+  // Show target screen
+  const target = document.getElementById('screen-' + name);
+  if (target) target.classList.add('active');
+
+  // Update nav buttons
+  const nameMap = {
+    splash: 'splash',
+    login: 'login',
+    feed: 'feed',
+    rivalry: 'rivalry ring',
+    portal: 'portal wire',
+    profile: 'hall of fame'
+  };
+  document.querySelectorAll('.screen-nav button').forEach(btn => {
+    const btnText = btn.textContent.toLowerCase();
+    const matchText = nameMap[name] || name;
+    btn.classList.toggle('active', btnText === matchText);
+  });
+
+  // Update status bar color for splash
+  const statusBar = document.getElementById('statusBar');
+  const homeIndicator = document.getElementById('homeIndicator');
+  if (name === 'splash') {
+    statusBar.style.color = '#f4efe4';
+    homeIndicator.style.background = 'rgba(244,239,228,0.3)';
+  } else {
+    statusBar.style.color = '#001A7A';
+    homeIndicator.style.background = 'rgba(0,26,122,0.25)';
+  }
+
+  currentScreen = name;
+}
+
+// Toggle menu
+function toggleMenu() {
+  document.getElementById('menuToggle').classList.toggle('open');
+  document.getElementById('menuOverlay').classList.toggle('open');
+}
+function navTo(screen) {
+  showScreen(screen);
+  document.getElementById('menuToggle').classList.remove('open');
+  document.getElementById('menuOverlay').classList.remove('open');
+}
+
+// Auto-advance splash after 3 seconds
+let splashTimer;
+function startSplashTimer() {
+  clearTimeout(splashTimer);
+  splashTimer = setTimeout(() => {
+    if (currentScreen === 'splash') {
+      showScreen('login');
+    }
+  }, 3000);
+}
+
+// Click splash to advance
+document.getElementById('screen-splash').addEventListener('click', () => {
+  showScreen('login');
+});
+
+// Penalty appeal interaction
+document.querySelector('.penalty-appeal')?.addEventListener('click', function(e) {
+  e.preventDefault();
+  this.textContent = 'Appeal Submitted -- Under Review';
+  this.style.color = '#5a3e0a';
+  this.style.textDecoration = 'none';
+  this.style.pointerEvents = 'none';
+});
+
+// Action button press feedback
+document.querySelectorAll('.action-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    this.style.transform = 'scale(0.95)';
+    this.style.opacity = '0.7';
+    setTimeout(() => {
+      this.style.transform = '';
+      this.style.opacity = '';
+    }, 150);
+  });
+});
+
+// Portal claim button feedback
+document.querySelectorAll('.portal-claim-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    this.textContent = 'Claimed!';
+    this.style.background = '#001A7A';
+    this.disabled = true;
+  });
+});
+
+// Start splash timer on load
+startSplashTimer();
+</script>
+
+</body>
+</html>

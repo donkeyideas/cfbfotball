@@ -1,5 +1,8 @@
 import { AdminSidebar } from '@/components/layout/AdminSidebar';
 import { AdminHeader } from '@/components/layout/AdminHeader';
+import { FloatingNotepad } from '@/components/widgets/floating-notepad';
+
+export const dynamic = 'force-dynamic';
 
 export default function DashboardLayout({
   children,
@@ -7,15 +10,16 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex min-h-screen">
+    <div style={{ display: 'flex', minHeight: '100vh', maxWidth: '100vw', overflow: 'hidden' }}>
       {/* Sidebar */}
       <AdminSidebar />
 
       {/* Main area */}
-      <div className="flex flex-1 flex-col">
+      <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0 }}>
         <AdminHeader />
-        <main className="flex-1 overflow-y-auto p-6">{children}</main>
+        <main style={{ flex: 1, overflowY: 'auto', padding: '24px' }}>{children}</main>
       </div>
+      <FloatingNotepad />
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import {
   View,
   Text,
@@ -8,339 +8,383 @@ import {
   Pressable,
   ActivityIndicator,
 } from 'react-native';
+import { useRouter } from 'expo-router';
 import { supabase } from '@/lib/supabase';
-import { colors } from '@/lib/theme/colors';
+import { useAuth } from '@/lib/auth/AuthProvider';
+import { useSchoolTheme } from '@/lib/theme/SchoolThemeProvider';
+import { useRealtimeFeed } from '@/lib/hooks/useRealtimeFeed';
+import { AppHeader } from '@/components/navigation/AppHeader';
+import { ScoresBanner } from '@/components/feed/ScoresBanner';
+import { FeedTabs, type FeedTab } from '@/components/feed/FeedTabs';
+import { NewPostsBanner } from '@/components/feed/NewPostsBanner';
+import { DynastyWidget } from '@/components/feed/DynastyWidget';
+import { PostCard, type PostData } from '@/components/posts/PostCard';
+import { PostComposer } from '@/components/posts/PostComposer';
+import { useColors } from '@/lib/theme/ThemeProvider';
 import { typography } from '@/lib/theme/typography';
 
-interface Post {
-  id: string;
-  content: string;
-  post_type: string;
-  created_at: string;
-  author: {
-    username: string;
-    display_name: string | null;
-    school_id: string | null;
-  } | null;
-  school: {
-    abbreviation: string;
-    primary_color: string;
-  } | null;
-}
+const PAGE_SIZE = 20;
 
-type FeedTab = 'national' | 'school';
+const POST_SELECT = `
+  *,
+  author:profiles!posts_author_id_fkey(
+    id, username, display_name, avatar_url, dynasty_tier,
+    school:schools!profiles_school_id_fkey(abbreviation, primary_color, slug)
+  )
+`;
+
+// Sentinel item injected into the FlatList data to render the DynastyWidget inline
+const DYNASTY_SENTINEL = '__DYNASTY_WIDGET__';
+type FeedItem = PostData | typeof DYNASTY_SENTINEL;
 
 export default function FeedScreen() {
-  const [posts, setPosts] = useState<Post[]>([]);
+  const colors = useColors();
+  const { session, userId, profile } = useAuth();
+  const { dark } = useSchoolTheme();
+  const { newPostCount, resetCount } = useRealtimeFeed(profile?.school_id ?? undefined);
+  const router = useRouter();
+
+  const [activeTab, setActiveTab] = useState<FeedTab>('latest');
+  const [posts, setPosts] = useState<PostData[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [activeTab, setActiveTab] = useState<FeedTab>('national');
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [composerVisible, setComposerVisible] = useState(false);
+  const [followedIds, setFollowedIds] = useState<string[]>([]);
 
-  const fetchPosts = useCallback(async () => {
-    const { data, error } = await supabase
-      .from('posts')
-      .select(`
-        id, content, post_type, created_at,
-        author:users!posts_author_id_fkey(username, display_name, school_id),
-        school:schools!posts_school_id_fkey(abbreviation, primary_color)
-      `)
-      .eq('status', 'PUBLISHED')
-      .order('created_at', { ascending: false })
-      .limit(30);
+  const offsetRef = useRef(0);
 
-    if (!error && data) {
-      setPosts(data as unknown as Post[]);
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.paper,
+    },
+    loaderContainer: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    listContent: {
+      paddingBottom: 80,
+    },
+    loadingMore: {
+      paddingVertical: 16,
+    },
+    emptyContainer: {
+      alignItems: 'center',
+      paddingVertical: 48,
+    },
+    emptyTitle: {
+      fontFamily: typography.serif,
+      fontSize: 20,
+      color: colors.textSecondary,
+    },
+    emptySubtitle: {
+      fontFamily: typography.sans,
+      fontSize: 14,
+      color: colors.textMuted,
+      marginTop: 4,
+    },
+    authGate: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingHorizontal: 32,
+      gap: 16,
+    },
+    authGateTitle: {
+      fontFamily: typography.serif,
+      fontSize: 18,
+      color: colors.textSecondary,
+      textAlign: 'center',
+    },
+    authGateButton: {
+      paddingVertical: 10,
+      paddingHorizontal: 24,
+      borderRadius: 6,
+    },
+    authGateButtonText: {
+      fontFamily: typography.sansSemiBold,
+      fontSize: 14,
+      color: colors.textInverse,
+    },
+    fab: {
+      position: 'absolute',
+      bottom: 24,
+      left: 24,
+      width: 56,
+      height: 56,
+      borderRadius: 28,
+      alignItems: 'center',
+      justifyContent: 'center',
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 3 },
+      shadowOpacity: 0.2,
+      shadowRadius: 5,
+      elevation: 5,
+    },
+    fabText: {
+      fontFamily: typography.sansBold,
+      fontSize: 28,
+      color: colors.textInverse,
+      marginTop: -2,
+    },
+  }), [colors]);
+
+  // ------------------------------------------------------------------
+  // Fetch followed user IDs (needed for the Following tab)
+  // ------------------------------------------------------------------
+  const fetchFollowing = useCallback(async () => {
+    if (!userId) {
+      setFollowedIds([]);
+      return;
     }
-    setLoading(false);
-    setRefreshing(false);
-  }, []);
+    const { data } = await supabase
+      .from('follows')
+      .select('following_id')
+      .eq('follower_id', userId);
+    if (data) {
+      setFollowedIds(data.map((f: { following_id: string }) => f.following_id));
+    }
+  }, [userId]);
 
   useEffect(() => {
-    fetchPosts();
+    fetchFollowing();
+  }, [fetchFollowing]);
+
+  // ------------------------------------------------------------------
+  // Build query for the active tab
+  // ------------------------------------------------------------------
+  const buildQuery = useCallback(
+    (offset: number) => {
+      let query = supabase
+        .from('posts')
+        .select(POST_SELECT)
+        .in('status', ['PUBLISHED', 'FLAGGED'])
+        .is('parent_id', null);
+
+      switch (activeTab) {
+        case 'latest':
+          query = query.order('created_at', { ascending: false });
+          break;
+        case 'top':
+          query = query.order('touchdown_count', { ascending: false });
+          break;
+        case 'receipts':
+          query = query.in('post_type', ['RECEIPT', 'PREDICTION']);
+          query = query.order('created_at', { ascending: false });
+          break;
+        case 'following':
+          if (followedIds.length > 0) {
+            query = query.in('author_id', followedIds);
+          } else {
+            // Return impossible filter to get empty result
+            query = query.eq('author_id', 'no-results');
+          }
+          query = query.order('created_at', { ascending: false });
+          break;
+        case 'mySchool':
+          if (profile?.school_id) {
+            query = query.eq('school_id', profile.school_id);
+          } else {
+            query = query.eq('school_id', 'no-results');
+          }
+          query = query.order('created_at', { ascending: false });
+          break;
+      }
+
+      query = query.range(offset, offset + PAGE_SIZE - 1);
+      return query;
+    },
+    [activeTab, followedIds, profile?.school_id]
+  );
+
+  // ------------------------------------------------------------------
+  // Fetch posts
+  // ------------------------------------------------------------------
+  const fetchPosts = useCallback(
+    async (reset = true) => {
+      if (reset) {
+        setLoading(true);
+        offsetRef.current = 0;
+      }
+
+      const { data, error } = await buildQuery(offsetRef.current);
+
+      if (!error && data) {
+        const typed = data as unknown as PostData[];
+        if (reset) {
+          setPosts(typed);
+        } else {
+          setPosts((prev) => [...prev, ...typed]);
+        }
+        setHasMore(typed.length >= PAGE_SIZE);
+        offsetRef.current += typed.length;
+      }
+
+      setLoading(false);
+      setRefreshing(false);
+      setLoadingMore(false);
+    },
+    [buildQuery]
+  );
+
+  useEffect(() => {
+    fetchPosts(true);
   }, [fetchPosts]);
 
-  function onRefresh() {
+  // ------------------------------------------------------------------
+  // Tab change
+  // ------------------------------------------------------------------
+  const handleTabChange = (tab: FeedTab) => {
+    setActiveTab(tab);
+    // fetchPosts will be triggered by the useEffect on fetchPosts changing
+  };
+
+  // ------------------------------------------------------------------
+  // Pull to refresh
+  // ------------------------------------------------------------------
+  const handleRefresh = () => {
     setRefreshing(true);
-    fetchPosts();
+    resetCount();
+    fetchPosts(true);
+  };
+
+  // ------------------------------------------------------------------
+  // New posts banner tap
+  // ------------------------------------------------------------------
+  const handleNewPostsBannerPress = () => {
+    resetCount();
+    fetchPosts(true);
+  };
+
+  // ------------------------------------------------------------------
+  // Load more
+  // ------------------------------------------------------------------
+  const handleLoadMore = () => {
+    if (loadingMore || !hasMore) return;
+    setLoadingMore(true);
+    fetchPosts(false);
+  };
+
+  // ------------------------------------------------------------------
+  // Post created callback
+  // ------------------------------------------------------------------
+  const handlePostCreated = () => {
+    fetchPosts(true);
+  };
+
+  // ------------------------------------------------------------------
+  // Auth gate for Following / My School
+  // ------------------------------------------------------------------
+  const needsAuth = (activeTab === 'following' || activeTab === 'mySchool') && !session;
+
+  // ------------------------------------------------------------------
+  // Build FlatList data with dynasty widget sentinel after 3rd post
+  // ------------------------------------------------------------------
+  const feedData: FeedItem[] = [];
+  for (let i = 0; i < posts.length; i++) {
+    feedData.push(posts[i]);
+    if (i === 2) {
+      feedData.push(DYNASTY_SENTINEL);
+    }
+  }
+  // If fewer than 3 posts, still add dynasty widget at the end
+  if (posts.length > 0 && posts.length <= 3 && !feedData.includes(DYNASTY_SENTINEL)) {
+    feedData.push(DYNASTY_SENTINEL);
   }
 
-  function getTimeAgo(dateStr: string): string {
-    const seconds = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
-    if (seconds < 60) return `${seconds}s`;
-    const minutes = Math.floor(seconds / 60);
-    if (minutes < 60) return `${minutes}m`;
-    const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `${hours}h`;
-    const days = Math.floor(hours / 24);
-    return `${days}d`;
-  }
+  // ------------------------------------------------------------------
+  // Render
+  // ------------------------------------------------------------------
+  const renderItem = ({ item }: { item: FeedItem }) => {
+    if (item === DYNASTY_SENTINEL) {
+      return <DynastyWidget />;
+    }
+    return <PostCard post={item} />;
+  };
 
-  function renderPost({ item }: { item: Post }) {
-    const authorName = item.author?.display_name ?? item.author?.username ?? 'Unknown';
+  const keyExtractor = (item: FeedItem, index: number) => {
+    if (item === DYNASTY_SENTINEL) return 'dynasty-widget';
+    return item.id;
+  };
 
-    return (
-      <View style={styles.postCard}>
-        {/* Post type badge */}
-        {item.post_type !== 'STANDARD' && (
-          <Text style={styles.postType}>{item.post_type.replace('_', ' ')}</Text>
-        )}
-
-        {/* Author row */}
-        <View style={styles.authorRow}>
-          <View
-            style={[
-              styles.avatar,
-              { backgroundColor: item.school?.primary_color ?? colors.crimson },
-            ]}
-          >
-            <Text style={styles.avatarText}>{authorName[0]}</Text>
-          </View>
-          <View style={styles.authorInfo}>
-            <View style={styles.authorNameRow}>
-              <Text style={styles.authorName}>{authorName}</Text>
-              {item.school && (
-                <View
-                  style={[
-                    styles.schoolBadge,
-                    { backgroundColor: `${item.school.primary_color}20` },
-                  ]}
-                >
-                  <Text
-                    style={[styles.schoolBadgeText, { color: item.school.primary_color }]}
-                  >
-                    {item.school.abbreviation}
-                  </Text>
-                </View>
-              )}
-            </View>
-            <Text style={styles.timestamp}>
-              @{item.author?.username ?? 'unknown'} &middot; {getTimeAgo(item.created_at)}
-            </Text>
-          </View>
-        </View>
-
-        {/* Content */}
-        <Text style={styles.content}>{item.content}</Text>
-
-        {/* Actions */}
-        <View style={styles.actions}>
-          <Pressable style={styles.actionButton}>
-            <Text style={styles.actionText}>TD</Text>
-          </Pressable>
-          <Pressable style={styles.actionButton}>
-            <Text style={styles.actionText}>Fumble</Text>
-          </Pressable>
-          <Pressable style={styles.actionButton}>
-            <Text style={styles.actionText}>Reply</Text>
-          </Pressable>
-          <Pressable style={styles.actionButton}>
-            <Text style={styles.actionText}>Repost</Text>
-          </Pressable>
-        </View>
-      </View>
-    );
-  }
-
-  if (loading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={colors.crimson} />
-      </View>
-    );
-  }
+  const ListFooter = loadingMore ? (
+    <ActivityIndicator
+      size="small"
+      color={dark}
+      style={styles.loadingMore}
+    />
+  ) : null;
 
   return (
     <View style={styles.container}>
-      {/* Tab switcher */}
-      <View style={styles.tabContainer}>
-        <Pressable
-          style={[styles.tab, activeTab === 'national' && styles.tabActive]}
-          onPress={() => setActiveTab('national')}
-        >
-          <Text
-            style={[styles.tabText, activeTab === 'national' && styles.tabTextActive]}
-          >
-            National
-          </Text>
-        </Pressable>
-        <Pressable
-          style={[styles.tab, activeTab === 'school' && styles.tabActive]}
-          onPress={() => setActiveTab('school')}
-        >
-          <Text
-            style={[styles.tabText, activeTab === 'school' && styles.tabTextActive]}
-          >
-            My School
-          </Text>
-        </Pressable>
-      </View>
+      <AppHeader />
+      <ScoresBanner />
+      <FeedTabs activeTab={activeTab} onTabChange={handleTabChange} />
 
-      <FlatList
-        data={posts}
-        renderItem={renderPost}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.listContent}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={colors.crimson}
-          />
-        }
-        ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyTitle}>The Gridiron is quiet...</Text>
-            <Text style={styles.emptySubtitle}>Be the first to post and stake your claim.</Text>
-          </View>
-        }
+      {newPostCount > 0 && (
+        <NewPostsBanner count={newPostCount} onPress={handleNewPostsBannerPress} />
+      )}
+
+      {loading ? (
+        <View style={styles.loaderContainer}>
+          <ActivityIndicator size="large" color={dark} />
+        </View>
+      ) : needsAuth ? (
+        <View style={styles.authGate}>
+          <Text style={styles.authGateTitle}>
+            {activeTab === 'following' ? 'Follow fans to see their takes' : 'Pick a school to see its takes'}
+          </Text>
+          <Pressable
+            style={[styles.authGateButton, { backgroundColor: dark }]}
+            onPress={() => router.push('/(auth)/login' as never)}
+          >
+            <Text style={styles.authGateButtonText}>Log In</Text>
+          </Pressable>
+        </View>
+      ) : (
+        <FlatList
+          data={feedData}
+          renderItem={renderItem}
+          keyExtractor={keyExtractor}
+          contentContainerStyle={styles.listContent}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={handleRefresh}
+              tintColor={dark}
+            />
+          }
+          onEndReached={handleLoadMore}
+          onEndReachedThreshold={0.3}
+          ListFooterComponent={ListFooter}
+          ListEmptyComponent={
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyTitle}>CFB Social is quiet...</Text>
+              <Text style={styles.emptySubtitle}>
+                Be the first to post and stake your claim.
+              </Text>
+            </View>
+          }
+        />
+      )}
+
+      {/* Floating compose button - bottom left */}
+      <Pressable
+        style={[styles.fab, { backgroundColor: dark }]}
+        onPress={() => setComposerVisible(true)}
+      >
+        <Text style={styles.fabText}>+</Text>
+      </Pressable>
+
+      <PostComposer
+        visible={composerVisible}
+        onClose={() => setComposerVisible(false)}
+        onPostCreated={handlePostCreated}
       />
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.paper,
-  },
-  loadingContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.paper,
-  },
-  tabContainer: {
-    flexDirection: 'row',
-    marginHorizontal: 16,
-    marginTop: 12,
-    backgroundColor: colors.surface,
-    borderRadius: 10,
-    padding: 4,
-  },
-  tab: {
-    flex: 1,
-    paddingVertical: 10,
-    alignItems: 'center',
-    borderRadius: 8,
-  },
-  tabActive: {
-    backgroundColor: colors.surfaceRaised,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
-  },
-  tabText: {
-    fontFamily: typography.sansSemiBold,
-    fontSize: 14,
-    color: colors.textMuted,
-  },
-  tabTextActive: {
-    color: colors.ink,
-  },
-  listContent: {
-    padding: 16,
-    gap: 12,
-  },
-  postCard: {
-    backgroundColor: colors.surfaceRaised,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 12,
-    padding: 16,
-  },
-  postType: {
-    fontFamily: typography.mono,
-    fontSize: 10,
-    letterSpacing: 1.5,
-    textTransform: 'uppercase',
-    color: colors.secondary,
-    marginBottom: 8,
-  },
-  authorRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  avatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  avatarText: {
-    fontFamily: typography.serifBold,
-    fontSize: 16,
-    color: '#ffffff',
-  },
-  authorInfo: {
-    flex: 1,
-  },
-  authorNameRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  authorName: {
-    fontFamily: typography.sansSemiBold,
-    fontSize: 15,
-    color: colors.ink,
-  },
-  schoolBadge: {
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
-  },
-  schoolBadgeText: {
-    fontFamily: typography.sansSemiBold,
-    fontSize: 11,
-  },
-  timestamp: {
-    fontFamily: typography.sans,
-    fontSize: 12,
-    color: colors.textMuted,
-    marginTop: 1,
-  },
-  content: {
-    fontFamily: typography.sans,
-    fontSize: 15,
-    lineHeight: 22,
-    color: colors.ink,
-    marginTop: 10,
-  },
-  actions: {
-    flexDirection: 'row',
-    marginTop: 12,
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-    gap: 24,
-  },
-  actionButton: {
-    paddingVertical: 2,
-  },
-  actionText: {
-    fontFamily: typography.mono,
-    fontSize: 11,
-    color: colors.textMuted,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  emptyContainer: {
-    alignItems: 'center',
-    paddingVertical: 48,
-  },
-  emptyTitle: {
-    fontFamily: typography.serif,
-    fontSize: 20,
-    color: colors.textSecondary,
-  },
-  emptySubtitle: {
-    fontFamily: typography.sans,
-    fontSize: 14,
-    color: colors.textMuted,
-    marginTop: 4,
-  },
-});

@@ -1,13 +1,16 @@
 import { useEffect } from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { View, Text, Image, StyleSheet, Pressable, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/lib/auth/AuthProvider';
+import { useSchoolTheme } from '@/lib/theme/SchoolThemeProvider';
+import { OrnamentDivider } from '@/components/ui/OrnamentDivider';
 import { colors } from '@/lib/theme/colors';
 import { typography } from '@/lib/theme/typography';
 
 export default function SplashScreen() {
   const router = useRouter();
   const { session, loading } = useAuth();
+  const { dark } = useSchoolTheme();
 
   useEffect(() => {
     if (!loading && session) {
@@ -17,24 +20,31 @@ export default function SplashScreen() {
 
   if (loading) {
     return (
-      <View style={styles.container}>
-        <Text style={styles.title}>The Gridiron</Text>
-        <Text style={styles.loading}>Loading...</Text>
+      <View style={styles.loadingContainer}>
+        <Image
+          source={require('../assets/icon.png')}
+          style={styles.loadingIcon}
+          resizeMode="contain"
+        />
+        <ActivityIndicator color={dark} size="large" style={styles.spinner} />
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
-      {/* Top ornament */}
-      <Text style={styles.ornament}>EST. 2026</Text>
+      {/* Logo */}
+      <Image
+        source={require('../assets/icon.png')}
+        style={styles.logo}
+        resizeMode="contain"
+      />
 
-      {/* Main title */}
-      <Text style={styles.title}>The Gridiron</Text>
+      {/* Subtitle */}
       <Text style={styles.subtitle}>COLLEGE FOOTBALL SOCIAL</Text>
 
       {/* Divider */}
-      <View style={styles.divider} />
+      <OrnamentDivider />
 
       {/* Tagline */}
       <Text style={styles.tagline}>
@@ -44,10 +54,10 @@ export default function SplashScreen() {
       {/* CTA buttons */}
       <View style={styles.buttonContainer}>
         <Pressable
-          style={styles.primaryButton}
+          style={[styles.primaryButton, { backgroundColor: dark }]}
           onPress={() => router.push('/(auth)/login')}
         >
-          <Text style={styles.primaryButtonText}>Enter The Gridiron</Text>
+          <Text style={styles.primaryButtonText}>Enter CFB Social</Text>
         </Pressable>
 
         <Pressable
@@ -65,6 +75,19 @@ export default function SplashScreen() {
 }
 
 const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.paper,
+  },
+  loadingIcon: {
+    width: 200,
+    height: 200,
+  },
+  spinner: {
+    marginTop: 24,
+  },
   container: {
     flex: 1,
     alignItems: 'center',
@@ -72,33 +95,26 @@ const styles = StyleSheet.create({
     backgroundColor: colors.paper,
     paddingHorizontal: 32,
   },
+  logo: {
+    width: 220,
+    height: 220,
+    marginBottom: 8,
+  },
   ornament: {
     fontFamily: typography.mono,
     fontSize: 10,
     letterSpacing: 3,
     color: colors.textMuted,
     textTransform: 'uppercase',
-  },
-  title: {
-    fontFamily: typography.serifBold,
-    fontSize: 48,
-    color: colors.ink,
-    marginTop: 24,
-    textAlign: 'center',
+    marginTop: 32,
   },
   subtitle: {
     fontFamily: typography.mono,
     fontSize: 12,
     letterSpacing: 4,
     color: colors.textSecondary,
-    marginTop: 4,
+    marginTop: 2,
     textTransform: 'uppercase',
-  },
-  divider: {
-    width: 120,
-    height: 1,
-    backgroundColor: colors.border,
-    marginVertical: 24,
   },
   tagline: {
     fontFamily: typography.sans,
@@ -107,19 +123,12 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     textAlign: 'center',
   },
-  loading: {
-    fontFamily: typography.sans,
-    fontSize: 14,
-    color: colors.textMuted,
-    marginTop: 16,
-  },
   buttonContainer: {
     marginTop: 32,
     width: '100%',
     gap: 12,
   },
   primaryButton: {
-    backgroundColor: colors.crimson,
     paddingVertical: 16,
     borderRadius: 8,
     alignItems: 'center',

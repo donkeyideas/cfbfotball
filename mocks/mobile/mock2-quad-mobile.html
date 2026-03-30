@@ -1,0 +1,2161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CFB Social — THE QUAD Mobile Mock</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ===== RESET & PAGE ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Nunito', -apple-system, sans-serif;
+  background: #f0ebe3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  padding: 24px 16px;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 {
+  font-family: 'Poppins', sans-serif;
+  line-height: 1.2;
+}
+
+/* ===== PAGE HEADER ===== */
+.page-header {
+  text-align: center;
+  margin-bottom: 32px;
+  max-width: 600px;
+}
+.page-header h1 {
+  font-size: 1.8rem;
+  color: #2d5016;
+  margin-bottom: 8px;
+}
+.page-header p {
+  color: #8a8175;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+/* ===== SCREEN SELECTOR ===== */
+.screen-nav {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.screen-nav button {
+  padding: 8px 20px;
+  border: 2px solid #d6cfc5;
+  background: #fff;
+  border-radius: 999px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #8a8175;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.screen-nav button:hover {
+  border-color: #2d5016;
+  color: #2d5016;
+}
+.screen-nav button.active {
+  background: #2d5016;
+  border-color: #2d5016;
+  color: #fff;
+}
+
+/* ===== PHONE FRAME ===== */
+.phone-frame {
+  width: 375px;
+  height: 812px;
+  border-radius: 44px;
+  background: #000;
+  padding: 12px;
+  box-shadow: 0 25px 80px rgba(0,0,0,0.25), 0 0 0 2px #333;
+  position: relative;
+}
+.phone-inner {
+  width: 100%;
+  height: 100%;
+  border-radius: 34px;
+  overflow: hidden;
+  position: relative;
+  background: #faf7f2;
+}
+
+/* Notch */
+.phone-notch {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 126px;
+  height: 34px;
+  background: #000;
+  border-radius: 0 0 20px 20px;
+  z-index: 100;
+}
+
+/* Status bar */
+.status-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 54px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 0 28px 8px;
+  z-index: 99;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+.status-bar .time { font-size: 0.8rem; font-weight: 700; }
+.status-bar .icons { display: flex; gap: 5px; align-items: center; font-size: 0.7rem; }
+
+/* Home indicator */
+.home-indicator {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 134px;
+  height: 5px;
+  background: rgba(0,0,0,0.2);
+  border-radius: 3px;
+  z-index: 100;
+}
+
+/* ===== SCREENS ===== */
+.screen {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease, transform 0.35s ease;
+  transform: scale(0.97);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.screen.active {
+  opacity: 1;
+  pointer-events: all;
+  transform: scale(1);
+}
+.screen::-webkit-scrollbar { display: none; }
+
+/* ===== PRINT: hide external controls ===== */
+@media print {
+  .page-header, .screen-nav { display: none; }
+}
+
+
+/* =========================================================
+   SCREEN 1: SPLASH
+   ========================================================= */
+.splash-screen {
+  background: linear-gradient(160deg, #2d5016 0%, #4a8c1f 40%, #c4560a 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: #fff;
+}
+.splash-screen .status-bar { color: #fff; }
+
+.splash-logo {
+  width: 96px;
+  height: 96px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 28px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.2);
+  animation: logo-pulse 2s ease-in-out infinite;
+}
+@keyframes logo-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+.splash-logo svg { width: 52px; height: 52px; }
+
+.splash-brand {
+  font-family: 'Poppins', sans-serif;
+  font-size: 2.4rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  margin-bottom: 8px;
+}
+.splash-tagline {
+  font-size: 0.95rem;
+  opacity: 0.85;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.splash-loader {
+  position: absolute;
+  bottom: 100px;
+  display: flex;
+  gap: 8px;
+}
+.splash-loader span {
+  width: 8px;
+  height: 8px;
+  background: rgba(255,255,255,0.4);
+  border-radius: 50%;
+  animation: dot-bounce 1.4s ease-in-out infinite;
+}
+.splash-loader span:nth-child(2) { animation-delay: 0.16s; }
+.splash-loader span:nth-child(3) { animation-delay: 0.32s; }
+@keyframes dot-bounce {
+  0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+  40% { transform: scale(1); opacity: 1; }
+}
+
+.splash-version {
+  position: absolute;
+  bottom: 60px;
+  font-size: 0.7rem;
+  opacity: 0.5;
+}
+
+
+/* =========================================================
+   SCREEN 2: LOGIN
+   ========================================================= */
+.login-screen {
+  background: #faf7f2;
+  padding: 54px 0 0;
+}
+
+.login-header {
+  text-align: center;
+  padding: 40px 28px 0;
+}
+.login-logo-small {
+  width: 56px;
+  height: 56px;
+  background: #2d5016;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+}
+.login-logo-small svg { width: 30px; height: 30px; }
+.login-header h2 {
+  font-size: 1.5rem;
+  color: #1a1a1a;
+  margin-bottom: 6px;
+}
+.login-header p {
+  font-size: 0.85rem;
+  color: #8a8175;
+}
+
+.login-form {
+  padding: 32px 28px;
+}
+.form-group {
+  margin-bottom: 18px;
+}
+.form-label {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 6px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+.form-input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1.5px solid #d6cfc5;
+  border-radius: 10px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.95rem;
+  color: #1a1a1a;
+  background: #fff;
+  transition: border-color 0.2s;
+  outline: none;
+}
+.form-input::placeholder { color: #b0a898; }
+.form-input:focus { border-color: #2d5016; }
+
+.btn-primary {
+  width: 100%;
+  padding: 15px;
+  background: #2d5016;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+  letter-spacing: 0.01em;
+}
+.btn-primary:hover { background: #244412; }
+.btn-primary:active { transform: scale(0.98); }
+
+.login-divider {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 24px 0;
+  color: #8a8175;
+  font-size: 0.78rem;
+}
+.login-divider::before, .login-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #d6cfc5;
+}
+
+.google-btn {
+  width: 100%;
+  padding: 14px;
+  background: #fff;
+  border: 1.5px solid #d6cfc5;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.google-btn:hover { border-color: #2d5016; background: #f5f0e8; }
+.google-btn svg { width: 20px; height: 20px; }
+
+.login-footer {
+  text-align: center;
+  padding: 24px 28px;
+  font-size: 0.85rem;
+  color: #8a8175;
+}
+.login-footer a {
+  color: #c4560a;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+
+/* =========================================================
+   SCREEN 3: FEED
+   ========================================================= */
+.feed-screen {
+  background: #faf7f2;
+  padding: 54px 0 0;
+  padding-bottom: 70px;
+}
+
+/* App Header */
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 20px 12px;
+  background: #faf7f2;
+  border-bottom: 1px solid #ece6db;
+}
+.app-header .logo {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 800;
+  font-size: 20px;
+  color: #2d5016;
+  letter-spacing: -0.5px;
+}
+.app-header .logo span { color: #c4560a; }
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.header-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #f0ebe3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  transition: background 0.2s;
+}
+.header-icon:hover { background: #e6dfcf; }
+.header-icon svg { width: 18px; height: 18px; color: #5c5548; }
+.header-icon .notif-dot {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 8px;
+  height: 8px;
+  background: #c4560a;
+  border-radius: 50%;
+  border: 2px solid #faf7f2;
+}
+.header-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #2d5016, #c4560a);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+/* Stories Row */
+.stories-row {
+  display: flex;
+  gap: 14px;
+  padding: 12px 20px 14px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+}
+.stories-row::-webkit-scrollbar { height: 0; }
+.story-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+  scroll-snap-align: start;
+  cursor: pointer;
+}
+.story-ring {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  padding: 3px;
+  background: linear-gradient(135deg, #2d5016, #4a8c1f, #c4560a, #e87a2f);
+  background-size: 200% 200%;
+  animation: ringShimmer 4s ease infinite;
+}
+@keyframes ringShimmer {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+.story-ring.add {
+  background: #d6d0c6;
+}
+.story-inner {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: #e6dfcf;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 800;
+  color: #2d5016;
+  border: 2.5px solid #faf7f2;
+}
+.story-ring.add .story-inner {
+  font-size: 22px;
+  color: #2d5016;
+}
+.story-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: #5c5548;
+  max-width: 60px;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Divider */
+.divider {
+  height: 1px;
+  background: #e6dfcf;
+  margin: 0 20px;
+}
+
+/* Feed Cards */
+.feed { padding: 0; }
+.post-card {
+  padding: 16px 20px;
+  border-bottom: 1px solid #ece6db;
+}
+.post-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.post-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 800;
+  color: #fff;
+  flex-shrink: 0;
+}
+.post-user-info { flex: 1; min-width: 0; }
+.post-name {
+  font-weight: 800;
+  font-size: 13px;
+  color: #1a1a1a;
+  line-height: 1.2;
+}
+.post-handle {
+  font-size: 11px;
+  color: #8a8175;
+  font-weight: 600;
+}
+.post-team-badge {
+  display: inline-block;
+  background: #f0ebe3;
+  color: #5c5548;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 10px;
+  margin-left: 4px;
+}
+.post-more {
+  font-size: 18px;
+  color: #b0a898;
+  cursor: pointer;
+  padding: 4px;
+  letter-spacing: 1px;
+}
+
+/* Photo Placeholder */
+.post-photo {
+  width: 100%;
+  height: 200px;
+  background: linear-gradient(135deg, #e6dfcf, #d6cfc5);
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.post-photo svg { opacity: 0.4; }
+.post-photo .label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #8a8175;
+}
+
+/* Post Text */
+.post-text {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #2a2520;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+/* Reactions Row */
+.reactions-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+.reaction-pill {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: #f0ebe3;
+  border: 1.5px solid #e0d8cc;
+  border-radius: 20px;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #5c5548;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.reaction-pill:hover {
+  background: #e6dfcf;
+  border-color: #2d5016;
+  color: #2d5016;
+}
+.reaction-pill.active {
+  background: #edf5e5;
+  border-color: #2d5016;
+  color: #2d5016;
+}
+
+/* Actions Row */
+.actions-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding-top: 4px;
+}
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #8a8175;
+  cursor: pointer;
+  transition: color 0.2s;
+  padding: 4px 8px;
+  border-radius: 8px;
+}
+.action-btn:hover { color: #2d5016; background: #f0ebe3; }
+.action-btn svg { width: 15px; height: 15px; }
+
+/* Receipt Card */
+.receipt-box {
+  background: #fff;
+  border: 1.5px solid #e0d8cc;
+  border-radius: 14px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+}
+.receipt-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+  font-size: 11px;
+  font-weight: 800;
+  color: #2d5016;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+.receipt-header svg { width: 14px; height: 14px; }
+.receipt-text {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 10px;
+  line-height: 1.4;
+}
+.receipt-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #c4560a;
+  background: #fef3ea;
+  padding: 5px 12px;
+  border-radius: 10px;
+  width: fit-content;
+}
+
+/* Dynasty Widget */
+.dynasty-widget {
+  margin: 4px 20px;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, #2d5016 0%, #3d6b1f 100%);
+  border-radius: 14px;
+  color: #fff;
+}
+.dynasty-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.dynasty-label {
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+.dynasty-xp {
+  font-size: 11px;
+  font-weight: 700;
+  opacity: 0.8;
+}
+.dynasty-bar-track {
+  width: 100%;
+  height: 7px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+.dynasty-bar-fill {
+  height: 100%;
+  width: 80%;
+  background: linear-gradient(90deg, #f5c842, #c4560a);
+  border-radius: 4px;
+  transition: width 1.2s ease;
+}
+.dynasty-streak {
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* AI Moderation Card */
+.mod-card {
+  margin: 0 20px;
+  padding: 14px 16px;
+  background: #fefce8;
+  border: 2px dashed #6b8c42;
+  border-radius: 14px;
+}
+.mod-title {
+  font-size: 14px;
+  font-weight: 800;
+  color: #2d5016;
+  margin-bottom: 4px;
+}
+.mod-desc {
+  font-size: 12px;
+  color: #5c5548;
+  font-weight: 600;
+  margin-bottom: 10px;
+  line-height: 1.4;
+}
+.mod-appeal {
+  font-size: 12px;
+  font-weight: 800;
+  color: #c4560a;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Rivalry Vote Card */
+.rivalry-card {
+  background: #fff;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1.5px solid #e0d8cc;
+  margin-bottom: 10px;
+}
+.rivalry-header {
+  text-align: center;
+  padding: 12px 16px 8px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+.rivalry-split {
+  display: flex;
+  height: 60px;
+  margin: 0 14px 14px;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+}
+.rivalry-side {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  color: #fff;
+  font-weight: 800;
+  cursor: pointer;
+  transition: flex 0.6s cubic-bezier(.4,0,.2,1);
+}
+.rivalry-side.left {
+  background: #bb0000;
+  flex: 52;
+  border-radius: 12px 0 0 12px;
+}
+.rivalry-side.right {
+  background: #00274c;
+  flex: 48;
+  border-radius: 0 12px 12px 0;
+}
+.rivalry-team {
+  font-size: 12px;
+  font-family: 'Poppins', sans-serif;
+  line-height: 1.1;
+}
+.rivalry-pct {
+  font-size: 18px;
+  font-family: 'Poppins', sans-serif;
+}
+.rivalry-vs {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 30px;
+  height: 30px;
+  background: #faf7f2;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 800;
+  color: #5c5548;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+/* Section Spacer */
+.section-spacer { height: 8px; background: #f0ebe3; }
+
+/* Bottom Tab Bar */
+.tab-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #faf7f2;
+  border-top: 1px solid #e6dfcf;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 8px 0 22px;
+  z-index: 60;
+}
+.tab-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  cursor: pointer;
+  transition: color 0.2s;
+  min-width: 48px;
+}
+.tab-item svg { width: 20px; height: 20px; color: #b0a898; transition: color 0.2s; }
+.tab-item .tab-label { font-size: 10px; font-weight: 800; color: #b0a898; transition: color 0.2s; }
+.tab-item.active svg { color: #2d5016; }
+.tab-item.active .tab-label { color: #2d5016; }
+.tab-item:hover svg { color: #5c5548; }
+.tab-item:hover .tab-label { color: #5c5548; }
+.tab-item.active:hover svg { color: #2d5016; }
+.tab-item.active:hover .tab-label { color: #2d5016; }
+
+
+/* =========================================================
+   SCREEN 4: RIVALRY ARENA
+   ========================================================= */
+.rivalry-screen {
+  background: #faf7f2;
+  padding: 54px 0 0;
+  padding-bottom: 70px;
+}
+
+.rivalry-page-header {
+  padding: 14px 20px;
+  background: #faf7f2;
+  border-bottom: 1px solid #ece6db;
+}
+.rivalry-page-header h2 {
+  font-size: 1.2rem;
+  color: #1a1a1a;
+}
+.rivalry-page-header p {
+  font-size: 0.78rem;
+  color: #8a8175;
+  margin-top: 2px;
+}
+
+.rivalry-body {
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.matchup-card {
+  background: #fff;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1.5px solid #e0d8cc;
+}
+.matchup-label {
+  text-align: center;
+  padding: 10px 16px 6px;
+  font-size: 11px;
+  font-weight: 800;
+  color: #c4560a;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+.matchup-title {
+  text-align: center;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #1a1a1a;
+  padding: 0 16px 10px;
+}
+.matchup-bar {
+  display: flex;
+  height: 52px;
+  margin: 0 14px 14px;
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+}
+.matchup-side {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  color: #fff;
+  font-weight: 800;
+  cursor: pointer;
+  transition: flex 0.6s cubic-bezier(.4,0,.2,1);
+}
+.matchup-side .team-name { font-size: 11px; font-family: 'Poppins', sans-serif; }
+.matchup-side .team-pct { font-size: 16px; font-family: 'Poppins', sans-serif; }
+.matchup-vs-badge {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 28px;
+  height: 28px;
+  background: #faf7f2;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 800;
+  color: #5c5548;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+}
+
+/* Debate Takes */
+.debate-section-title {
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 10px;
+}
+.debate-take {
+  background: #fff;
+  border: 1.5px solid #e0d8cc;
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+}
+.debate-take-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.debate-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 800;
+  color: #fff;
+  flex-shrink: 0;
+}
+.debate-take-name {
+  font-size: 12px;
+  font-weight: 800;
+  color: #1a1a1a;
+}
+.debate-take-text {
+  font-size: 13px;
+  color: #5c5548;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.share-take-btn {
+  width: 100%;
+  padding: 14px;
+  background: #2d5016;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-top: 4px;
+}
+.share-take-btn:hover { background: #244412; }
+
+/* Past results */
+.past-results-title {
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: #8a8175;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 8px;
+}
+.past-result {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #ece6db;
+  font-size: 12px;
+  font-weight: 600;
+  color: #5c5548;
+}
+.past-result .winner { color: #2d5016; font-weight: 800; }
+
+
+/* =========================================================
+   SCREEN 5: TRANSFER PORTAL
+   ========================================================= */
+.portal-screen {
+  background: #faf7f2;
+  padding: 54px 0 0;
+  padding-bottom: 70px;
+}
+
+.portal-header {
+  padding: 14px 20px;
+  background: #faf7f2;
+  border-bottom: 1px solid #ece6db;
+}
+.portal-header h2 {
+  font-size: 1.2rem;
+  color: #1a1a1a;
+}
+.portal-header p {
+  font-size: 0.78rem;
+  color: #8a8175;
+  margin-top: 2px;
+}
+
+.portal-body {
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Team selector */
+.team-selector {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1.5px solid #d6cfc5;
+  border-radius: 10px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  background: #fff;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238a8175' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+}
+
+/* Portal player card */
+.portal-card {
+  background: #fff;
+  border: 1.5px solid #e0d8cc;
+  border-radius: 14px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.portal-photo {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #e6dfcf, #d6cfc5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.portal-photo svg { width: 24px; height: 24px; color: #b0a898; }
+.portal-info { flex: 1; min-width: 0; }
+.portal-name {
+  font-size: 14px;
+  font-weight: 800;
+  color: #1a1a1a;
+  line-height: 1.2;
+}
+.portal-detail {
+  font-size: 11px;
+  color: #8a8175;
+  font-weight: 600;
+  margin-top: 2px;
+}
+.portal-stars {
+  font-size: 11px;
+  font-weight: 800;
+  color: #c4560a;
+  margin-top: 3px;
+}
+.portal-add-btn {
+  padding: 8px 14px;
+  background: #2d5016;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+.portal-add-btn:hover { background: #244412; }
+
+/* Roster progress */
+.roster-progress {
+  background: #f0ebe3;
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+.roster-label {
+  font-size: 12px;
+  font-weight: 800;
+  color: #5c5548;
+  margin-bottom: 8px;
+}
+.roster-bar-track {
+  width: 100%;
+  height: 8px;
+  background: #d6cfc5;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.roster-bar-fill {
+  height: 100%;
+  width: 60%;
+  background: linear-gradient(90deg, #2d5016, #4a8c1f);
+  border-radius: 4px;
+  transition: width 0.8s ease;
+}
+
+
+/* =========================================================
+   SCREEN 6: PROFILE
+   ========================================================= */
+.profile-screen {
+  background: #faf7f2;
+  padding: 54px 0 0;
+  padding-bottom: 70px;
+}
+
+.profile-top {
+  text-align: center;
+  padding: 24px 20px 16px;
+}
+.profile-avatar-large {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #2d5016, #c4560a);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 12px;
+  color: #fff;
+  font-family: 'Poppins', sans-serif;
+  font-size: 28px;
+  font-weight: 800;
+}
+.profile-name {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 2px;
+}
+.profile-handle {
+  font-size: 0.85rem;
+  color: #8a8175;
+  font-weight: 600;
+}
+.profile-school {
+  font-size: 0.78rem;
+  color: #c4560a;
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+/* Stats row */
+.profile-stats-row {
+  display: flex;
+  justify-content: space-around;
+  padding: 16px 20px;
+  border-top: 1px solid #ece6db;
+  border-bottom: 1px solid #ece6db;
+}
+.profile-stat {
+  text-align: center;
+}
+.profile-stat-value {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #1a1a1a;
+}
+.profile-stat-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #8a8175;
+}
+
+/* Dynasty card (profile) */
+.profile-dynasty {
+  margin: 16px 20px;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, #2d5016 0%, #3d6b1f 100%);
+  border-radius: 14px;
+  color: #fff;
+}
+.profile-dynasty .dynasty-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.profile-dynasty .dynasty-label {
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+}
+.profile-dynasty .dynasty-sub {
+  font-size: 11px;
+  opacity: 0.8;
+}
+.profile-dynasty .dynasty-bar-track {
+  width: 100%;
+  height: 7px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+.profile-dynasty .dynasty-bar-fill {
+  height: 100%;
+  width: 80%;
+  background: linear-gradient(90deg, #f5c842, #c4560a);
+  border-radius: 4px;
+}
+.profile-dynasty .achievements {
+  font-size: 12px;
+  font-weight: 700;
+  opacity: 0.9;
+}
+
+/* Badges */
+.badges-section {
+  padding: 0 20px;
+  margin-bottom: 16px;
+}
+.badges-title {
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 10px;
+}
+.badges-row {
+  display: flex;
+  gap: 10px;
+}
+.badge-card {
+  flex: 1;
+  background: #fff;
+  border: 1.5px solid #e0d8cc;
+  border-radius: 12px;
+  padding: 12px 8px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.badge-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  margin: 0 auto 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.badge-icon svg { width: 18px; height: 18px; }
+.badge-name {
+  font-size: 10px;
+  font-weight: 800;
+  color: #5c5548;
+  line-height: 1.2;
+}
+
+/* Recent takes */
+.recent-takes {
+  padding: 0 20px;
+  margin-bottom: 16px;
+}
+.takes-title {
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 10px;
+}
+.take-item {
+  background: #fff;
+  border: 1.5px solid #e0d8cc;
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+}
+.take-text {
+  font-size: 13px;
+  font-weight: 600;
+  color: #2a2520;
+  line-height: 1.4;
+}
+.take-meta {
+  font-size: 11px;
+  color: #8a8175;
+  margin-top: 4px;
+  font-weight: 600;
+}
+
+/* Edit profile button */
+.edit-profile-btn {
+  display: block;
+  width: calc(100% - 40px);
+  margin: 0 20px 20px;
+  padding: 13px;
+  background: transparent;
+  color: #c4560a;
+  border: 2px solid #c4560a;
+  border-radius: 12px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+.edit-profile-btn:hover {
+  background: #fef3ea;
+}
+
+</style>
+</head>
+<body>
+
+<!-- ===== PAGE HEADER (outside phone) ===== -->
+<div class="page-header">
+  <h1>CFB Social -- The Quad</h1>
+  <p>Campus social theme -- Interactive UI preview. Click the screen buttons to navigate.</p>
+</div>
+
+<!-- ===== SCREEN NAVIGATION (outside phone) ===== -->
+<div class="screen-nav">
+  <button class="active" onclick="showScreen('splash')">Splash</button>
+  <button onclick="showScreen('login')">Login</button>
+  <button onclick="showScreen('feed')">Feed</button>
+  <button onclick="showScreen('rivalry')">Rivalry Arena</button>
+  <button onclick="showScreen('portal')">Transfer Portal</button>
+  <button onclick="showScreen('profile')">Profile</button>
+</div>
+
+<!-- ===== PHONE FRAME ===== -->
+<div class="phone-frame">
+  <div class="phone-notch"></div>
+  <div class="phone-inner" id="phoneInner">
+
+    <!-- Status Bar (shared, positioned absolute) -->
+    <div class="status-bar" id="statusBar">
+      <span class="time">9:41</span>
+      <span class="icons">
+        <svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor"><rect x="0" y="6" width="3" height="6" rx="1"/><rect x="4.5" y="4" width="3" height="8" rx="1"/><rect x="9" y="2" width="3" height="10" rx="1"/><rect x="13.5" y="0" width="3" height="12" rx="1" opacity="0.3"/></svg>
+        <svg width="16" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><circle cx="12" cy="20" r="1" fill="currentColor"/></svg>
+        <svg width="24" height="12" viewBox="0 0 28 14" fill="currentColor"><rect x="0" y="1" width="24" height="12" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="2.5" y="3.5" width="16" height="7" rx="1.5" fill="currentColor"/><rect x="25.5" y="4.5" width="2" height="5" rx="1" opacity="0.4"/></svg>
+      </span>
+    </div>
+
+    <!-- Home Indicator -->
+    <div class="home-indicator" id="homeIndicator"></div>
+
+
+    <!-- ==================== SCREEN 1: SPLASH ==================== -->
+    <div class="screen splash-screen active" id="screen-splash">
+      <div class="splash-logo">
+        <svg viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Football silhouette -->
+          <ellipse cx="26" cy="26" rx="18" ry="12" stroke="#fff" stroke-width="2.5" fill="none"/>
+          <path d="M14 26 C18 20, 34 20, 38 26" stroke="#fff" stroke-width="1.5" fill="none"/>
+          <path d="M14 26 C18 32, 34 32, 38 26" stroke="#fff" stroke-width="1.5" fill="none"/>
+          <line x1="26" y1="18" x2="26" y2="34" stroke="#fff" stroke-width="1.5"/>
+          <line x1="20" y1="22" x2="32" y2="22" stroke="#fff" stroke-width="1"/>
+          <line x1="20" y1="30" x2="32" y2="30" stroke="#fff" stroke-width="1"/>
+        </svg>
+      </div>
+      <div class="splash-brand">CFB Social</div>
+      <div class="splash-tagline">Your College Football Community</div>
+      <div class="splash-loader">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+      <div class="splash-version">v1.0.0</div>
+    </div>
+
+
+    <!-- ==================== SCREEN 2: LOGIN ==================== -->
+    <div class="screen login-screen" id="screen-login">
+      <div class="login-header">
+        <div class="login-logo-small">
+          <svg viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <ellipse cx="15" cy="15" rx="10" ry="7" stroke="#fff" stroke-width="2" fill="none"/>
+            <line x1="15" y1="10" x2="15" y2="20" stroke="#fff" stroke-width="1.5"/>
+            <line x1="11" y1="12" x2="19" y2="12" stroke="#fff" stroke-width="1"/>
+            <line x1="11" y1="18" x2="19" y2="18" stroke="#fff" stroke-width="1"/>
+          </svg>
+        </div>
+        <h2>Welcome Back</h2>
+        <p>Sign in to your account</p>
+      </div>
+
+      <div class="login-form">
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input class="form-input" type="text" placeholder="you@college.edu" readonly>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input class="form-input" type="password" placeholder="Enter your password" readonly>
+        </div>
+
+        <button class="btn-primary" onclick="showScreen('feed')">Sign In</button>
+
+        <div class="login-divider">or</div>
+
+        <button class="google-btn">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
+            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+          </svg>
+          Sign in with Google
+        </button>
+
+        <div class="login-footer">
+          New here? <a href="#" onclick="event.preventDefault()">Create Account</a>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ==================== SCREEN 3: FEED ==================== -->
+    <div class="screen feed-screen" id="screen-feed">
+
+      <!-- App Header -->
+      <div class="app-header">
+        <div class="logo">CFB<span>Social</span></div>
+        <div class="header-actions">
+          <div class="header-icon" title="Notifications">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+            <span class="notif-dot"></span>
+          </div>
+          <div class="header-icon" title="Messages">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+          </div>
+          <div class="header-avatar">Y</div>
+        </div>
+      </div>
+
+      <!-- Stories Row -->
+      <div class="stories-row">
+        <div class="story-item">
+          <div class="story-ring add">
+            <div class="story-inner">+</div>
+          </div>
+          <span class="story-label">Your Story</span>
+        </div>
+        <div class="story-item">
+          <div class="story-ring">
+            <div class="story-inner">GAME</div>
+          </div>
+          <span class="story-label">OSU-MICH</span>
+        </div>
+        <div class="story-item">
+          <div class="story-ring">
+            <div class="story-inner">SEC</div>
+          </div>
+          <span class="story-label">SEC Champ</span>
+        </div>
+        <div class="story-item">
+          <div class="story-ring">
+            <div class="story-inner" style="color:#c4560a;">VS</div>
+          </div>
+          <span class="story-label">Rivalry</span>
+        </div>
+        <div class="story-item">
+          <div class="story-ring">
+            <div class="story-inner">TG</div>
+          </div>
+          <span class="story-label">Tailgate</span>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Feed -->
+      <div class="feed">
+
+        <!-- Post 1: Photo Post -->
+        <div class="post-card">
+          <div class="post-header">
+            <div class="post-avatar" style="background: linear-gradient(135deg, #ba0c2f, #000);">SM</div>
+            <div class="post-user-info">
+              <div class="post-name">Sarah M. <span class="post-team-badge">Georgia</span></div>
+              <div class="post-handle">@DawgPound -- 2h</div>
+            </div>
+            <div class="post-more">...</div>
+          </div>
+          <div class="post-photo">
+            <svg viewBox="0 0 48 48" width="48" height="48" fill="none" stroke="#8a8175" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="4" y="8" width="40" height="32" rx="4"/>
+              <circle cx="16" cy="20" r="4"/>
+              <path d="M44 32l-10-10-8 8-4-4-14 14"/>
+            </svg>
+            <span class="label">Game day in Athens!</span>
+          </div>
+          <div class="reactions-row">
+            <span class="reaction-pill active">TD <b>458</b></span>
+            <span class="reaction-pill">FUM <b>23</b></span>
+          </div>
+          <div class="actions-row">
+            <span class="action-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+              34
+            </span>
+            <span class="action-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+              Share
+            </span>
+            <span class="action-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+              Stat Check
+            </span>
+            <span class="action-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>
+              Save
+            </span>
+          </div>
+        </div>
+
+        <!-- Post 2: Receipt Prediction -->
+        <div class="post-card">
+          <div class="post-header">
+            <div class="post-avatar" style="background: linear-gradient(135deg, #9e1b32, #fdf0d5);">MJ</div>
+            <div class="post-user-info">
+              <div class="post-name">Marcus J. <span class="post-team-badge">Alabama</span></div>
+              <div class="post-handle">@CrimsonTide -- 4h</div>
+            </div>
+            <div class="post-more">...</div>
+          </div>
+          <div class="receipt-box">
+            <div class="receipt-header">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#2d5016" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+              RECEIPT TRACKED
+            </div>
+            <div class="receipt-text">"Jalen Milroe throwing 300+ vs LSU"</div>
+            <div class="receipt-meta">Aging Take -- Revisits Oct 12</div>
+          </div>
+          <div class="reactions-row">
+            <span class="reaction-pill">TD <b>189</b></span>
+            <span class="reaction-pill active">FUM <b>267</b></span>
+          </div>
+          <div class="actions-row">
+            <span class="action-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+              51
+            </span>
+            <span class="action-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+              Share
+            </span>
+            <span class="action-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              Challenge
+            </span>
+            <span class="action-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>
+              Save
+            </span>
+          </div>
+        </div>
+
+        <!-- Dynasty Widget -->
+        <div class="section-spacer"></div>
+        <div class="dynasty-widget">
+          <div class="dynasty-top">
+            <span class="dynasty-label">DYNASTY MODE -- Level 15</span>
+            <span class="dynasty-xp">3,200 / 4,000 XP</span>
+          </div>
+          <div class="dynasty-bar-track">
+            <div class="dynasty-bar-fill" id="dynastyBar"></div>
+          </div>
+          <div class="dynasty-streak">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#f5c842" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            Heisman Streak: 7 days
+          </div>
+        </div>
+        <div class="section-spacer"></div>
+
+        <!-- Post 3: AI Moderation -->
+        <div class="post-card" style="border-bottom: none;">
+          <div class="mod-card">
+            <div class="mod-title">OFFSIDES! AI detected off-topic content.</div>
+            <div class="mod-desc">College football takes only! Keep the discussion on the field.</div>
+            <span class="mod-appeal">Appeal this call</span>
+          </div>
+        </div>
+
+        <!-- Post 4: Rivalry Vote -->
+        <div class="post-card">
+          <div class="rivalry-card">
+            <div class="rivalry-header">Ohio State vs Michigan -- Who wins?</div>
+            <div class="rivalry-split" id="rivalrySplit">
+              <div class="rivalry-side left" id="osuSide" style="flex:52;">
+                <span class="rivalry-team">OSU</span>
+                <span class="rivalry-pct" id="osuPct">52%</span>
+              </div>
+              <div class="rivalry-vs">VS</div>
+              <div class="rivalry-side right" id="michSide" style="flex:48;">
+                <span class="rivalry-team">MICH</span>
+                <span class="rivalry-pct" id="michPct">48%</span>
+              </div>
+            </div>
+          </div>
+          <div class="reactions-row">
+            <span class="reaction-pill">TD <b>341</b></span>
+            <span class="reaction-pill">FUM <b>109</b></span>
+          </div>
+          <div class="actions-row">
+            <span class="action-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+              87
+            </span>
+            <span class="action-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+              Share
+            </span>
+            <span class="action-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>
+              Save
+            </span>
+          </div>
+        </div>
+
+      </div><!-- /feed -->
+
+      <!-- Bottom Tab Bar -->
+      <div class="tab-bar">
+        <div class="tab-item active" onclick="showScreen('feed')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          <span class="tab-label">Home</span>
+        </div>
+        <div class="tab-item" onclick="showScreen('feed')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <span class="tab-label">Discover</span>
+        </div>
+        <div class="tab-item" onclick="showScreen('rivalry')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+          <span class="tab-label">Rivals</span>
+        </div>
+        <div class="tab-item" onclick="showScreen('portal')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+          <span class="tab-label">Portal</span>
+        </div>
+        <div class="tab-item" onclick="showScreen('profile')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span class="tab-label">Profile</span>
+        </div>
+      </div>
+
+    </div>
+
+
+    <!-- ==================== SCREEN 4: RIVALRY ARENA ==================== -->
+    <div class="screen rivalry-screen" id="screen-rivalry">
+
+      <div class="rivalry-page-header">
+        <h2>Rivalry Arena</h2>
+        <p>This week's biggest matchups and debates</p>
+      </div>
+
+      <div class="rivalry-body">
+
+        <!-- This Week's Matchup -->
+        <div class="matchup-card">
+          <div class="matchup-label">This Week's Matchup</div>
+          <div class="matchup-title">Texas vs Oklahoma -- Red River Showdown</div>
+          <div class="matchup-bar">
+            <div class="matchup-side" style="flex:56; background:#bf5700; border-radius:10px 0 0 10px;">
+              <span class="team-name">Texas</span>
+              <span class="team-pct">56%</span>
+            </div>
+            <div class="matchup-vs-badge">VS</div>
+            <div class="matchup-side" style="flex:44; background:#841617; border-radius:0 10px 10px 0;">
+              <span class="team-name">Oklahoma</span>
+              <span class="team-pct">44%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Debate Takes -->
+        <div class="debate-section-title">Hot Takes</div>
+
+        <div class="debate-take">
+          <div class="debate-take-header">
+            <div class="debate-avatar" style="background:#bf5700;">JR</div>
+            <span class="debate-take-name">Jake R. @HookEm</span>
+          </div>
+          <div class="debate-take-text">Texas wins by 14. The defense is elite this year, OU can't keep up.</div>
+        </div>
+
+        <div class="debate-take">
+          <div class="debate-take-header">
+            <div class="debate-avatar" style="background:#841617;">LK</div>
+            <span class="debate-take-name">Lisa K. @BoomerSooner</span>
+          </div>
+          <div class="debate-take-text">Everyone sleeping on our new QB. Oklahoma covers the spread easily.</div>
+        </div>
+
+        <div class="debate-take">
+          <div class="debate-take-header">
+            <div class="debate-avatar" style="background:#2d5016;">TM</div>
+            <span class="debate-take-name">Tyler M. @CFBAnalyst</span>
+          </div>
+          <div class="debate-take-text">This game always delivers chaos. Expect a one-score game regardless of the stats.</div>
+        </div>
+
+        <button class="share-take-btn">Share Your Take</button>
+
+        <!-- Past Results -->
+        <div class="past-results-title">Past Results</div>
+        <div class="past-result">
+          <span>Alabama vs Auburn</span>
+          <span class="winner">Alabama W 28-21</span>
+        </div>
+        <div class="past-result">
+          <span>Ohio State vs Michigan</span>
+          <span class="winner">Michigan W 31-24</span>
+        </div>
+        <div class="past-result" style="border-bottom:none;">
+          <span>Georgia vs Florida</span>
+          <span class="winner">Georgia W 34-17</span>
+        </div>
+
+      </div>
+
+      <!-- Bottom Tab Bar -->
+      <div class="tab-bar">
+        <div class="tab-item" onclick="showScreen('feed')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          <span class="tab-label">Home</span>
+        </div>
+        <div class="tab-item" onclick="showScreen('feed')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <span class="tab-label">Discover</span>
+        </div>
+        <div class="tab-item active" onclick="showScreen('rivalry')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+          <span class="tab-label">Rivals</span>
+        </div>
+        <div class="tab-item" onclick="showScreen('portal')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+          <span class="tab-label">Portal</span>
+        </div>
+        <div class="tab-item" onclick="showScreen('profile')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span class="tab-label">Profile</span>
+        </div>
+      </div>
+
+    </div>
+
+
+    <!-- ==================== SCREEN 5: TRANSFER PORTAL ==================== -->
+    <div class="screen portal-screen" id="screen-portal">
+
+      <div class="portal-header">
+        <h2>Portal War Room</h2>
+        <p>Build your dream roster from the transfer portal</p>
+      </div>
+
+      <div class="portal-body">
+
+        <!-- Team Selector -->
+        <select class="team-selector">
+          <option>Select Your Team</option>
+          <option>Alabama Crimson Tide</option>
+          <option>Georgia Bulldogs</option>
+          <option>Ohio State Buckeyes</option>
+          <option>Texas Longhorns</option>
+          <option>USC Trojans</option>
+        </select>
+
+        <!-- Portal Player Cards -->
+        <div class="portal-card">
+          <div class="portal-photo">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <div class="portal-info">
+            <div class="portal-name">DeShawn Harris</div>
+            <div class="portal-detail">QB -- From: Oregon State</div>
+            <div class="portal-stars">4-Star Transfer</div>
+          </div>
+          <button class="portal-add-btn">Add to Roster</button>
+        </div>
+
+        <div class="portal-card">
+          <div class="portal-photo">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <div class="portal-info">
+            <div class="portal-name">Tre Williams</div>
+            <div class="portal-detail">WR -- From: Tennessee</div>
+            <div class="portal-stars">5-Star Transfer</div>
+          </div>
+          <button class="portal-add-btn">Add to Roster</button>
+        </div>
+
+        <div class="portal-card">
+          <div class="portal-photo">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <div class="portal-info">
+            <div class="portal-name">Chris Okafor</div>
+            <div class="portal-detail">EDGE -- From: Michigan</div>
+            <div class="portal-stars">4-Star Transfer</div>
+          </div>
+          <button class="portal-add-btn">Add to Roster</button>
+        </div>
+
+        <!-- Roster Progress -->
+        <div class="roster-progress">
+          <div class="roster-label">Your Roster: 3/5 spots filled</div>
+          <div class="roster-bar-track">
+            <div class="roster-bar-fill" style="width:60%;"></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Bottom Tab Bar -->
+      <div class="tab-bar">
+        <div class="tab-item" onclick="showScreen('feed')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          <span class="tab-label">Home</span>
+        </div>
+        <div class="tab-item" onclick="showScreen('feed')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <span class="tab-label">Discover</span>
+        </div>
+        <div class="tab-item" onclick="showScreen('rivalry')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+          <span class="tab-label">Rivals</span>
+        </div>
+        <div class="tab-item active" onclick="showScreen('portal')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+          <span class="tab-label">Portal</span>
+        </div>
+        <div class="tab-item" onclick="showScreen('profile')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span class="tab-label">Profile</span>
+        </div>
+      </div>
+
+    </div>
+
+
+    <!-- ==================== SCREEN 6: PROFILE ==================== -->
+    <div class="screen profile-screen" id="screen-profile">
+
+      <!-- Profile Top -->
+      <div class="profile-top">
+        <div class="profile-avatar-large">YB</div>
+        <div class="profile-name">Your Name</div>
+        <div class="profile-handle">@YourHandle</div>
+        <div class="profile-school">Georgia Bulldogs</div>
+      </div>
+
+      <!-- Stats Row -->
+      <div class="profile-stats-row">
+        <div class="profile-stat">
+          <div class="profile-stat-value">142</div>
+          <div class="profile-stat-label">Posts</div>
+        </div>
+        <div class="profile-stat">
+          <div class="profile-stat-value">38</div>
+          <div class="profile-stat-label">Receipts</div>
+        </div>
+        <div class="profile-stat">
+          <div class="profile-stat-value">67</div>
+          <div class="profile-stat-label">Wins</div>
+        </div>
+      </div>
+
+      <!-- Dynasty Card -->
+      <div class="profile-dynasty">
+        <div class="dynasty-top">
+          <span class="dynasty-label">DYNASTY -- Level 15</span>
+          <span class="dynasty-sub">12 Achievements</span>
+        </div>
+        <div class="dynasty-bar-track">
+          <div class="dynasty-bar-fill" style="width:80%;"></div>
+        </div>
+        <div class="achievements">3,200 / 4,000 XP to Level 16</div>
+      </div>
+
+      <!-- Badges -->
+      <div class="badges-section">
+        <div class="badges-title">Badges</div>
+        <div class="badges-row">
+          <div class="badge-card">
+            <div class="badge-icon" style="background:#edf5e5;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#2d5016" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </div>
+            <div class="badge-name">Heisman Voter</div>
+          </div>
+          <div class="badge-card">
+            <div class="badge-icon" style="background:#fef3ea;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#c4560a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            </div>
+            <div class="badge-name">Receipt King</div>
+          </div>
+          <div class="badge-card">
+            <div class="badge-icon" style="background:#f0ebe3;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#5c5548" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/><circle cx="12" cy="12" r="10"/></svg>
+            </div>
+            <div class="badge-name">Rivalry MVP</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Takes -->
+      <div class="recent-takes">
+        <div class="takes-title">Recent Takes</div>
+        <div class="take-item">
+          <div class="take-text">"Georgia repeats as champs this year. Nobody stopping our defense."</div>
+          <div class="take-meta">2 days ago -- TD 124 / FUM 31</div>
+        </div>
+        <div class="take-item">
+          <div class="take-text">"Arch Manning starts by Week 3. Book it."</div>
+          <div class="take-meta">5 days ago -- TD 89 / FUM 203</div>
+        </div>
+        <div class="take-item">
+          <div class="take-text">"The SEC is overrated. Big Ten has more depth."</div>
+          <div class="take-meta">1 week ago -- TD 56 / FUM 312</div>
+        </div>
+      </div>
+
+      <!-- Edit Profile Button -->
+      <button class="edit-profile-btn">Edit Profile</button>
+
+      <!-- Bottom Tab Bar -->
+      <div class="tab-bar">
+        <div class="tab-item" onclick="showScreen('feed')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          <span class="tab-label">Home</span>
+        </div>
+        <div class="tab-item" onclick="showScreen('feed')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <span class="tab-label">Discover</span>
+        </div>
+        <div class="tab-item" onclick="showScreen('rivalry')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+          <span class="tab-label">Rivals</span>
+        </div>
+        <div class="tab-item" onclick="showScreen('portal')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+          <span class="tab-label">Portal</span>
+        </div>
+        <div class="tab-item active" onclick="showScreen('profile')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span class="tab-label">Profile</span>
+        </div>
+      </div>
+
+    </div>
+
+
+  </div><!-- /phone-inner -->
+</div><!-- /phone-frame -->
+
+<script>
+(function() {
+  'use strict';
+
+  /* ── Screen names ── */
+  var screens = ['splash', 'login', 'feed', 'rivalry', 'portal', 'profile'];
+  var currentScreen = 'splash';
+
+  /* ── Show Screen ── */
+  window.showScreen = function(name) {
+    // Hide all screens
+    screens.forEach(function(s) {
+      var el = document.getElementById('screen-' + s);
+      if (el) el.classList.remove('active');
+    });
+
+    // Show target screen
+    var target = document.getElementById('screen-' + name);
+    if (target) target.classList.add('active');
+
+    // Update nav buttons
+    var navMap = {
+      splash: 'Splash',
+      login: 'Login',
+      feed: 'Feed',
+      rivalry: 'Rivalry Arena',
+      portal: 'Transfer Portal',
+      profile: 'Profile'
+    };
+    document.querySelectorAll('.screen-nav button').forEach(function(btn) {
+      btn.classList.toggle('active', btn.textContent === navMap[name]);
+    });
+
+    // Update status bar color for splash
+    var statusBar = document.getElementById('statusBar');
+    var homeIndicator = document.getElementById('homeIndicator');
+    if (name === 'splash') {
+      statusBar.style.color = '#fff';
+      homeIndicator.style.background = 'rgba(255,255,255,0.3)';
+    } else {
+      statusBar.style.color = '#1a1a1a';
+      homeIndicator.style.background = 'rgba(0,0,0,0.2)';
+    }
+
+    currentScreen = name;
+  };
+
+  /* ── Reaction pill toggle ── */
+  document.querySelectorAll('.reaction-pill').forEach(function(pill) {
+    pill.addEventListener('click', function() {
+      pill.classList.toggle('active');
+      var b = pill.querySelector('b');
+      if (b) {
+        var n = parseInt(b.textContent.replace(/,/g, ''));
+        b.textContent = pill.classList.contains('active') ? (n + 1).toLocaleString() : (n - 1).toLocaleString();
+      }
+    });
+  });
+
+  /* ── Rivalry bar click to vote ── */
+  var osuSide = document.getElementById('osuSide');
+  var michSide = document.getElementById('michSide');
+
+  function setRivalry(osu, mich) {
+    osuSide.style.flex = osu;
+    michSide.style.flex = mich;
+    document.getElementById('osuPct').textContent = osu + '%';
+    document.getElementById('michPct').textContent = mich + '%';
+  }
+
+  if (osuSide && michSide) {
+    osuSide.addEventListener('click', function() {
+      var cur = parseInt(osuSide.style.flex) || 52;
+      if (cur < 80) setRivalry(cur + 2, 100 - cur - 2);
+    });
+    michSide.addEventListener('click', function() {
+      var cur = parseInt(michSide.style.flex) || 48;
+      if (cur < 80) setRivalry(100 - cur - 2, cur + 2);
+    });
+  }
+
+  /* ── Dynasty bar animate on load ── */
+  var bar = document.getElementById('dynastyBar');
+  if (bar) {
+    bar.style.width = '0%';
+    setTimeout(function() { bar.style.width = '80%'; }, 400);
+  }
+
+  /* ── Save action toggle ── */
+  document.querySelectorAll('.action-btn').forEach(function(btn) {
+    if (btn.textContent.indexOf('Save') !== -1) {
+      btn.addEventListener('click', function() {
+        if (btn.style.color === 'rgb(196, 86, 10)') {
+          btn.style.color = '';
+        } else {
+          btn.style.color = '#c4560a';
+        }
+      });
+    }
+  });
+
+  /* ── Auto-advance splash after 3 seconds ── */
+  var splashTimer;
+  function startSplashTimer() {
+    clearTimeout(splashTimer);
+    splashTimer = setTimeout(function() {
+      if (currentScreen === 'splash') {
+        showScreen('login');
+      }
+    }, 3000);
+  }
+
+  /* ── Click splash to advance ── */
+  document.getElementById('screen-splash').addEventListener('click', function() {
+    showScreen('login');
+  });
+
+  /* ── Login Sign In navigates to Feed ── */
+  /* (handled via onclick on the button) */
+
+  /* ── Start splash timer on load ── */
+  startSplashTimer();
+
+})();
+</script>
+
+</body>
+</html>

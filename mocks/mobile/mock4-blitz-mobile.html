@@ -1,0 +1,3119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CFB Social -- BLITZ Mobile</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ========== RESET & PAGE ========== */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #0d0618;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px 60px;
+    font-family: 'Space Grotesk', sans-serif;
+    overflow-x: hidden;
+    color: #e0d8f0;
+  }
+
+  /* ========== PAGE HEADER (outside phone) ========== */
+  .page-header {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+
+  .page-header h1 {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 32px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 2px;
+    text-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+    margin-bottom: 6px;
+  }
+
+  .page-header p {
+    font-size: 14px;
+    color: #8a7aa8;
+    letter-spacing: 0.5px;
+  }
+
+  /* ========== SCREEN NAV PILLS ========== */
+  .screen-nav {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 32px;
+    max-width: 520px;
+  }
+
+  .screen-nav button {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 18px;
+    border-radius: 999px;
+    border: 1.5px solid rgba(0, 212, 255, 0.25);
+    background: rgba(26, 10, 46, 0.6);
+    color: #8a7aa8;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    letter-spacing: 0.5px;
+  }
+
+  .screen-nav button:hover {
+    border-color: rgba(0, 212, 255, 0.5);
+    color: #00d4ff;
+    background: rgba(0, 212, 255, 0.08);
+  }
+
+  .screen-nav button.active {
+    background: linear-gradient(135deg, #00d4ff, #007acc);
+    border-color: #00d4ff;
+    color: #fff;
+    box-shadow: 0 0 16px rgba(0, 212, 255, 0.35);
+  }
+
+  /* ========== PHONE FRAME ========== */
+  .phone-container {
+    position: relative;
+    width: 375px;
+    height: 812px;
+  }
+
+  .phone-frame {
+    width: 375px;
+    height: 812px;
+    background: #1a0a2e;
+    border-radius: 44px;
+    overflow: hidden;
+    position: relative;
+    border: 3px solid #111;
+    box-shadow:
+      0 0 0 1px rgba(0, 212, 255, 0.15),
+      0 0 40px rgba(0, 212, 255, 0.12),
+      0 0 80px rgba(0, 212, 255, 0.06),
+      0 20px 60px rgba(0, 0, 0, 0.5);
+  }
+
+  /* Notch */
+  .phone-notch {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 150px;
+    height: 30px;
+    background: #000;
+    border-radius: 0 0 18px 18px;
+    z-index: 200;
+  }
+
+  .phone-notch::before {
+    content: '';
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 6px;
+    background: #1a1a2e;
+    border-radius: 3px;
+  }
+
+  /* Status Bar */
+  .status-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 28px 6px;
+    background: transparent;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: 'Space Grotesk', sans-serif;
+    position: relative;
+    z-index: 150;
+  }
+
+  .status-bar-left { font-size: 14px; font-weight: 700; }
+
+  .status-bar-right {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .status-icon-wifi {
+    width: 14px; height: 10px;
+    display: flex;
+    align-items: flex-end;
+    gap: 1px;
+  }
+  .status-icon-wifi span {
+    display: block;
+    width: 3px;
+    background: #fff;
+    border-radius: 1px;
+  }
+  .status-icon-wifi span:nth-child(1) { height: 4px; }
+  .status-icon-wifi span:nth-child(2) { height: 6px; }
+  .status-icon-wifi span:nth-child(3) { height: 8px; }
+  .status-icon-wifi span:nth-child(4) { height: 10px; }
+
+  .status-icon-battery {
+    width: 22px; height: 10px;
+    border: 1.5px solid #fff;
+    border-radius: 2px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: 1.5px;
+  }
+  .status-icon-battery::after {
+    content: '';
+    position: absolute;
+    right: -4px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 2px; height: 5px;
+    background: #fff;
+    border-radius: 0 1px 1px 0;
+  }
+  .status-icon-battery-fill {
+    width: 80%;
+    height: 100%;
+    background: #fff;
+    border-radius: 1px;
+  }
+
+  /* Home Indicator */
+  .home-indicator {
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 134px;
+    height: 5px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+    z-index: 200;
+  }
+
+  /* ========== SCREEN SYSTEM ========== */
+  .screen {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    opacity: 0;
+    transform: scale(0.96);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+    pointer-events: none;
+    overflow-y: auto;
+    overflow-x: hidden;
+    z-index: 1;
+  }
+
+  .screen.active {
+    opacity: 1;
+    transform: scale(1);
+    pointer-events: auto;
+    z-index: 10;
+  }
+
+  .screen::-webkit-scrollbar { width: 3px; }
+  .screen::-webkit-scrollbar-track { background: transparent; }
+  .screen::-webkit-scrollbar-thumb { background: rgba(0, 212, 255, 0.2); border-radius: 2px; }
+
+  /* ========== SHARED: BOTTOM TAB BAR ========== */
+  .bottom-tabs {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 72px;
+    background: linear-gradient(180deg, rgba(26, 10, 46, 0.97), rgba(13, 6, 24, 0.99));
+    border-top: 1px solid rgba(0, 212, 255, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    padding: 0 6px 14px;
+    z-index: 100;
+  }
+
+  .tab-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    position: relative;
+    padding: 4px 8px;
+  }
+
+  .tab-icon {
+    width: 22px; height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .tab-label {
+    font-size: 9px;
+    font-weight: 700;
+    font-family: 'Rajdhani', sans-serif;
+    letter-spacing: 1px;
+    color: #5a4a7a;
+    text-transform: uppercase;
+  }
+
+  .tab-item.active .tab-label {
+    color: #00d4ff;
+    text-shadow: 0 0 8px rgba(0, 212, 255, 0.5);
+  }
+
+  .tab-item.active::after {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 24px;
+    height: 2px;
+    background: #00d4ff;
+    box-shadow: 0 0 8px rgba(0, 212, 255, 0.6);
+    border-radius: 1px;
+  }
+
+  /* Tab icon shapes */
+  .icon-feed {
+    width: 18px; height: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .icon-feed span {
+    height: 2px;
+    background: #5a4a7a;
+    border-radius: 1px;
+  }
+  .icon-feed span:nth-child(1) { width: 18px; }
+  .icon-feed span:nth-child(2) { width: 14px; }
+  .icon-feed span:nth-child(3) { width: 16px; }
+  .tab-item.active .icon-feed span { background: #00d4ff; }
+
+  .icon-arena {
+    width: 18px; height: 18px;
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    background: #5a4a7a;
+  }
+  .tab-item.active .icon-arena { background: #00d4ff; }
+
+  .icon-play {
+    width: 0; height: 0;
+    border-top: 9px solid transparent;
+    border-bottom: 9px solid transparent;
+    border-left: 14px solid #5a4a7a;
+    margin-left: 3px;
+  }
+  .tab-item.active .icon-play {
+    border-left-color: #00d4ff;
+    filter: drop-shadow(0 0 6px rgba(0, 212, 255, 0.6));
+  }
+
+  .icon-portal {
+    width: 16px; height: 16px;
+    border: 2px solid #5a4a7a;
+    border-radius: 50%;
+    position: relative;
+  }
+  .icon-portal::after {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 6px; height: 6px;
+    background: #5a4a7a;
+    border-radius: 50%;
+  }
+  .tab-item.active .icon-portal { border-color: #00d4ff; }
+  .tab-item.active .icon-portal::after { background: #00d4ff; }
+
+  .icon-rank {
+    width: 16px; height: 16px;
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+  }
+  .icon-rank span {
+    width: 4px;
+    background: #5a4a7a;
+    border-radius: 1px 1px 0 0;
+  }
+  .icon-rank span:nth-child(1) { height: 8px; }
+  .icon-rank span:nth-child(2) { height: 14px; }
+  .icon-rank span:nth-child(3) { height: 11px; }
+  .tab-item.active .icon-rank span { background: #00d4ff; }
+
+
+  /* =============================================================== */
+  /*  SCREEN 1: SPLASH                                               */
+  /* =============================================================== */
+  .splash-screen {
+    background: linear-gradient(160deg, #1a0a2e 0%, #0d0618 40%, #1a0a2e 70%, #2d1050 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 40px 20px;
+  }
+
+  .splash-glow-bg {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(0, 212, 255, 0.08) 0%, rgba(255, 45, 123, 0.04) 40%, transparent 70%);
+    border-radius: 50%;
+    animation: splashGlowPulse 3s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  @keyframes splashGlowPulse {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
+    50% { transform: translate(-50%, -50%) scale(1.15); opacity: 1; }
+  }
+
+  .splash-hex-logo {
+    width: 100px; height: 100px;
+    position: relative;
+    margin-bottom: 32px;
+    z-index: 2;
+  }
+
+  .splash-hex-outer {
+    width: 100px; height: 100px;
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    background: linear-gradient(135deg, #00d4ff, #ff2d7b);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: hexPulse 2.5s ease-in-out infinite;
+  }
+
+  @keyframes hexPulse {
+    0%, 100% { filter: drop-shadow(0 0 12px rgba(0, 212, 255, 0.5)); }
+    50% { filter: drop-shadow(0 0 24px rgba(0, 212, 255, 0.8)) drop-shadow(0 0 40px rgba(255, 45, 123, 0.3)); }
+  }
+
+  .splash-hex-inner {
+    width: 92px; height: 92px;
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    background: #1a0a2e;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .splash-hex-icon {
+    width: 0; height: 0;
+    border-top: 18px solid transparent;
+    border-bottom: 18px solid transparent;
+    border-left: 28px solid #00d4ff;
+    margin-left: 6px;
+    filter: drop-shadow(0 0 6px rgba(0, 212, 255, 0.5));
+  }
+
+  .splash-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 64px;
+    font-weight: 700;
+    letter-spacing: 12px;
+    color: #fff;
+    text-shadow:
+      0 0 10px #00d4ff,
+      0 0 20px #00d4ff,
+      0 0 40px rgba(0, 212, 255, 0.5),
+      0 0 80px rgba(0, 212, 255, 0.3),
+      0 0 10px #ff2d7b,
+      0 0 20px rgba(255, 45, 123, 0.3);
+    animation: neonFlicker 3s ease-in-out infinite;
+    z-index: 2;
+    margin-bottom: 8px;
+  }
+
+  @keyframes neonFlicker {
+    0%, 100% {
+      text-shadow:
+        0 0 10px #00d4ff, 0 0 20px #00d4ff, 0 0 40px rgba(0, 212, 255, 0.5),
+        0 0 80px rgba(0, 212, 255, 0.3), 0 0 10px #ff2d7b, 0 0 20px rgba(255, 45, 123, 0.3);
+    }
+    48% { opacity: 1; }
+    50% { opacity: 0.85; }
+    52% { opacity: 1; }
+    50% {
+      text-shadow:
+        0 0 6px #00d4ff, 0 0 12px #00d4ff, 0 0 24px rgba(0, 212, 255, 0.4),
+        0 0 48px rgba(0, 212, 255, 0.2), 0 0 6px #ff2d7b, 0 0 12px rgba(255, 45, 123, 0.2);
+    }
+  }
+
+  .splash-subtitle {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 4px;
+    color: #8a7aa8;
+    text-transform: uppercase;
+    z-index: 2;
+    margin-bottom: 48px;
+  }
+
+  .splash-dots {
+    display: flex;
+    gap: 8px;
+    z-index: 2;
+    margin-bottom: 20px;
+  }
+
+  .splash-dots span {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    animation: dotBounce 1.4s ease-in-out infinite;
+  }
+  .splash-dots span:nth-child(1) { background: #00d4ff; animation-delay: 0s; }
+  .splash-dots span:nth-child(2) { background: #ff2d7b; animation-delay: 0.2s; }
+  .splash-dots span:nth-child(3) { background: #00ff88; animation-delay: 0.4s; }
+
+  @keyframes dotBounce {
+    0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+    40% { transform: translateY(-10px); opacity: 1; }
+  }
+
+  .splash-version {
+    font-size: 11px;
+    color: #5a4a7a;
+    letter-spacing: 2px;
+    z-index: 2;
+  }
+
+
+  /* =============================================================== */
+  /*  SCREEN 2: LOGIN                                                */
+  /* =============================================================== */
+  .login-screen {
+    background: linear-gradient(180deg, #1a0a2e 0%, #0d0618 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 60px 28px 40px;
+  }
+
+  .login-logo {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 42px;
+    font-weight: 700;
+    letter-spacing: 6px;
+    color: #fff;
+    text-shadow: 0 0 10px #00d4ff, 0 0 20px #00d4ff, 0 0 40px rgba(0, 212, 255, 0.4);
+    margin-bottom: 32px;
+    animation: neonPulse 2s ease-in-out infinite;
+  }
+
+  @keyframes neonPulse {
+    0%, 100% {
+      text-shadow: 0 0 10px #00d4ff, 0 0 20px #00d4ff, 0 0 40px rgba(0, 212, 255, 0.5), 0 0 80px rgba(0, 212, 255, 0.3);
+    }
+    50% {
+      text-shadow: 0 0 5px #00d4ff, 0 0 10px #00d4ff, 0 0 20px rgba(0, 212, 255, 0.4), 0 0 40px rgba(0, 212, 255, 0.2);
+    }
+  }
+
+  .login-heading {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: #e0d8f0;
+    letter-spacing: 2px;
+    margin-bottom: 28px;
+    text-transform: uppercase;
+  }
+
+  .login-form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+
+  .login-input {
+    width: 100%;
+    padding: 14px 16px;
+    background: rgba(26, 14, 50, 0.8);
+    border: 1.5px solid rgba(0, 212, 255, 0.15);
+    border-radius: 8px;
+    color: #e0d8f0;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .login-input::placeholder { color: #5a4a7a; }
+
+  .login-input:focus {
+    border-color: #00d4ff;
+    box-shadow: 0 0 12px rgba(0, 212, 255, 0.2), 0 0 24px rgba(0, 212, 255, 0.08);
+  }
+
+  .login-btn {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #00d4ff, #ff2d7b);
+    border: none;
+    border-radius: 8px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 3px;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 4px 20px rgba(0, 212, 255, 0.25);
+  }
+
+  .login-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 24px rgba(0, 212, 255, 0.35);
+  }
+
+  .login-divider {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    margin: 20px 0;
+    color: #5a4a7a;
+    font-size: 12px;
+  }
+
+  .login-divider::before,
+  .login-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(0, 212, 255, 0.1);
+  }
+
+  .google-btn {
+    width: 100%;
+    padding: 12px;
+    background: transparent;
+    border: 1.5px solid rgba(0, 212, 255, 0.2);
+    border-radius: 8px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: #e0d8f0;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .google-btn:hover {
+    border-color: rgba(0, 212, 255, 0.4);
+    background: rgba(0, 212, 255, 0.05);
+  }
+
+  .google-icon {
+    width: 16px; height: 16px;
+    border: 2px solid #e0d8f0;
+    border-radius: 50%;
+    position: relative;
+    font-size: 10px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #e0d8f0;
+  }
+
+  .login-signup {
+    margin-top: 24px;
+    font-size: 13px;
+    color: #8a7aa8;
+  }
+
+  .login-signup a {
+    color: #00ff88;
+    text-decoration: none;
+    font-weight: 600;
+    cursor: pointer;
+    transition: text-shadow 0.2s ease;
+  }
+
+  .login-signup a:hover {
+    text-shadow: 0 0 8px rgba(0, 255, 136, 0.4);
+  }
+
+
+  /* =============================================================== */
+  /*  SCREEN 3: FEED                                                 */
+  /* =============================================================== */
+  .feed-screen {
+    background: linear-gradient(180deg, #1a0a2e 0%, #150828 100%);
+    padding-bottom: 80px;
+  }
+
+  /* App Header */
+  .app-header {
+    padding: 42px 16px 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(135deg, #1a0a2e 0%, #2d1050 100%);
+    border-bottom: 1px solid rgba(0, 212, 255, 0.1);
+    position: relative;
+  }
+
+  .app-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #00d4ff, #ff2d7b, transparent);
+    animation: headerLine 3s linear infinite;
+  }
+
+  @keyframes headerLine {
+    0% { opacity: 0.4; }
+    50% { opacity: 1; }
+    100% { opacity: 0.4; }
+  }
+
+  .header-left { display: flex; align-items: center; gap: 12px; }
+
+  .blitz-logo {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: 4px;
+    color: #fff;
+    text-shadow:
+      0 0 10px #00d4ff, 0 0 20px #00d4ff,
+      0 0 40px rgba(0, 212, 255, 0.5), 0 0 80px rgba(0, 212, 255, 0.3);
+    animation: neonPulse 2s ease-in-out infinite;
+  }
+
+  .level-display {
+    font-size: 10px;
+    font-weight: 600;
+    color: #00ff88;
+    background: rgba(0, 255, 136, 0.1);
+    border: 1px solid rgba(0, 255, 136, 0.3);
+    padding: 3px 8px;
+    border-radius: 4px;
+    letter-spacing: 1px;
+  }
+
+  .header-right { position: relative; }
+
+  .notif-bell {
+    width: 28px; height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    cursor: pointer;
+  }
+
+  .bell-shape {
+    width: 16px; height: 16px;
+    background: #8a7aa8;
+    border-radius: 8px 8px 2px 2px;
+    position: relative;
+  }
+  .bell-shape::after {
+    content: '';
+    position: absolute;
+    bottom: -3px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 6px; height: 3px;
+    background: #8a7aa8;
+    border-radius: 0 0 3px 3px;
+  }
+
+  .notif-badge {
+    position: absolute;
+    top: -2px; right: -4px;
+    width: 18px; height: 18px;
+    background: #ff2d7b;
+    border-radius: 50%;
+    font-size: 9px;
+    font-weight: 700;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 8px rgba(255, 45, 123, 0.6);
+    animation: badgePulse 1.5s ease-in-out infinite;
+  }
+
+  @keyframes badgePulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+  }
+
+  /* XP Progress Bar */
+  .xp-bar-container {
+    padding: 6px 16px 8px;
+    background: rgba(13, 6, 24, 0.6);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .xp-label {
+    font-size: 9px;
+    font-weight: 600;
+    color: #00ff88;
+    letter-spacing: 1px;
+    white-space: nowrap;
+  }
+
+  .xp-bar-track {
+    flex: 1;
+    height: 4px;
+    background: rgba(0, 255, 136, 0.1);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .xp-bar-fill {
+    width: 94.6%;
+    height: 100%;
+    background: linear-gradient(90deg, #00ff88, #00d4ff);
+    border-radius: 2px;
+    position: relative;
+    animation: xpGlow 2s ease-in-out infinite;
+    box-shadow: 0 0 8px rgba(0, 255, 136, 0.5);
+  }
+
+  @keyframes xpGlow {
+    0%, 100% { box-shadow: 0 0 8px rgba(0, 255, 136, 0.5); }
+    50% { box-shadow: 0 0 14px rgba(0, 255, 136, 0.8); }
+  }
+
+  .xp-bar-fill::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%);
+    animation: xpShimmer 2s linear infinite;
+  }
+
+  @keyframes xpShimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+
+  .xp-amount {
+    font-size: 9px;
+    font-weight: 500;
+    color: rgba(0, 255, 136, 0.6);
+    white-space: nowrap;
+  }
+
+  /* Feed area */
+  .feed-area {
+    padding: 8px 12px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* Card Base */
+  .card {
+    background: rgba(26, 14, 50, 0.8);
+    border: 1px solid rgba(0, 212, 255, 0.1);
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #00d4ff, #ff2d7b, #00ff88);
+    opacity: 0.6;
+  }
+
+  .card-inner { padding: 14px; }
+
+  .diagonal-accent {
+    position: absolute;
+    top: 0; right: 0;
+    width: 60px; height: 60px;
+    background: linear-gradient(135deg, transparent 50%, rgba(0, 212, 255, 0.04) 50%);
+    pointer-events: none;
+  }
+
+  /* Post Header */
+  .post-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .avatar-hex {
+    width: 38px; height: 38px;
+    background: linear-gradient(135deg, #00d4ff, #ff2d7b);
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .avatar-hex-inner {
+    width: 34px; height: 34px;
+    background: #2d1050;
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: #00d4ff;
+  }
+
+  .user-meta { flex: 1; }
+
+  .username {
+    font-weight: 700;
+    font-size: 13px;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .rank-badge {
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 2px 6px;
+    border-radius: 3px;
+    text-transform: uppercase;
+  }
+
+  .rank-diamond {
+    background: linear-gradient(135deg, #00d4ff, #7b5dff);
+    color: #fff;
+    box-shadow: 0 0 6px rgba(0, 212, 255, 0.4);
+  }
+
+  .rank-platinum {
+    background: linear-gradient(135deg, #c0c0c0, #e8e8e8);
+    color: #1a0a2e;
+  }
+
+  .diamond-shape {
+    display: inline-block;
+    width: 8px; height: 8px;
+    background: #00d4ff;
+    transform: rotate(45deg);
+    margin-right: 2px;
+    vertical-align: middle;
+    box-shadow: 0 0 4px rgba(0, 212, 255, 0.6);
+  }
+
+  .user-streak {
+    font-size: 10px;
+    font-weight: 600;
+    color: #ff2d7b;
+    text-shadow: 0 0 6px rgba(255, 45, 123, 0.4);
+    margin-top: 1px;
+  }
+
+  .user-subtitle {
+    font-size: 10px;
+    color: #8a7aa8;
+    margin-top: 1px;
+  }
+
+  .post-text {
+    font-size: 14px;
+    line-height: 1.5;
+    color: #e0d8f0;
+    margin-bottom: 12px;
+  }
+
+  /* Reactions */
+  .reactions {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+    align-items: center;
+  }
+
+  .reaction-hex {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    clip-path: polygon(8% 0%, 92% 0%, 100% 50%, 92% 100%, 8% 100%, 0% 50%);
+  }
+
+  .reaction-td { background: rgba(0, 255, 136, 0.15); color: #00ff88; }
+  .reaction-fum { background: rgba(255, 45, 123, 0.15); color: #ff2d7b; }
+
+  .reaction-label {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+
+  .xp-float {
+    font-size: 11px;
+    font-weight: 700;
+    color: #00ff88;
+    text-shadow: 0 0 6px rgba(0, 255, 136, 0.5);
+    margin-left: auto;
+    animation: floatUp 2s ease-in-out infinite;
+  }
+
+  @keyframes floatUp {
+    0%, 100% { transform: translateY(0); opacity: 1; }
+    50% { transform: translateY(-4px); opacity: 0.7; }
+  }
+
+  /* Post Actions */
+  .post-actions {
+    display: flex;
+    gap: 4px;
+    border-top: 1px solid rgba(0, 212, 255, 0.08);
+    padding-top: 10px;
+  }
+
+  .action-btn {
+    flex: 1;
+    background: transparent;
+    border: 1px solid rgba(0, 212, 255, 0.15);
+    color: #8a7aa8;
+    font-size: 9px;
+    font-weight: 700;
+    font-family: 'Rajdhani', sans-serif;
+    letter-spacing: 1px;
+    padding: 6px 4px;
+    border-radius: 4px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+  }
+
+  .action-btn:hover {
+    background: rgba(0, 212, 255, 0.1);
+    color: #00d4ff;
+    border-color: rgba(0, 212, 255, 0.3);
+  }
+
+  /* Receipt Banner */
+  .receipt-banner {
+    background: linear-gradient(135deg, rgba(255, 45, 123, 0.15), rgba(0, 212, 255, 0.1));
+    border: 1px solid rgba(255, 45, 123, 0.3);
+    border-radius: 6px;
+    padding: 8px 12px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .receipt-lock {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    color: #ff2d7b;
+    letter-spacing: 2px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .lock-icon {
+    width: 12px; height: 14px;
+    border: 2px solid #ff2d7b;
+    border-radius: 2px;
+    position: relative;
+  }
+  .lock-icon::before {
+    content: '';
+    position: absolute;
+    top: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 8px; height: 6px;
+    border: 2px solid #ff2d7b;
+    border-bottom: none;
+    border-radius: 4px 4px 0 0;
+  }
+
+  .receipt-timer { font-size: 10px; color: #8a7aa8; }
+  .receipt-timer span { color: #00d4ff; font-weight: 600; }
+
+  /* Violation Card */
+  .violation-card {
+    background: rgba(255, 20, 20, 0.08);
+    border: 1px solid rgba(255, 45, 45, 0.3);
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .violation-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: #ff2d2d;
+  }
+
+  .scanlines {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(
+      0deg, transparent, transparent 2px,
+      rgba(255, 20, 20, 0.03) 2px, rgba(255, 20, 20, 0.03) 4px
+    );
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .violation-inner {
+    padding: 16px;
+    position: relative;
+    z-index: 2;
+    text-align: center;
+  }
+
+  .violation-icon {
+    width: 36px; height: 36px;
+    margin: 0 auto 8px;
+  }
+
+  .violation-triangle {
+    width: 0; height: 0;
+    border-left: 18px solid transparent;
+    border-right: 18px solid transparent;
+    border-bottom: 32px solid rgba(255, 45, 45, 0.3);
+    position: relative;
+  }
+  .violation-triangle::after {
+    content: '!';
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: #ff4545;
+  }
+
+  .violation-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: #ff4545;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    text-shadow: 0 0 10px rgba(255, 45, 45, 0.4);
+    animation: violationFlicker 3s ease-in-out infinite;
+  }
+
+  @keyframes violationFlicker {
+    0%, 100% { opacity: 1; }
+    48% { opacity: 1; }
+    50% { opacity: 0.6; }
+    52% { opacity: 1; }
+    78% { opacity: 1; }
+    80% { opacity: 0.7; }
+    82% { opacity: 1; }
+  }
+
+  .violation-text {
+    font-size: 12px;
+    color: #cc8888;
+    margin-bottom: 12px;
+    line-height: 1.4;
+  }
+
+  .appeal-btn {
+    display: inline-block;
+    padding: 6px 24px;
+    background: transparent;
+    border: 1px solid rgba(255, 45, 45, 0.4);
+    color: #ff4545;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    box-shadow: 0 0 10px rgba(255, 45, 45, 0.1);
+  }
+
+  .appeal-btn:hover {
+    background: rgba(255, 45, 45, 0.1);
+    box-shadow: 0 0 20px rgba(255, 45, 45, 0.2);
+  }
+
+  .warning-text {
+    font-size: 10px;
+    color: #cc6666;
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255, 45, 45, 0.15);
+  }
+
+  /* Live Card */
+  .live-card { border-color: rgba(255, 45, 123, 0.3); background: rgba(26, 14, 50, 0.9); }
+  .live-card::before { background: linear-gradient(90deg, #ff2d7b, #00d4ff); }
+
+  .live-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .live-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #ff2d7b;
+    color: #fff;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    padding: 3px 10px;
+    border-radius: 3px;
+    animation: livePulse 1.5s ease-in-out infinite;
+  }
+
+  .live-dot {
+    width: 6px; height: 6px;
+    background: #fff;
+    border-radius: 50%;
+    animation: liveDotPulse 1s ease-in-out infinite;
+  }
+
+  @keyframes livePulse {
+    0%, 100% { box-shadow: 0 0 8px rgba(255, 45, 123, 0.5); }
+    50% { box-shadow: 0 0 16px rgba(255, 45, 123, 0.8); }
+  }
+
+  @keyframes liveDotPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  .live-game-info {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: #e0d8f0;
+    letter-spacing: 0.5px;
+  }
+
+  .live-subtitle { font-size: 11px; color: #8a7aa8; }
+
+  .play-caller-label {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    color: #ff2d7b;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .live-question {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 12px;
+    text-align: center;
+  }
+
+  .vote-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+
+  .vote-btn {
+    background: rgba(0, 212, 255, 0.08);
+    border: 1px solid rgba(0, 212, 255, 0.2);
+    border-radius: 6px;
+    padding: 10px 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .vote-btn:hover {
+    background: rgba(0, 212, 255, 0.15);
+    border-color: rgba(0, 212, 255, 0.4);
+  }
+
+  .vote-btn.active {
+    border-color: #00d4ff;
+    background: rgba(0, 212, 255, 0.12);
+    box-shadow: 0 0 10px rgba(0, 212, 255, 0.2);
+  }
+
+  .vote-btn-label {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: #fff;
+    display: block;
+    letter-spacing: 0.5px;
+  }
+
+  .vote-btn-pct {
+    font-size: 10px;
+    color: #00d4ff;
+    font-weight: 600;
+    margin-top: 2px;
+  }
+
+  .vote-bar-bg {
+    position: absolute;
+    bottom: 0; left: 0;
+    height: 3px;
+    background: rgba(0, 212, 255, 0.15);
+    width: 100%;
+  }
+
+  .vote-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #00d4ff, #00ff88);
+    border-radius: 0 2px 2px 0;
+  }
+
+  .coach-match {
+    text-align: center;
+    padding: 8px;
+    background: rgba(0, 255, 136, 0.08);
+    border: 1px solid rgba(0, 255, 136, 0.2);
+    border-radius: 6px;
+  }
+
+  .coach-match-text {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: #00ff88;
+    letter-spacing: 1px;
+    text-shadow: 0 0 8px rgba(0, 255, 136, 0.4);
+  }
+
+  .coach-xp {
+    font-size: 11px;
+    color: #00ff88;
+    font-weight: 600;
+    animation: floatUp 2s ease-in-out infinite;
+  }
+
+  /* Achievement Popup (in feed) */
+  .achievement-popup {
+    margin: 4px 0;
+    background: linear-gradient(135deg, #2d1050, #1a0a2e);
+    border: 1px solid rgba(0, 255, 136, 0.4);
+    border-radius: 12px;
+    padding: 12px 14px;
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.15), 0 4px 24px rgba(0, 0, 0, 0.4);
+    animation: achieveGlow 2s ease-in-out infinite;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  @keyframes achieveGlow {
+    0%, 100% { box-shadow: 0 0 20px rgba(0, 255, 136, 0.15), 0 4px 24px rgba(0, 0, 0, 0.4); }
+    50% { box-shadow: 0 0 30px rgba(0, 255, 136, 0.25), 0 4px 24px rgba(0, 0, 0, 0.4); }
+  }
+
+  .achieve-hex {
+    width: 40px; height: 40px;
+    background: linear-gradient(135deg, #00ff88, #00d4ff);
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .achieve-hex-inner {
+    width: 34px; height: 34px;
+    background: #1a0a2e;
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .achieve-star {
+    width: 14px; height: 14px;
+    background: #00ff88;
+    clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+  }
+
+  .achieve-content { flex: 1; }
+
+  .achieve-label {
+    font-size: 8px;
+    font-weight: 700;
+    color: #00ff88;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+  }
+
+  .achieve-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+  }
+
+  .achieve-desc {
+    font-size: 10px;
+    color: #8a7aa8;
+    margin-top: 1px;
+  }
+
+  .achieve-xp {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: #00ff88;
+    text-shadow: 0 0 6px rgba(0, 255, 136, 0.4);
+    flex-shrink: 0;
+  }
+
+
+  /* =============================================================== */
+  /*  SCREEN 4: RIVALRY ARENA                                        */
+  /* =============================================================== */
+  .rivalry-screen {
+    background: linear-gradient(180deg, #1a0a2e 0%, #150828 100%);
+    padding-bottom: 80px;
+  }
+
+  .rivalry-header {
+    padding: 50px 16px 14px;
+    text-align: center;
+    background: linear-gradient(135deg, #1a0a2e 0%, #2d1050 100%);
+    border-bottom: 1px solid rgba(0, 212, 255, 0.15);
+  }
+
+  .rivalry-header h2 {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: 4px;
+    color: #fff;
+    text-shadow: 0 0 12px rgba(0, 212, 255, 0.4), 0 0 24px rgba(0, 212, 255, 0.2);
+    text-transform: uppercase;
+  }
+
+  .rivalry-body { padding: 12px; }
+
+  .rivalry-split {
+    display: flex;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 12px;
+    border: 1px solid rgba(0, 212, 255, 0.15);
+  }
+
+  .rivalry-side {
+    flex: 1;
+    padding: 16px 12px;
+    text-align: center;
+    position: relative;
+  }
+
+  .rivalry-side-blue {
+    background: linear-gradient(180deg, rgba(0, 212, 255, 0.12), rgba(0, 212, 255, 0.04));
+    border-right: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .rivalry-side-pink {
+    background: linear-gradient(180deg, rgba(255, 45, 123, 0.12), rgba(255, 45, 123, 0.04));
+  }
+
+  .rivalry-team-name {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+
+  .rivalry-side-blue .rivalry-team-name { color: #00d4ff; }
+  .rivalry-side-pink .rivalry-team-name { color: #ff2d7b; }
+
+  .rivalry-vs {
+    position: absolute;
+    top: 50%;
+    right: -14px;
+    transform: translateY(-50%);
+    width: 28px; height: 28px;
+    background: #1a0a2e;
+    border: 2px solid rgba(0, 212, 255, 0.3);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    color: #fff;
+    z-index: 2;
+    letter-spacing: 1px;
+  }
+
+  .rivalry-player {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+    justify-content: center;
+  }
+
+  .rivalry-player-avatar {
+    width: 28px; height: 28px;
+    background: linear-gradient(135deg, #00d4ff, #ff2d7b);
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .rivalry-player-avatar-inner {
+    width: 24px; height: 24px;
+    background: #2d1050;
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    font-weight: 700;
+    color: #00d4ff;
+    font-family: 'Rajdhani', sans-serif;
+  }
+
+  .rivalry-player-info {
+    text-align: left;
+  }
+
+  .rivalry-player-name {
+    font-size: 11px;
+    font-weight: 600;
+    color: #e0d8f0;
+  }
+
+  .rivalry-player-pts {
+    font-size: 10px;
+    color: #8a7aa8;
+  }
+
+  .rivalry-side-blue .rivalry-player-pts span { color: #00d4ff; }
+  .rivalry-side-pink .rivalry-player-pts span { color: #ff2d7b; }
+
+  /* Community vote bar */
+  .community-vote {
+    background: rgba(26, 14, 50, 0.6);
+    border: 1px solid rgba(0, 212, 255, 0.1);
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 12px;
+    text-align: center;
+  }
+
+  .vote-title-label {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: #8a7aa8;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .vote-bar-outer {
+    width: 100%;
+    height: 24px;
+    background: rgba(255, 45, 123, 0.2);
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+    margin-bottom: 6px;
+  }
+
+  .vote-bar-left {
+    position: absolute;
+    top: 0; left: 0; bottom: 0;
+    width: 56%;
+    background: linear-gradient(90deg, #00d4ff, rgba(0, 212, 255, 0.6));
+    border-radius: 12px 0 0 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 1px;
+  }
+
+  .vote-bar-right-label {
+    position: absolute;
+    top: 50%; right: 12px;
+    transform: translateY(-50%);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 1px;
+  }
+
+  .join-arena-btn {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, #00d4ff, #ff2d7b);
+    border: none;
+    border-radius: 8px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 3px;
+    cursor: pointer;
+    text-transform: uppercase;
+    box-shadow: 0 4px 16px rgba(0, 212, 255, 0.2);
+    transition: transform 0.2s ease;
+    margin-bottom: 14px;
+  }
+
+  .join-arena-btn:hover { transform: translateY(-1px); }
+
+  /* Debate takes */
+  .debate-take {
+    background: rgba(26, 14, 50, 0.7);
+    border: 1px solid rgba(0, 212, 255, 0.08);
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+  }
+
+  .debate-take-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 4px;
+  }
+
+  .debate-take-user {
+    font-size: 11px;
+    font-weight: 700;
+    color: #e0d8f0;
+  }
+
+  .debate-take-side {
+    font-size: 8px;
+    font-weight: 700;
+    padding: 1px 5px;
+    border-radius: 3px;
+    letter-spacing: 1px;
+  }
+
+  .side-blue { background: rgba(0, 212, 255, 0.2); color: #00d4ff; }
+  .side-pink { background: rgba(255, 45, 123, 0.2); color: #ff2d7b; }
+
+  .debate-take-text {
+    font-size: 12px;
+    color: #c0b8d8;
+    line-height: 1.4;
+  }
+
+
+  /* =============================================================== */
+  /*  SCREEN 5: TRANSFER PORTAL / WAR ROOM                          */
+  /* =============================================================== */
+  .portal-screen {
+    background: linear-gradient(180deg, #1a0a2e 0%, #150828 100%);
+    padding-bottom: 80px;
+  }
+
+  .portal-header {
+    padding: 50px 16px 14px;
+    text-align: center;
+    background: linear-gradient(135deg, #1a0a2e 0%, #2d1050 100%);
+    border-bottom: 1px solid rgba(0, 212, 255, 0.15);
+  }
+
+  .portal-header h2 {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: 4px;
+    color: #fff;
+    text-shadow: 0 0 12px rgba(0, 212, 255, 0.4), 0 0 24px rgba(0, 212, 255, 0.2);
+    text-transform: uppercase;
+  }
+
+  .portal-body { padding: 12px; }
+
+  /* Team selector */
+  .team-selector {
+    width: 100%;
+    padding: 12px 14px;
+    background: rgba(26, 14, 50, 0.8);
+    border: 1.5px solid rgba(0, 212, 255, 0.2);
+    border-radius: 8px;
+    color: #e0d8f0;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .team-selector:hover {
+    border-color: #00d4ff;
+    box-shadow: 0 0 12px rgba(0, 212, 255, 0.15);
+  }
+
+  .team-selector-arrow {
+    width: 0; height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 6px solid #00d4ff;
+  }
+
+  /* New entries alert */
+  .new-entries-alert {
+    text-align: center;
+    padding: 8px;
+    background: rgba(255, 45, 123, 0.1);
+    border: 1px solid rgba(255, 45, 123, 0.3);
+    border-radius: 8px;
+    margin-bottom: 14px;
+    animation: alertPulse 2s ease-in-out infinite;
+  }
+
+  @keyframes alertPulse {
+    0%, 100% { box-shadow: 0 0 8px rgba(255, 45, 123, 0.1); }
+    50% { box-shadow: 0 0 16px rgba(255, 45, 123, 0.25); }
+  }
+
+  .new-entries-text {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: #ff2d7b;
+    letter-spacing: 2px;
+  }
+
+  /* Portal player cards */
+  .portal-card {
+    background: rgba(26, 14, 50, 0.8);
+    border: 1px solid rgba(0, 212, 255, 0.12);
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .portal-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #00d4ff, #ff2d7b);
+    opacity: 0.5;
+  }
+
+  .portal-avatar {
+    width: 44px; height: 44px;
+    background: linear-gradient(135deg, #00d4ff, #7b5dff);
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .portal-avatar-inner {
+    width: 38px; height: 38px;
+    background: #2d1050;
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: #00d4ff;
+  }
+
+  .portal-info { flex: 1; }
+
+  .portal-name {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 0.5px;
+  }
+
+  .portal-detail {
+    font-size: 11px;
+    color: #8a7aa8;
+    margin-top: 2px;
+  }
+
+  .portal-stars {
+    display: flex;
+    gap: 2px;
+    margin-top: 3px;
+  }
+
+  .star-shape {
+    width: 10px; height: 10px;
+    background: #00d4ff;
+    clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+  }
+
+  .star-shape.empty {
+    background: #3a2a5a;
+  }
+
+  .claim-btn {
+    padding: 6px 14px;
+    background: transparent;
+    border: 1.5px solid #00d4ff;
+    border-radius: 6px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    color: #00d4ff;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    flex-shrink: 0;
+  }
+
+  .claim-btn:hover {
+    background: rgba(0, 212, 255, 0.1);
+    box-shadow: 0 0 12px rgba(0, 212, 255, 0.2);
+  }
+
+  /* Roster progress */
+  .roster-progress {
+    background: rgba(26, 14, 50, 0.6);
+    border: 1px solid rgba(0, 212, 255, 0.1);
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 12px;
+  }
+
+  .roster-label {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: #e0d8f0;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+  }
+
+  .roster-bar-track {
+    width: 100%;
+    height: 8px;
+    background: rgba(0, 212, 255, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .roster-bar-fill {
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(90deg, #00d4ff, #00ff88);
+    border-radius: 4px;
+    box-shadow: 0 0 8px rgba(0, 212, 255, 0.4);
+  }
+
+  /* Top GMs Leaderboard */
+  .gm-leaderboard {
+    background: rgba(26, 14, 50, 0.6);
+    border: 1px solid rgba(0, 212, 255, 0.1);
+    border-radius: 10px;
+    padding: 14px;
+  }
+
+  .gm-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: #e0d8f0;
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+  }
+
+  .gm-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(0, 212, 255, 0.05);
+  }
+
+  .gm-row:last-child { border-bottom: none; }
+
+  .gm-rank-num {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: #00d4ff;
+    width: 20px;
+    text-align: center;
+  }
+
+  .gm-name {
+    flex: 1;
+    font-size: 12px;
+    font-weight: 600;
+    color: #e0d8f0;
+  }
+
+  .gm-accuracy {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: #00ff88;
+  }
+
+
+  /* =============================================================== */
+  /*  SCREEN 6: PROFILE / DYNASTY                                    */
+  /* =============================================================== */
+  .profile-screen {
+    background: linear-gradient(180deg, #1a0a2e 0%, #150828 100%);
+    padding-bottom: 80px;
+  }
+
+  .profile-header-section {
+    padding: 50px 16px 14px;
+    text-align: center;
+    background: linear-gradient(135deg, #1a0a2e 0%, #2d1050 100%);
+    border-bottom: 1px solid rgba(0, 212, 255, 0.15);
+  }
+
+  .profile-header-section h2 {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: 4px;
+    color: #fff;
+    text-shadow: 0 0 12px rgba(0, 212, 255, 0.4), 0 0 24px rgba(0, 212, 255, 0.2);
+    text-transform: uppercase;
+  }
+
+  .profile-body { padding: 16px 12px; }
+
+  /* Large hexagonal avatar */
+  .profile-avatar-wrap {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 14px;
+  }
+
+  .profile-avatar {
+    width: 80px; height: 80px;
+    background: linear-gradient(135deg, #00d4ff, #ff2d7b);
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: hexPulse 2.5s ease-in-out infinite;
+  }
+
+  .profile-avatar-inner {
+    width: 72px; height: 72px;
+    background: #2d1050;
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: #00d4ff;
+  }
+
+  .profile-username {
+    text-align: center;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 1px;
+    margin-bottom: 2px;
+  }
+
+  .profile-handle {
+    text-align: center;
+    font-size: 13px;
+    color: #8a7aa8;
+    margin-bottom: 4px;
+  }
+
+  .profile-school {
+    text-align: center;
+    font-size: 11px;
+    color: #5a4a7a;
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .profile-rank-badge {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 16px;
+  }
+
+  .profile-rank-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: linear-gradient(135deg, #00d4ff, #7b5dff);
+    padding: 4px 14px;
+    border-radius: 999px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 1px;
+    box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+  }
+
+  .profile-rank-diamond {
+    width: 10px; height: 10px;
+    background: #fff;
+    transform: rotate(45deg);
+  }
+
+  /* XP Bar in profile */
+  .profile-xp-section {
+    background: rgba(26, 14, 50, 0.6);
+    border: 1px solid rgba(0, 212, 255, 0.1);
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 12px;
+  }
+
+  .profile-xp-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  .profile-xp-level {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: #e0d8f0;
+    letter-spacing: 1px;
+  }
+
+  .profile-xp-nums {
+    font-size: 11px;
+    color: #00ff88;
+    font-weight: 600;
+  }
+
+  .profile-xp-track {
+    width: 100%;
+    height: 8px;
+    background: rgba(0, 255, 136, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .profile-xp-fill {
+    width: 94.6%;
+    height: 100%;
+    background: linear-gradient(90deg, #00ff88, #00d4ff);
+    border-radius: 4px;
+    box-shadow: 0 0 8px rgba(0, 255, 136, 0.5);
+    position: relative;
+  }
+
+  .profile-xp-fill::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    animation: xpShimmer 2s linear infinite;
+  }
+
+  /* Stats Grid */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .stat-card {
+    background: rgba(26, 14, 50, 0.6);
+    border: 1px solid rgba(0, 212, 255, 0.1);
+    border-radius: 10px;
+    padding: 12px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #00d4ff, #ff2d7b);
+    opacity: 0.4;
+  }
+
+  .stat-value {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1;
+    margin-bottom: 2px;
+    text-shadow: 0 0 8px rgba(0, 212, 255, 0.2);
+  }
+
+  .stat-label {
+    font-size: 9px;
+    font-weight: 700;
+    color: #8a7aa8;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  /* Weekly Challenges */
+  .challenges-section {
+    background: rgba(26, 14, 50, 0.6);
+    border: 1px solid rgba(0, 212, 255, 0.1);
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 12px;
+  }
+
+  .challenges-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: #e0d8f0;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .challenge-row {
+    margin-bottom: 10px;
+  }
+
+  .challenge-row:last-child { margin-bottom: 0; }
+
+  .challenge-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+  }
+
+  .challenge-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: #e0d8f0;
+  }
+
+  .challenge-progress-text {
+    font-size: 11px;
+    font-weight: 700;
+    color: #00d4ff;
+  }
+
+  .challenge-bar-track {
+    width: 100%;
+    height: 6px;
+    background: rgba(0, 212, 255, 0.1);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .challenge-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #00d4ff, #00ff88);
+    border-radius: 3px;
+    transition: width 0.3s ease;
+  }
+
+  /* Achievement Badges */
+  .badges-section {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+
+  .badge-hex {
+    width: 56px; height: 56px;
+    position: relative;
+  }
+
+  .badge-hex-outer {
+    width: 56px; height: 56px;
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: badgeGlow 3s ease-in-out infinite;
+  }
+
+  .badge-hex-outer.badge-blue { background: linear-gradient(135deg, #00d4ff, #7b5dff); }
+  .badge-hex-outer.badge-pink { background: linear-gradient(135deg, #ff2d7b, #ff6b9d); }
+  .badge-hex-outer.badge-green { background: linear-gradient(135deg, #00ff88, #00d4ff); }
+
+  @keyframes badgeGlow {
+    0%, 100% { filter: drop-shadow(0 0 4px rgba(0, 212, 255, 0.3)); }
+    50% { filter: drop-shadow(0 0 10px rgba(0, 212, 255, 0.5)); }
+  }
+
+  .badge-hex-inner {
+    width: 48px; height: 48px;
+    background: #1a0a2e;
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .badge-icon-star {
+    width: 18px; height: 18px;
+    background: #00d4ff;
+    clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+  }
+
+  .badge-icon-bolt {
+    width: 12px; height: 20px;
+    position: relative;
+  }
+
+  .badge-icon-bolt::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 2px;
+    width: 0; height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-bottom: 12px solid #ff2d7b;
+    transform: skewX(-10deg);
+  }
+
+  .badge-icon-bolt::after {
+    content: '';
+    position: absolute;
+    bottom: 0; right: 2px;
+    width: 0; height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 12px solid #ff2d7b;
+    transform: skewX(-10deg);
+  }
+
+  .badge-icon-shield {
+    width: 16px; height: 18px;
+    background: #00ff88;
+    clip-path: polygon(50% 0%, 100% 10%, 100% 60%, 50% 100%, 0% 60%, 0% 10%);
+  }
+
+  /* Edit Loadout Button */
+  .edit-loadout-btn {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, #00d4ff, #ff2d7b);
+    border: none;
+    border-radius: 8px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 3px;
+    cursor: pointer;
+    text-transform: uppercase;
+    box-shadow: 0 4px 16px rgba(0, 212, 255, 0.2);
+    transition: transform 0.2s ease;
+  }
+
+  .edit-loadout-btn:hover { transform: translateY(-1px); }
+</style>
+</head>
+<body>
+
+<!-- ============================================================= -->
+<!-- PAGE HEADER (outside phone)                                    -->
+<!-- ============================================================= -->
+<div class="page-header">
+  <h1>CFB Social -- Blitz</h1>
+  <p>Gamified esports theme -- Interactive UI preview</p>
+</div>
+
+<!-- ============================================================= -->
+<!-- SCREEN NAV PILLS                                               -->
+<!-- ============================================================= -->
+<div class="screen-nav">
+  <button class="active" onclick="showScreen('splash')">Splash</button>
+  <button onclick="showScreen('login')">Login</button>
+  <button onclick="showScreen('feed')">Feed</button>
+  <button onclick="showScreen('rivalry')">Rivalry Arena</button>
+  <button onclick="showScreen('portal')">War Room</button>
+  <button onclick="showScreen('profile')">Dynasty</button>
+</div>
+
+<!-- ============================================================= -->
+<!-- PHONE FRAME                                                    -->
+<!-- ============================================================= -->
+<div class="phone-container">
+  <div class="phone-frame">
+
+    <!-- Notch -->
+    <div class="phone-notch"></div>
+
+    <!-- Status Bar (shared, always visible) -->
+    <div class="status-bar">
+      <div class="status-bar-left">9:41</div>
+      <div class="status-bar-right">
+        <div class="status-icon-wifi">
+          <span></span><span></span><span></span><span></span>
+        </div>
+        <div class="status-icon-battery">
+          <div class="status-icon-battery-fill"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Home Indicator -->
+    <div class="home-indicator"></div>
+
+
+    <!-- ========================================================= -->
+    <!-- SCREEN 1: SPLASH                                          -->
+    <!-- ========================================================= -->
+    <div class="screen splash-screen active" id="screen-splash">
+      <div class="splash-glow-bg"></div>
+
+      <div class="splash-hex-logo">
+        <div class="splash-hex-outer">
+          <div class="splash-hex-inner">
+            <div class="splash-hex-icon"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="splash-title">BLITZ</div>
+      <div class="splash-subtitle">College Football Social</div>
+
+      <div class="splash-dots">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+
+      <div class="splash-version">v1.0.0</div>
+    </div>
+
+
+    <!-- ========================================================= -->
+    <!-- SCREEN 2: LOGIN                                           -->
+    <!-- ========================================================= -->
+    <div class="screen login-screen" id="screen-login">
+      <div class="login-logo">BLITZ</div>
+
+      <div class="login-heading">Enter the Arena</div>
+
+      <div class="login-form">
+        <input type="text" class="login-input" placeholder="Email address" readonly>
+        <input type="password" class="login-input" placeholder="Password" readonly>
+        <button class="login-btn" onclick="showScreen('feed')">LOG IN</button>
+      </div>
+
+      <div class="login-divider">or</div>
+
+      <button class="google-btn">
+        <span class="google-icon">G</span>
+        Continue with Google
+      </button>
+
+      <div class="login-signup">
+        New Player? <a onclick="showScreen('feed')">Create Account</a>
+      </div>
+    </div>
+
+
+    <!-- ========================================================= -->
+    <!-- SCREEN 3: FEED                                            -->
+    <!-- ========================================================= -->
+    <div class="screen feed-screen" id="screen-feed">
+
+      <!-- App Header -->
+      <div class="app-header">
+        <div class="header-left">
+          <div class="blitz-logo">BLITZ</div>
+          <div class="level-display">LVL 24 | 5,680 XP</div>
+        </div>
+        <div class="header-right">
+          <div class="notif-bell">
+            <div class="bell-shape"></div>
+            <div class="notif-badge">7</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- XP Bar -->
+      <div class="xp-bar-container">
+        <div class="xp-label">XP</div>
+        <div class="xp-bar-track">
+          <div class="xp-bar-fill"></div>
+        </div>
+        <div class="xp-amount">5,680 / 6,000</div>
+      </div>
+
+      <!-- Feed Cards -->
+      <div class="feed-area">
+
+        <!-- Post 1: Gamified Take -->
+        <div class="card">
+          <div class="diagonal-accent"></div>
+          <div class="card-inner">
+            <div class="post-header">
+              <div class="avatar-hex">
+                <div class="avatar-hex-inner">BN</div>
+              </div>
+              <div class="user-meta">
+                <div class="username">
+                  @BuckeyeNation
+                  <span class="rank-badge rank-diamond"><span class="diamond-shape"></span>Diamond III</span>
+                </div>
+                <div class="user-streak">7-day hot streak</div>
+              </div>
+            </div>
+            <div class="post-text">
+              Travis Hunter = best two-way player since Deion. Not even a debate at this point.
+            </div>
+            <div class="reactions">
+              <div class="reaction-hex reaction-td">
+                <span class="reaction-label">TD</span> 342
+              </div>
+              <div class="reaction-hex reaction-fum">
+                <span class="reaction-label">FUM</span> 89
+              </div>
+              <div class="xp-float">+15 XP</div>
+            </div>
+            <div class="post-actions">
+              <div class="action-btn">STAT CHECK</div>
+              <div class="action-btn">CHALLENGE</div>
+              <div class="action-btn">AGE</div>
+              <div class="action-btn">REPLY</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Post 2: Receipt -->
+        <div class="card">
+          <div class="diagonal-accent"></div>
+          <div class="card-inner">
+            <div class="post-header">
+              <div class="avatar-hex">
+                <div class="avatar-hex-inner">TR</div>
+              </div>
+              <div class="user-meta">
+                <div class="username">
+                  @TideRollin
+                  <span class="rank-badge rank-platinum">Platinum I</span>
+                </div>
+                <div class="user-subtitle">12h ago</div>
+              </div>
+            </div>
+            <div class="post-text">
+              Alabama going 11-1. Only loss at Georgia. Book it.
+            </div>
+            <div class="receipt-banner">
+              <div class="receipt-lock">
+                <div class="lock-icon"></div>
+                RECEIPT LOCKED
+              </div>
+              <div class="receipt-timer">Revisits Week 12 -- <span>34 days</span></div>
+            </div>
+            <div class="reactions">
+              <div class="reaction-hex reaction-td">
+                <span class="reaction-label">TD</span> 234
+              </div>
+              <div class="reaction-hex reaction-fum">
+                <span class="reaction-label">FUM</span> 156
+              </div>
+            </div>
+            <div class="post-actions">
+              <div class="action-btn">STAT CHECK</div>
+              <div class="action-btn">CHALLENGE</div>
+              <div class="action-btn">AGE</div>
+              <div class="action-btn">REPLY</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Post 3: AI Violation -->
+        <div class="violation-card">
+          <div class="scanlines"></div>
+          <div class="violation-inner">
+            <div class="violation-icon">
+              <div class="violation-triangle"></div>
+            </div>
+            <div class="violation-title">VIOLATION DETECTED</div>
+            <div class="violation-text">
+              AI REFEREE: Political/Off-Topic content removed.<br>
+              This post has been flagged and removed from the feed.
+            </div>
+            <button class="appeal-btn">APPEAL</button>
+            <div class="warning-text">2 warnings -- 1 more = temp ban</div>
+          </div>
+        </div>
+
+        <!-- Post 4: Play Caller LIVE -->
+        <div class="card live-card">
+          <div class="diagonal-accent"></div>
+          <div class="card-inner">
+            <div class="play-caller-label">PLAY CALLER</div>
+            <div class="live-header">
+              <div class="live-badge">
+                <span class="live-dot"></span>
+                LIVE
+              </div>
+              <div>
+                <div class="live-game-info">Auburn vs LSU -- Q1 4:32</div>
+                <div class="live-subtitle">SEC Conference Play</div>
+              </div>
+            </div>
+            <div class="live-question">3rd and 7 -- What's the call?</div>
+            <div class="vote-grid">
+              <div class="vote-btn active">
+                <span class="vote-btn-label">Deep Pass</span>
+                <span class="vote-btn-pct">34%</span>
+                <div class="vote-bar-bg"><div class="vote-bar-fill" style="width:34%"></div></div>
+              </div>
+              <div class="vote-btn">
+                <span class="vote-btn-label">Screen</span>
+                <span class="vote-btn-pct">28%</span>
+                <div class="vote-bar-bg"><div class="vote-bar-fill" style="width:28%"></div></div>
+              </div>
+              <div class="vote-btn">
+                <span class="vote-btn-label">QB Run</span>
+                <span class="vote-btn-pct">22%</span>
+                <div class="vote-bar-bg"><div class="vote-bar-fill" style="width:22%"></div></div>
+              </div>
+              <div class="vote-btn">
+                <span class="vote-btn-label">Play Action</span>
+                <span class="vote-btn-pct">16%</span>
+                <div class="vote-bar-bg"><div class="vote-bar-fill" style="width:16%"></div></div>
+              </div>
+            </div>
+            <div class="coach-match">
+              <div class="coach-match-text">COACH MATCHED!</div>
+              <div class="coach-xp">+25 XP</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Achievement Popup (inline in feed) -->
+        <div class="achievement-popup">
+          <div class="achieve-hex">
+            <div class="achieve-hex-inner">
+              <div class="achieve-star"></div>
+            </div>
+          </div>
+          <div class="achieve-content">
+            <div class="achieve-label">ACHIEVEMENT</div>
+            <div class="achieve-title">First Rivalry Win</div>
+            <div class="achieve-desc">Win a challenge against a rival flair</div>
+          </div>
+          <div class="achieve-xp">+50 XP</div>
+        </div>
+
+      </div><!-- end feed-area -->
+
+      <!-- Bottom Tabs -->
+      <div class="bottom-tabs">
+        <div class="tab-item active" onclick="switchTab(this)">
+          <div class="tab-icon"><div class="icon-feed"><span></span><span></span><span></span></div></div>
+          <div class="tab-label">FEED</div>
+        </div>
+        <div class="tab-item" onclick="switchTab(this); showScreen('rivalry')">
+          <div class="tab-icon"><div class="icon-arena"></div></div>
+          <div class="tab-label">ARENA</div>
+        </div>
+        <div class="tab-item" onclick="switchTab(this)">
+          <div class="tab-icon"><div class="icon-play"></div></div>
+          <div class="tab-label">PLAY</div>
+        </div>
+        <div class="tab-item" onclick="switchTab(this); showScreen('portal')">
+          <div class="tab-icon"><div class="icon-portal"></div></div>
+          <div class="tab-label">PORTAL</div>
+        </div>
+        <div class="tab-item" onclick="switchTab(this); showScreen('profile')">
+          <div class="tab-icon"><div class="icon-rank"><span></span><span></span><span></span></div></div>
+          <div class="tab-label">RANK</div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ========================================================= -->
+    <!-- SCREEN 4: RIVALRY ARENA                                   -->
+    <!-- ========================================================= -->
+    <div class="screen rivalry-screen" id="screen-rivalry">
+
+      <div class="rivalry-header">
+        <h2>Rivalry Arena</h2>
+      </div>
+
+      <div class="rivalry-body">
+
+        <!-- Head-to-Head Split -->
+        <div class="rivalry-split">
+          <div class="rivalry-side rivalry-side-blue">
+            <div class="rivalry-team-name">TEXAS</div>
+            <div class="rivalry-player">
+              <div class="rivalry-player-avatar">
+                <div class="rivalry-player-avatar-inner">HE</div>
+              </div>
+              <div class="rivalry-player-info">
+                <div class="rivalry-player-name">@HookEm</div>
+                <div class="rivalry-player-pts"><span>1,240</span> pts</div>
+              </div>
+            </div>
+            <div class="rivalry-vs">VS</div>
+          </div>
+          <div class="rivalry-side rivalry-side-pink">
+            <div class="rivalry-team-name">OKLAHOMA</div>
+            <div class="rivalry-player">
+              <div class="rivalry-player-avatar">
+                <div class="rivalry-player-avatar-inner">BS</div>
+              </div>
+              <div class="rivalry-player-info">
+                <div class="rivalry-player-name">@BoomerSooner</div>
+                <div class="rivalry-player-pts"><span>1,180</span> pts</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Community Vote -->
+        <div class="community-vote">
+          <div class="vote-title-label">COMMUNITY VOTE</div>
+          <div class="vote-bar-outer">
+            <div class="vote-bar-left">56%</div>
+            <div class="vote-bar-right-label">44%</div>
+          </div>
+        </div>
+
+        <!-- Join Arena Button -->
+        <button class="join-arena-btn">JOIN THE ARENA</button>
+
+        <!-- Live Debate Takes -->
+        <div class="debate-take">
+          <div class="debate-take-header">
+            <div class="debate-take-user">@LonghornLegend</div>
+            <span class="debate-take-side side-blue">TEXAS</span>
+          </div>
+          <div class="debate-take-text">Quinn Ewers is the most NFL-ready QB in college football right now. The arm talent is unreal.</div>
+        </div>
+
+        <div class="debate-take">
+          <div class="debate-take-header">
+            <div class="debate-take-user">@SoonerMagic</div>
+            <span class="debate-take-side side-pink">OU</span>
+          </div>
+          <div class="debate-take-text">OU's defense is going to shock everyone this season. The portal haul was elite.</div>
+        </div>
+
+        <div class="debate-take">
+          <div class="debate-take-header">
+            <div class="debate-take-user">@CFBAnalyst42</div>
+            <span class="debate-take-side side-blue">TEXAS</span>
+          </div>
+          <div class="debate-take-text">Texas by 14. The depth chart advantage is massive at every position group.</div>
+        </div>
+
+        <div class="debate-take">
+          <div class="debate-take-header">
+            <div class="debate-take-user">@RedRiverRival</div>
+            <span class="debate-take-side side-pink">OU</span>
+          </div>
+          <div class="debate-take-text">People keep sleeping on OU's running game. That O-line is a mauler unit.</div>
+        </div>
+
+      </div>
+
+      <!-- Bottom Tabs -->
+      <div class="bottom-tabs">
+        <div class="tab-item" onclick="showScreen('feed')">
+          <div class="tab-icon"><div class="icon-feed"><span></span><span></span><span></span></div></div>
+          <div class="tab-label">FEED</div>
+        </div>
+        <div class="tab-item active">
+          <div class="tab-icon"><div class="icon-arena"></div></div>
+          <div class="tab-label">ARENA</div>
+        </div>
+        <div class="tab-item">
+          <div class="tab-icon"><div class="icon-play"></div></div>
+          <div class="tab-label">PLAY</div>
+        </div>
+        <div class="tab-item" onclick="showScreen('portal')">
+          <div class="tab-icon"><div class="icon-portal"></div></div>
+          <div class="tab-label">PORTAL</div>
+        </div>
+        <div class="tab-item" onclick="showScreen('profile')">
+          <div class="tab-icon"><div class="icon-rank"><span></span><span></span><span></span></div></div>
+          <div class="tab-label">RANK</div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ========================================================= -->
+    <!-- SCREEN 5: TRANSFER PORTAL / WAR ROOM                     -->
+    <!-- ========================================================= -->
+    <div class="screen portal-screen" id="screen-portal">
+
+      <div class="portal-header">
+        <h2>War Room</h2>
+      </div>
+
+      <div class="portal-body">
+
+        <!-- Team Selector -->
+        <div class="team-selector">
+          <span>SELECT YOUR TEAM</span>
+          <div class="team-selector-arrow"></div>
+        </div>
+
+        <!-- New Entries Alert -->
+        <div class="new-entries-alert">
+          <div class="new-entries-text">3 NEW ENTRIES</div>
+        </div>
+
+        <!-- Portal Player Cards -->
+        <div class="portal-card">
+          <div class="portal-avatar">
+            <div class="portal-avatar-inner">JW</div>
+          </div>
+          <div class="portal-info">
+            <div class="portal-name">Jaylen Wright</div>
+            <div class="portal-detail">QB -- USC -- Sophomore</div>
+            <div class="portal-stars">
+              <div class="star-shape"></div>
+              <div class="star-shape"></div>
+              <div class="star-shape"></div>
+              <div class="star-shape"></div>
+              <div class="star-shape empty"></div>
+            </div>
+          </div>
+          <button class="claim-btn">CLAIM</button>
+        </div>
+
+        <div class="portal-card">
+          <div class="portal-avatar">
+            <div class="portal-avatar-inner">MK</div>
+          </div>
+          <div class="portal-info">
+            <div class="portal-name">Marcus King</div>
+            <div class="portal-detail">WR -- Alabama -- Junior</div>
+            <div class="portal-stars">
+              <div class="star-shape"></div>
+              <div class="star-shape"></div>
+              <div class="star-shape"></div>
+              <div class="star-shape"></div>
+              <div class="star-shape"></div>
+            </div>
+          </div>
+          <button class="claim-btn">CLAIM</button>
+        </div>
+
+        <div class="portal-card">
+          <div class="portal-avatar">
+            <div class="portal-avatar-inner">DT</div>
+          </div>
+          <div class="portal-info">
+            <div class="portal-name">Derek Thomas</div>
+            <div class="portal-detail">LB -- Oregon -- Senior</div>
+            <div class="portal-stars">
+              <div class="star-shape"></div>
+              <div class="star-shape"></div>
+              <div class="star-shape"></div>
+              <div class="star-shape empty"></div>
+              <div class="star-shape empty"></div>
+            </div>
+          </div>
+          <button class="claim-btn">CLAIM</button>
+        </div>
+
+        <!-- Roster Progress -->
+        <div class="roster-progress">
+          <div class="roster-label">3/5 ROSTER SPOTS</div>
+          <div class="roster-bar-track">
+            <div class="roster-bar-fill"></div>
+          </div>
+        </div>
+
+        <!-- Top GMs Leaderboard -->
+        <div class="gm-leaderboard">
+          <div class="gm-title">TOP GMs</div>
+          <div class="gm-row">
+            <div class="gm-rank-num">1</div>
+            <div class="gm-name">@PortalKing_CFB</div>
+            <div class="gm-accuracy">87.3%</div>
+          </div>
+          <div class="gm-row">
+            <div class="gm-rank-num">2</div>
+            <div class="gm-name">@ScoutMaster22</div>
+            <div class="gm-accuracy">84.1%</div>
+          </div>
+          <div class="gm-row">
+            <div class="gm-rank-num">3</div>
+            <div class="gm-name">@TransferGuru</div>
+            <div class="gm-accuracy">81.7%</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Bottom Tabs -->
+      <div class="bottom-tabs">
+        <div class="tab-item" onclick="showScreen('feed')">
+          <div class="tab-icon"><div class="icon-feed"><span></span><span></span><span></span></div></div>
+          <div class="tab-label">FEED</div>
+        </div>
+        <div class="tab-item" onclick="showScreen('rivalry')">
+          <div class="tab-icon"><div class="icon-arena"></div></div>
+          <div class="tab-label">ARENA</div>
+        </div>
+        <div class="tab-item">
+          <div class="tab-icon"><div class="icon-play"></div></div>
+          <div class="tab-label">PLAY</div>
+        </div>
+        <div class="tab-item active">
+          <div class="tab-icon"><div class="icon-portal"></div></div>
+          <div class="tab-label">PORTAL</div>
+        </div>
+        <div class="tab-item" onclick="showScreen('profile')">
+          <div class="tab-icon"><div class="icon-rank"><span></span><span></span><span></span></div></div>
+          <div class="tab-label">RANK</div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ========================================================= -->
+    <!-- SCREEN 6: PROFILE / DYNASTY                               -->
+    <!-- ========================================================= -->
+    <div class="screen profile-screen" id="screen-profile">
+
+      <div class="profile-header-section">
+        <h2>Dynasty Mode</h2>
+      </div>
+
+      <div class="profile-body">
+
+        <!-- Large Hex Avatar -->
+        <div class="profile-avatar-wrap">
+          <div class="profile-avatar">
+            <div class="profile-avatar-inner">GR</div>
+          </div>
+        </div>
+
+        <div class="profile-username">GridironKing</div>
+        <div class="profile-handle">@GridironKing_CFB</div>
+        <div class="profile-school">Ohio State Buckeyes</div>
+
+        <div class="profile-rank-badge">
+          <div class="profile-rank-pill">
+            <div class="profile-rank-diamond"></div>
+            Diamond III
+          </div>
+        </div>
+
+        <!-- XP Bar -->
+        <div class="profile-xp-section">
+          <div class="profile-xp-header">
+            <div class="profile-xp-level">Level 24</div>
+            <div class="profile-xp-nums">5,680 / 6,000 XP</div>
+          </div>
+          <div class="profile-xp-track">
+            <div class="profile-xp-fill"></div>
+          </div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-value">247</div>
+            <div class="stat-label">POSTS</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">89</div>
+            <div class="stat-label">WINS</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">34</div>
+            <div class="stat-label">RECEIPTS</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">12</div>
+            <div class="stat-label">STREAK</div>
+          </div>
+        </div>
+
+        <!-- Weekly Challenges -->
+        <div class="challenges-section">
+          <div class="challenges-title">WEEKLY CHALLENGES</div>
+
+          <div class="challenge-row">
+            <div class="challenge-header">
+              <div class="challenge-name">Post 10 Takes</div>
+              <div class="challenge-progress-text">7/10</div>
+            </div>
+            <div class="challenge-bar-track">
+              <div class="challenge-bar-fill" style="width: 70%"></div>
+            </div>
+          </div>
+
+          <div class="challenge-row">
+            <div class="challenge-header">
+              <div class="challenge-name">Win 3 Rivalries</div>
+              <div class="challenge-progress-text">2/3</div>
+            </div>
+            <div class="challenge-bar-track">
+              <div class="challenge-bar-fill" style="width: 66.6%"></div>
+            </div>
+          </div>
+
+          <div class="challenge-row">
+            <div class="challenge-header">
+              <div class="challenge-name">Lock 5 Receipts</div>
+              <div class="challenge-progress-text">3/5</div>
+            </div>
+            <div class="challenge-bar-track">
+              <div class="challenge-bar-fill" style="width: 60%"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Achievement Badges -->
+        <div class="badges-section">
+          <div class="badge-hex">
+            <div class="badge-hex-outer badge-blue">
+              <div class="badge-hex-inner">
+                <div class="badge-icon-star"></div>
+              </div>
+            </div>
+          </div>
+          <div class="badge-hex">
+            <div class="badge-hex-outer badge-pink">
+              <div class="badge-hex-inner">
+                <div class="badge-icon-bolt"></div>
+              </div>
+            </div>
+          </div>
+          <div class="badge-hex">
+            <div class="badge-hex-outer badge-green">
+              <div class="badge-hex-inner">
+                <div class="badge-icon-shield"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Edit Loadout Button -->
+        <button class="edit-loadout-btn">EDIT LOADOUT</button>
+
+      </div>
+
+      <!-- Bottom Tabs -->
+      <div class="bottom-tabs">
+        <div class="tab-item" onclick="showScreen('feed')">
+          <div class="tab-icon"><div class="icon-feed"><span></span><span></span><span></span></div></div>
+          <div class="tab-label">FEED</div>
+        </div>
+        <div class="tab-item" onclick="showScreen('rivalry')">
+          <div class="tab-icon"><div class="icon-arena"></div></div>
+          <div class="tab-label">ARENA</div>
+        </div>
+        <div class="tab-item">
+          <div class="tab-icon"><div class="icon-play"></div></div>
+          <div class="tab-label">PLAY</div>
+        </div>
+        <div class="tab-item" onclick="showScreen('portal')">
+          <div class="tab-icon"><div class="icon-portal"></div></div>
+          <div class="tab-label">PORTAL</div>
+        </div>
+        <div class="tab-item active">
+          <div class="tab-icon"><div class="icon-rank"><span></span><span></span><span></span></div></div>
+          <div class="tab-label">RANK</div>
+        </div>
+      </div>
+    </div>
+
+
+  </div><!-- end phone-frame -->
+</div><!-- end phone-container -->
+
+
+<!-- ============================================================= -->
+<!-- JAVASCRIPT                                                     -->
+<!-- ============================================================= -->
+<script>
+  // Screen switching with opacity + scale transitions
+  function showScreen(name) {
+    // Deactivate all screens
+    document.querySelectorAll('.screen').forEach(function(s) {
+      s.classList.remove('active');
+    });
+
+    // Activate target screen
+    var target = document.getElementById('screen-' + name);
+    if (target) {
+      target.classList.add('active');
+    }
+
+    // Update nav pills
+    document.querySelectorAll('.screen-nav button').forEach(function(btn) {
+      btn.classList.remove('active');
+    });
+    var screenMap = {
+      'splash': 0, 'login': 1, 'feed': 2,
+      'rivalry': 3, 'portal': 4, 'profile': 5
+    };
+    var idx = screenMap[name];
+    if (idx !== undefined) {
+      document.querySelectorAll('.screen-nav button')[idx].classList.add('active');
+    }
+  }
+
+  // Tab switching within screens (visual only)
+  function switchTab(el) {
+    var tabs = el.parentElement;
+    tabs.querySelectorAll('.tab-item').forEach(function(t) {
+      t.classList.remove('active');
+    });
+    el.classList.add('active');
+  }
+
+  // Vote button interactivity
+  document.querySelectorAll('.vote-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var grid = btn.closest('.vote-grid');
+      if (grid) {
+        grid.querySelectorAll('.vote-btn').forEach(function(b) {
+          b.classList.remove('active');
+        });
+      }
+      btn.classList.add('active');
+    });
+  });
+
+  // Reaction button tap effect
+  document.querySelectorAll('.reaction-hex').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      btn.style.transform = 'scale(1.1)';
+      setTimeout(function() {
+        btn.style.transform = 'scale(1)';
+      }, 150);
+    });
+  });
+
+  // Claim button interaction
+  document.querySelectorAll('.claim-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      btn.textContent = 'CLAIMED';
+      btn.style.background = 'rgba(0, 255, 136, 0.15)';
+      btn.style.borderColor = '#00ff88';
+      btn.style.color = '#00ff88';
+      btn.style.pointerEvents = 'none';
+    });
+  });
+</script>
+
+</body>
+</html>

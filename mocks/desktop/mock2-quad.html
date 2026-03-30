@@ -1,0 +1,2194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CFB Social — The Quad</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ========== RESET & BASE ========== */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --cream: #faf7f2;
+  --cream-dark: #f0ebe3;
+  --white: #ffffff;
+  --forest: #2d5016;
+  --forest-light: #3a6b1e;
+  --forest-pale: #e8f0e2;
+  --burnt-orange: #c4560a;
+  --orange-light: #e8732e;
+  --orange-pale: #fdf0e6;
+  --text-primary: #2c2c2c;
+  --text-secondary: #6b6b6b;
+  --text-muted: #9a9a9a;
+  --border: #e8e4de;
+  --shadow-sm: 0 1px 4px rgba(0,0,0,0.05);
+  --shadow-md: 0 2px 8px rgba(0,0,0,0.08);
+  --shadow-lg: 0 4px 16px rgba(0,0,0,0.10);
+  --radius: 16px;
+  --radius-sm: 10px;
+  --radius-pill: 50px;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: var(--cream);
+  color: var(--text-primary);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Poppins', sans-serif;
+  line-height: 1.3;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+button {
+  font-family: 'Nunito', sans-serif;
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+/* ========== SCROLLBAR ========== */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* ========== TOP NAVIGATION BAR ========== */
+.top-nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  padding: 0 32px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.nav-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.nav-logo {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 800;
+  font-size: 22px;
+  color: var(--forest);
+  letter-spacing: -0.5px;
+}
+
+.nav-logo .football-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: var(--forest);
+  color: var(--white);
+  border-radius: 50%;
+  font-size: 14px;
+  margin-right: 6px;
+  vertical-align: middle;
+  position: relative;
+  top: -1px;
+}
+
+.nav-center {
+  flex: 1;
+  max-width: 480px;
+  margin: 0 32px;
+}
+
+.search-bar {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  background: var(--cream);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-pill);
+  padding: 8px 18px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.search-bar:focus-within {
+  border-color: var(--forest);
+  box-shadow: 0 0 0 3px var(--forest-pale);
+}
+
+.search-bar svg {
+  width: 18px;
+  height: 18px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.search-bar input {
+  flex: 1;
+  border: none;
+  background: none;
+  outline: none;
+  font-family: 'Nunito', sans-serif;
+  font-size: 14px;
+  color: var(--text-primary);
+  margin-left: 10px;
+}
+
+.search-bar input::placeholder {
+  color: var(--text-muted);
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.nav-btn {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 18px;
+  transition: background 0.15s;
+  position: relative;
+  color: var(--text-secondary);
+}
+
+.nav-btn:hover {
+  background: var(--cream);
+}
+
+.nav-btn.create-btn {
+  background: var(--forest);
+  color: var(--white);
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.nav-btn.create-btn:hover {
+  background: var(--forest-light);
+}
+
+.nav-btn .badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 8px;
+  height: 8px;
+  background: var(--burnt-orange);
+  border-radius: 50%;
+  border: 2px solid var(--white);
+}
+
+.nav-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--forest), var(--forest-light));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--white);
+  font-size: 14px;
+  font-weight: 700;
+  margin-left: 4px;
+  cursor: pointer;
+  transition: box-shadow 0.15s;
+}
+
+.nav-avatar:hover {
+  box-shadow: 0 0 0 3px var(--forest-pale);
+}
+
+/* ========== GAME DAY STORIES BAR ========== */
+.stories-bar {
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  padding: 16px 0;
+  overflow: hidden;
+}
+
+.stories-scroll {
+  display: flex;
+  gap: 18px;
+  padding: 0 32px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.stories-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.story-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.story-ring {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  padding: 3px;
+  background: linear-gradient(135deg, var(--forest), var(--burnt-orange));
+  transition: transform 0.2s;
+}
+
+.story-ring.viewed {
+  background: var(--border);
+}
+
+.story-ring.add-story {
+  background: var(--cream);
+  border: 2px dashed var(--forest);
+  padding: 2px;
+}
+
+.story-item:hover .story-ring {
+  transform: scale(1.06);
+}
+
+.story-avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: var(--cream);
+  border: 3px solid var(--white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  overflow: hidden;
+}
+
+.story-avatar.has-image {
+  background-size: cover;
+  background-position: center;
+}
+
+.story-avatar .add-icon {
+  font-size: 22px;
+  color: var(--forest);
+  font-weight: 700;
+}
+
+.story-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  max-width: 72px;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ========== MAIN LAYOUT ========== */
+.main-layout {
+  display: flex;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px 16px;
+  gap: 24px;
+}
+
+/* ========== LEFT SIDEBAR ========== */
+.left-sidebar {
+  width: 250px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 88px;
+  align-self: flex-start;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.profile-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  padding: 24px 20px;
+  text-align: center;
+}
+
+.profile-card .avatar-wrapper {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 12px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--forest), var(--orange-light));
+  padding: 3px;
+}
+
+.profile-card .avatar-inner {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: var(--cream-dark);
+  border: 3px solid var(--white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+}
+
+.profile-card .profile-name {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+
+.profile-card .profile-handle {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 14px;
+}
+
+.dynasty-title {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--forest);
+  margin-bottom: 12px;
+}
+
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+.stat-row .stat-label {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.stat-row .stat-value {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.xp-bar-container {
+  margin: 10px 0 6px;
+}
+
+.xp-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.xp-bar {
+  height: 8px;
+  background: var(--cream);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.xp-fill {
+  height: 100%;
+  width: 80%;
+  background: linear-gradient(90deg, var(--forest), var(--forest-light));
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.divider {
+  height: 1px;
+  background: var(--border);
+  margin: 14px 0;
+}
+
+.receipts-stat {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.receipts-stat .check-icon {
+  color: var(--forest);
+}
+
+.receipts-stat strong {
+  color: var(--text-primary);
+}
+
+/* Quick Links */
+.quick-links {
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  padding: 8px;
+}
+
+.quick-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  transition: all 0.15s;
+}
+
+.quick-link:hover {
+  background: var(--cream);
+  color: var(--text-primary);
+}
+
+.quick-link.active {
+  background: var(--forest-pale);
+  color: var(--forest);
+}
+
+.quick-link .ql-icon {
+  width: 20px;
+  text-align: center;
+  font-size: 16px;
+}
+
+/* ========== CENTER FEED ========== */
+.center-feed {
+  flex: 1;
+  min-width: 0;
+  max-width: 620px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* Post Composer */
+.post-composer {
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  padding: 20px;
+}
+
+.composer-top {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.composer-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--forest), var(--forest-light));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--white);
+  font-size: 16px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.composer-input {
+  flex: 1;
+  padding: 10px 16px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-pill);
+  font-size: 14px;
+  font-family: 'Nunito', sans-serif;
+  color: var(--text-muted);
+  background: var(--cream);
+  cursor: text;
+  transition: border-color 0.2s;
+}
+
+.composer-input:hover {
+  border-color: var(--forest);
+}
+
+.composer-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+.composer-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: var(--radius-pill);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  transition: all 0.15s;
+}
+
+.composer-btn:hover {
+  background: var(--cream);
+  color: var(--text-primary);
+}
+
+.composer-btn .cb-icon {
+  font-size: 16px;
+}
+
+.composer-btn.photo-btn:hover { color: var(--forest); }
+.composer-btn.poll-btn:hover { color: var(--burnt-orange); }
+.composer-btn.predict-btn:hover { color: #6b4ce6; }
+
+.composer-submit {
+  margin-left: auto;
+  padding: 8px 20px;
+  background: var(--forest);
+  color: var(--white);
+  border-radius: var(--radius-pill);
+  font-size: 13px;
+  font-weight: 700;
+  transition: background 0.15s;
+}
+
+.composer-submit:hover {
+  background: var(--forest-light);
+}
+
+/* ========== FEED POSTS (shared) ========== */
+.feed-post {
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  transition: box-shadow 0.2s;
+}
+
+.feed-post:hover {
+  box-shadow: var(--shadow-lg);
+}
+
+.post-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 20px 0;
+}
+
+.post-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--white);
+  position: relative;
+}
+
+.post-avatar .online-ring {
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  border: 2.5px solid var(--forest);
+}
+
+.post-user-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.post-user-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.post-name {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+.post-handle {
+  font-size: 13px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.post-flair {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  font-weight: 700;
+  background: var(--cream);
+}
+
+.post-flair.georgia { color: #ba0c2f; background: #fce8ec; }
+.post-flair.alabama { color: #9e1b32; background: #fce4e8; }
+.post-flair.texas { color: #bf5700; background: var(--orange-pale); }
+.post-flair.osu { color: #bb0000; background: #fce8e8; }
+
+.post-time {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.post-more {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 18px;
+  color: var(--text-muted);
+  transition: background 0.15s;
+}
+
+.post-more:hover {
+  background: var(--cream);
+}
+
+/* Post body */
+.post-body {
+  padding: 12px 20px 0;
+}
+
+.post-text {
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--text-primary);
+}
+
+/* Photo post */
+.post-photo {
+  margin: 14px 20px 0;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--cream-dark);
+  height: 340px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 10px;
+  position: relative;
+}
+
+.post-photo .photo-icon {
+  font-size: 56px;
+  opacity: 0.35;
+}
+
+.post-photo .photo-caption {
+  font-size: 14px;
+  color: var(--text-muted);
+  font-weight: 500;
+  font-style: italic;
+}
+
+.post-photo .photo-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 40px 18px 14px;
+  background: linear-gradient(transparent, rgba(0,0,0,0.5));
+  color: var(--white);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* Reactions */
+.post-reactions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 20px 0;
+}
+
+.reaction-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 16px;
+  border-radius: var(--radius-pill);
+  font-size: 13px;
+  font-weight: 700;
+  border: 1.5px solid var(--border);
+  transition: all 0.15s;
+  cursor: pointer;
+}
+
+.reaction-pill:hover {
+  border-color: var(--forest);
+  background: var(--forest-pale);
+}
+
+.reaction-pill.active {
+  border-color: var(--forest);
+  background: var(--forest-pale);
+  color: var(--forest);
+}
+
+.reaction-pill .r-icon {
+  font-size: 15px;
+}
+
+.reaction-pill .r-label {
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.reaction-pill .r-count {
+  color: var(--text-primary);
+}
+
+.reaction-pill.fumble:hover {
+  border-color: var(--burnt-orange);
+  background: var(--orange-pale);
+}
+
+.reaction-pill.fumble.active {
+  border-color: var(--burnt-orange);
+  background: var(--orange-pale);
+  color: var(--burnt-orange);
+}
+
+/* Comment preview */
+.comment-preview {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px 0;
+  font-size: 13px;
+}
+
+.comment-preview .cp-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--cream-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  flex-shrink: 0;
+  color: var(--text-secondary);
+}
+
+.comment-preview .cp-text {
+  color: var(--text-secondary);
+}
+
+.comment-preview .cp-text strong {
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+/* Action bar */
+.post-actions {
+  display: flex;
+  align-items: center;
+  padding: 12px 12px 14px;
+  margin-top: 8px;
+  border-top: 1px solid var(--border);
+  gap: 2px;
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 10px;
+  border-radius: var(--radius-pill);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.action-btn:hover {
+  background: var(--cream);
+  color: var(--text-primary);
+}
+
+.action-btn .ab-icon {
+  font-size: 15px;
+}
+
+/* Receipt badge */
+.receipt-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--forest-pale);
+  color: var(--forest);
+  font-size: 12px;
+  font-weight: 700;
+  margin-top: 10px;
+}
+
+.aging-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--orange-pale);
+  color: var(--burnt-orange);
+  font-size: 12px;
+  font-weight: 700;
+  margin-top: 8px;
+  margin-left: 8px;
+}
+
+/* AI Moderation Card */
+.moderation-card {
+  background: #fffdf5;
+  border: 2px dashed var(--forest);
+  border-radius: var(--radius);
+  padding: 22px 24px;
+  text-align: center;
+}
+
+.moderation-card .mod-icon {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+.moderation-card .mod-title {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--forest);
+  margin-bottom: 6px;
+}
+
+.moderation-card .mod-text {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 12px;
+}
+
+.moderation-card .mod-appeal {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--forest);
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.moderation-card .mod-appeal:hover {
+  color: var(--forest-light);
+  text-decoration: underline;
+}
+
+/* Rivalry Arena Card */
+.rivalry-card {
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+}
+
+.rivalry-header {
+  display: flex;
+  height: 80px;
+  position: relative;
+}
+
+.rivalry-side {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 800;
+  font-size: 20px;
+  color: var(--white);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.rivalry-side.scarlet {
+  background: linear-gradient(135deg, #bb0000, #8b0000);
+}
+
+.rivalry-side.grey-blue {
+  background: linear-gradient(135deg, #00274c, #003d73);
+}
+
+.rivalry-vs {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 800;
+  font-size: 13px;
+  color: var(--text-primary);
+  box-shadow: var(--shadow-md);
+}
+
+.rivalry-body {
+  background: var(--white);
+  padding: 18px 20px 20px;
+  text-align: center;
+}
+
+.rivalry-body .rivalry-title {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.rivalry-body .rivalry-subtitle {
+  font-size: 15px;
+  color: var(--text-secondary);
+  margin-bottom: 14px;
+}
+
+.rivalry-votes {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.vote-btn {
+  flex: 1;
+  padding: 10px;
+  border-radius: var(--radius-sm);
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  border: 2px solid;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.vote-btn.osu-vote {
+  border-color: #bb0000;
+  color: #bb0000;
+  background: #fce8e8;
+}
+
+.vote-btn.osu-vote:hover {
+  background: #bb0000;
+  color: var(--white);
+}
+
+.vote-btn.mich-vote {
+  border-color: #00274c;
+  color: #00274c;
+  background: #e5eef6;
+}
+
+.vote-btn.mich-vote:hover {
+  background: #00274c;
+  color: var(--white);
+}
+
+.rivalry-meta {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.rivalry-meta a {
+  color: var(--forest);
+  font-weight: 700;
+}
+
+.rivalry-meta a:hover {
+  text-decoration: underline;
+}
+
+/* Sideline tag */
+.sideline-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--forest-pale);
+  color: var(--forest);
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.stat-check-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 10px;
+  padding: 5px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--forest-pale);
+  color: var(--forest);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.stat-check-tag:hover {
+  background: #d6e8cc;
+}
+
+/* ========== RIGHT SIDEBAR ========== */
+.right-sidebar {
+  width: 300px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 88px;
+  align-self: flex-start;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sidebar-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  padding: 18px 18px 14px;
+}
+
+.sidebar-card-title {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--text-primary);
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sidebar-card-title .sct-icon {
+  font-size: 16px;
+}
+
+/* Recruiting Buzz */
+.recruit-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.recruit-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.recruit-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--forest-pale);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.recruit-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.recruit-name {
+  font-weight: 700;
+  font-size: 13.5px;
+  color: var(--text-primary);
+}
+
+.recruit-detail {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 1px;
+}
+
+.recruit-stars {
+  color: #f5a623;
+  font-size: 11px;
+  letter-spacing: 1px;
+  margin-top: 2px;
+}
+
+.commit-badge {
+  display: inline-flex;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--forest-pale);
+  color: var(--forest);
+  font-size: 11px;
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+/* Transfer Portal */
+.portal-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.portal-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.portal-arrow {
+  color: var(--burnt-orange);
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.portal-player {
+  flex: 1;
+  min-width: 0;
+}
+
+.portal-player-name {
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.portal-player-school {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.portal-tag {
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--orange-pale);
+  color: var(--burnt-orange);
+  font-size: 10px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* Trending Hashtags */
+.hashtag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.hashtag-chip {
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  background: var(--cream);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--forest);
+  cursor: pointer;
+  transition: all 0.15s;
+  border: 1.5px solid transparent;
+}
+
+.hashtag-chip:hover {
+  border-color: var(--forest);
+  background: var(--forest-pale);
+}
+
+/* Suggested Follows */
+.follow-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.follow-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.follow-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--white);
+  flex-shrink: 0;
+}
+
+.follow-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.follow-name {
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.follow-handle {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.follow-btn {
+  padding: 5px 14px;
+  border-radius: var(--radius-pill);
+  background: var(--forest);
+  color: var(--white);
+  font-size: 12px;
+  font-weight: 700;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+
+.follow-btn:hover {
+  background: var(--forest-light);
+}
+
+/* Tailgate Finder */
+.tailgate-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0 4px;
+}
+
+.tailgate-map {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: var(--forest-pale);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.tailgate-info {
+  flex: 1;
+}
+
+.tailgate-count {
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+.tailgate-loc {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.tailgate-link {
+  margin-top: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--forest);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.tailgate-link:hover {
+  text-decoration: underline;
+}
+
+/* ========== TAB NAV (Feed Tabs) ========== */
+.feed-tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  padding: 6px;
+}
+
+.feed-tab {
+  flex: 1;
+  padding: 10px 8px;
+  text-align: center;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-muted);
+  transition: all 0.15s;
+  cursor: pointer;
+}
+
+.feed-tab:hover {
+  color: var(--text-primary);
+  background: var(--cream);
+}
+
+.feed-tab.active {
+  background: var(--forest);
+  color: var(--white);
+}
+
+/* ========== ANIMATIONS ========== */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.feed-post,
+.post-composer,
+.feed-tabs,
+.sidebar-card,
+.profile-card,
+.quick-links,
+.moderation-card,
+.rivalry-card {
+  animation: fadeUp 0.4s ease both;
+}
+
+.feed-post:nth-child(2) { animation-delay: 0.05s; }
+.feed-post:nth-child(3) { animation-delay: 0.1s; }
+.feed-post:nth-child(4) { animation-delay: 0.15s; }
+.feed-post:nth-child(5) { animation-delay: 0.2s; }
+.feed-post:nth-child(6) { animation-delay: 0.25s; }
+.feed-post:nth-child(7) { animation-delay: 0.3s; }
+.feed-post:nth-child(8) { animation-delay: 0.35s; }
+
+</style>
+</head>
+<body>
+
+<!-- ===== TOP NAVIGATION BAR ===== -->
+<nav class="top-nav">
+  <div class="nav-left">
+    <a href="#" class="nav-logo">
+      <span class="football-icon">CFB</span>CFB Social
+    </a>
+  </div>
+
+  <div class="nav-center">
+    <div class="search-bar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"/>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input type="text" placeholder="Search teams, players, hashtags...">
+    </div>
+  </div>
+
+  <div class="nav-right">
+    <button class="nav-btn create-btn" title="Create Post">+</button>
+    <button class="nav-btn" title="Notifications">
+      Alerts
+      <span class="badge"></span>
+    </button>
+    <button class="nav-btn" title="Messages">Msg</button>
+    <div class="nav-avatar" title="Profile">JK</div>
+  </div>
+</nav>
+
+<!-- ===== GAME DAY STORIES BAR ===== -->
+<section class="stories-bar">
+  <div class="stories-scroll" id="storiesScroll">
+    <!-- Your Story -->
+    <div class="story-item">
+      <div class="story-ring add-story">
+        <div class="story-avatar">
+          <span class="add-icon">+</span>
+        </div>
+      </div>
+      <span class="story-label">Your Story</span>
+    </div>
+    <!-- Unwatched Stories -->
+    <div class="story-item">
+      <div class="story-ring">
+        <div class="story-avatar" style="font-size:13px; font-weight:800; color:var(--forest);">GAME</div>
+      </div>
+      <span class="story-label">OSU vs MICH</span>
+    </div>
+    <div class="story-item">
+      <div class="story-ring">
+        <div class="story-avatar" style="font-size:13px; font-weight:800; color:var(--forest);">SEC</div>
+      </div>
+      <span class="story-label">SEC Champ</span>
+    </div>
+    <div class="story-item">
+      <div class="story-ring">
+        <div class="story-avatar" style="font-size:13px; font-weight:800; color:var(--burnt-orange);">RIV</div>
+      </div>
+      <span class="story-label">Rivalry Week</span>
+    </div>
+    <div class="story-item">
+      <div class="story-ring">
+        <div class="story-avatar" style="font-size:13px; font-weight:800; color:var(--forest);">TG</div>
+      </div>
+      <span class="story-label">Tailgate Cam</span>
+    </div>
+    <div class="story-item">
+      <div class="story-ring">
+        <div class="story-avatar" style="font-size:13px; font-weight:800; color:var(--forest);">PTL</div>
+      </div>
+      <span class="story-label">Portal Watch</span>
+    </div>
+    <div class="story-item">
+      <div class="story-ring">
+        <div class="story-avatar" style="font-size:13px; font-weight:800; color:var(--burnt-orange);">HTR</div>
+      </div>
+      <span class="story-label">Heisman Race</span>
+    </div>
+    <!-- Viewed Stories -->
+    <div class="story-item">
+      <div class="story-ring viewed">
+        <div class="story-avatar" style="font-size:12px; font-weight:800; color:var(--text-muted);">SPR</div>
+      </div>
+      <span class="story-label">Spring Game</span>
+    </div>
+    <div class="story-item">
+      <div class="story-ring viewed">
+        <div class="story-avatar" style="font-size:12px; font-weight:800; color:var(--text-muted);">NIL</div>
+      </div>
+      <span class="story-label">NIL Deals</span>
+    </div>
+    <div class="story-item">
+      <div class="story-ring viewed">
+        <div class="story-avatar" style="font-size:12px; font-weight:800; color:var(--text-muted);">CAM</div>
+      </div>
+      <span class="story-label">Campus Life</span>
+    </div>
+  </div>
+</section>
+
+<!-- ===== MAIN 3-COLUMN LAYOUT ===== -->
+<main class="main-layout">
+
+  <!-- ===== LEFT SIDEBAR ===== -->
+  <aside class="left-sidebar">
+
+    <!-- Profile Card -->
+    <div class="profile-card">
+      <div class="avatar-wrapper">
+        <div class="avatar-inner" style="font-size:18px; font-weight:800;">JK</div>
+      </div>
+      <div class="profile-name">Jordan K.</div>
+      <div class="profile-handle">@GridironJordan</div>
+      <div class="dynasty-title">Your Dynasty Stats</div>
+
+      <div class="stat-row">
+        <span class="stat-label">Level</span>
+        <span class="stat-value">15</span>
+      </div>
+
+      <div class="xp-bar-container">
+        <div class="xp-label">
+          <span>XP</span>
+          <span>3,200 / 4,000</span>
+        </div>
+        <div class="xp-bar">
+          <div class="xp-fill" style="width: 80%"></div>
+        </div>
+      </div>
+
+      <div class="stat-row" style="margin-top:10px;">
+        <span class="stat-label">Heisman Streak</span>
+        <span class="stat-value">7 days</span>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="receipts-stat">
+        <span class="check-icon" style="font-weight:800;">&#10003;</span>
+        <span>Receipts: <strong>12</strong> correct / <strong>18</strong> total</span>
+      </div>
+    </div>
+
+    <!-- Quick Links -->
+    <nav class="quick-links">
+      <a href="#" class="quick-link active">
+        <span class="ql-icon" style="font-weight:800; font-size:13px;">HOME</span> Feed
+      </a>
+      <a href="#" class="quick-link">
+        <span class="ql-icon" style="font-weight:800; font-size:13px;">FIND</span> Discover
+      </a>
+      <a href="#" class="quick-link">
+        <span class="ql-icon" style="font-weight:800; font-size:13px;">VS</span> Rivalry Arena
+      </a>
+      <a href="#" class="quick-link">
+        <span class="ql-icon" style="font-weight:800; font-size:13px;">PTL</span> Portal
+      </a>
+      <a href="#" class="quick-link">
+        <span class="ql-icon" style="font-weight:800; font-size:13px;">REC</span> Recruiting
+      </a>
+      <a href="#" class="quick-link">
+        <span class="ql-icon" style="font-weight:800; font-size:13px;">SAVE</span> Bookmarks
+      </a>
+    </nav>
+
+  </aside>
+
+  <!-- ===== CENTER FEED ===== -->
+  <section class="center-feed">
+
+    <!-- Feed Tabs -->
+    <div class="feed-tabs">
+      <div class="feed-tab active">For You</div>
+      <div class="feed-tab">Following</div>
+      <div class="feed-tab">Trending</div>
+      <div class="feed-tab">Live</div>
+    </div>
+
+    <!-- Post Composer -->
+    <div class="post-composer">
+      <div class="composer-top">
+        <div class="composer-avatar">JK</div>
+        <div class="composer-input">Share your take on today's games...</div>
+      </div>
+      <div class="composer-actions">
+        <button class="composer-btn photo-btn">
+          <span class="cb-icon">[img]</span> Photo
+        </button>
+        <button class="composer-btn poll-btn">
+          <span class="cb-icon">[poll]</span> Poll
+        </button>
+        <button class="composer-btn predict-btn">
+          <span class="cb-icon">[pred]</span> Prediction
+        </button>
+        <button class="composer-submit">Post</button>
+      </div>
+    </div>
+
+    <!-- ===== POST 1: Photo Post ===== -->
+    <article class="feed-post">
+      <div class="post-header">
+        <div class="post-avatar" style="background: linear-gradient(135deg, #ba0c2f, #e04050);">
+          <span class="online-ring"></span>
+          SM
+        </div>
+        <div class="post-user-info">
+          <div class="post-user-row">
+            <span class="post-name">Sarah M.</span>
+            <span class="post-handle">@DawgPound</span>
+            <span class="post-flair georgia">Georgia</span>
+          </div>
+          <div class="post-time">2h ago</div>
+        </div>
+        <button class="post-more">&#8230;</button>
+      </div>
+
+      <div class="post-body">
+        <p class="post-text">Game day in Athens! Nothing beats it.</p>
+      </div>
+
+      <div class="post-photo">
+        <span class="photo-icon" style="font-size:32px; opacity:0.35; font-weight:800; color:var(--text-muted);">[PHOTO]</span>
+        <span class="photo-caption">Game Day in Athens, GA</span>
+        <div class="photo-overlay">Sanford Stadium &mdash; Between the Hedges</div>
+      </div>
+
+      <div class="post-reactions">
+        <button class="reaction-pill active">
+          <span class="r-icon" style="font-size:12px; font-weight:800;">TD</span>
+          <span class="r-label">Touchdown</span>
+          <span class="r-count">458</span>
+        </button>
+        <button class="reaction-pill fumble">
+          <span class="r-icon" style="font-size:12px; font-weight:800;">FUM</span>
+          <span class="r-label">Fumble</span>
+          <span class="r-count">23</span>
+        </button>
+      </div>
+
+      <div class="comment-preview">
+        <div class="cp-avatar">VN</div>
+        <div class="cp-text"><strong>@VolNation</strong> &mdash; "OMG best tailgate spot!"</div>
+      </div>
+
+      <div class="post-actions">
+        <button class="action-btn">
+          <span class="ab-icon">--</span> Comments (34)
+        </button>
+        <button class="action-btn">
+          <span class="ab-icon">--</span> Share
+        </button>
+        <button class="action-btn">
+          <span class="ab-icon">--</span> Stat Check
+        </button>
+        <button class="action-btn">
+          <span class="ab-icon">--</span> Challenge
+        </button>
+        <button class="action-btn">
+          <span class="ab-icon">--</span> Save
+        </button>
+      </div>
+    </article>
+
+    <!-- ===== POST 2: Prediction/Receipt ===== -->
+    <article class="feed-post">
+      <div class="post-header">
+        <div class="post-avatar" style="background: linear-gradient(135deg, #9e1b32, #c0354c);">
+          MJ
+        </div>
+        <div class="post-user-info">
+          <div class="post-user-row">
+            <span class="post-name">Marcus J.</span>
+            <span class="post-handle">@CrimsonTide</span>
+            <span class="post-flair alabama">Alabama</span>
+          </div>
+          <div class="post-time">5h ago</div>
+        </div>
+        <button class="post-more">&#8230;</button>
+      </div>
+
+      <div class="post-body">
+        <p class="post-text">Jalen Milroe is going to throw for 300+ against LSU. Mark my words.</p>
+        <div style="margin-top: 12px; display: flex; flex-wrap: wrap; gap: 6px;">
+          <span class="receipt-badge">RECEIPT TRACKED &mdash; AI auto-detected</span>
+          <span class="aging-badge">AGING TAKE &mdash; Revisits Oct 12</span>
+        </div>
+      </div>
+
+      <div class="post-reactions">
+        <button class="reaction-pill">
+          <span class="r-icon" style="font-size:12px; font-weight:800;">TD</span>
+          <span class="r-label">Touchdown</span>
+          <span class="r-count">189</span>
+        </button>
+        <button class="reaction-pill fumble active">
+          <span class="r-icon" style="font-size:12px; font-weight:800;">FUM</span>
+          <span class="r-label">Fumble</span>
+          <span class="r-count">267</span>
+        </button>
+      </div>
+
+      <div class="post-actions">
+        <button class="action-btn">
+          <span class="ab-icon">--</span> Comments (89)
+        </button>
+        <button class="action-btn">
+          <span class="ab-icon">--</span> Share
+        </button>
+        <button class="action-btn">
+          <span class="ab-icon">--</span> Stat Check
+        </button>
+        <button class="action-btn">
+          <span class="ab-icon">--</span> Challenge
+        </button>
+        <button class="action-btn">
+          <span class="ab-icon">--</span> Save
+        </button>
+      </div>
+    </article>
+
+    <!-- ===== POST 3: AI Moderation Card ===== -->
+    <div class="moderation-card" style="animation: fadeUp 0.4s ease 0.15s both;">
+      <div class="mod-icon" style="font-size:18px; font-weight:800; color:var(--forest);">OFFSIDES!</div>
+      <div class="mod-title">Our AI referee detected this post drifted off-topic from college football.</div>
+      <div class="mod-text">This content has been gently sidelined. College football takes only!<br>Keep the conversation on the gridiron and we'll keep the feed golden.</div>
+      <a class="mod-appeal">Appeal this call</a>
+    </div>
+
+    <!-- ===== POST 4: Rivalry Arena Mini ===== -->
+    <div class="rivalry-card" style="animation: fadeUp 0.4s ease 0.2s both;">
+      <div class="rivalry-header">
+        <div class="rivalry-side scarlet">OSU</div>
+        <div class="rivalry-vs">VS</div>
+        <div class="rivalry-side grey-blue">MICH</div>
+      </div>
+      <div class="rivalry-body">
+        <div class="rivalry-title">RIVALRY ARENA: Ohio State vs Michigan</div>
+        <div class="rivalry-subtitle">Who wins The Game this year?</div>
+        <div class="rivalry-votes">
+          <button class="vote-btn osu-vote">OSU &mdash; 52%</button>
+          <button class="vote-btn mich-vote">MICH &mdash; 48%</button>
+        </div>
+        <div class="rivalry-meta">
+          247 fans debating &mdash; <a href="#">Join the Arena &#8594;</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== POST 5: Sideline Tagged Live Take ===== -->
+    <article class="feed-post">
+      <div class="post-header">
+        <div class="post-avatar" style="background: linear-gradient(135deg, #bf5700, #e87525);">
+          HE
+        </div>
+        <div class="post-user-info">
+          <div class="post-user-row">
+            <span class="post-name">Tyler R.</span>
+            <span class="post-handle">@HookEmHorns</span>
+            <span class="post-flair texas">Texas</span>
+          </div>
+          <div class="post-time">12m ago</div>
+        </div>
+        <button class="post-more">&#8230;</button>
+      </div>
+
+      <div class="post-body">
+        <div class="sideline-tag">LIVE Sideline: Q3 7:15 | Texas vs Oklahoma</div>
+        <p class="post-text">Ewers just threw the most beautiful deep ball I've ever seen in the Cotton Bowl. Absolute dime to the back corner of the end zone. This kid is HIM.</p>
+        <div class="stat-check-tag">&#10003; Stat Check Available</div>
+      </div>
+
+      <div class="post-reactions">
+        <button class="reaction-pill active">
+          <span class="r-icon" style="font-size:12px; font-weight:800;">TD</span>
+          <span class="r-label">Touchdown</span>
+          <span class="r-count">312</span>
+        </button>
+        <button class="reaction-pill fumble">
+          <span class="r-icon" style="font-size:12px; font-weight:800;">FUM</span>
+          <span class="r-label">Fumble</span>
+          <span class="r-count">45</span>
+        </button>
+      </div>
+
+      <div class="post-actions">
+        <button class="action-btn">
+          <span class="ab-icon">--</span> Comments (67)
+        </button>
+        <button class="action-btn">
+          <span class="ab-icon">--</span> Share
+        </button>
+        <button class="action-btn">
+          <span class="ab-icon">--</span> Stat Check
+        </button>
+        <button class="action-btn">
+          <span class="ab-icon">--</span> Challenge
+        </button>
+        <button class="action-btn">
+          <span class="ab-icon">--</span> Save
+        </button>
+      </div>
+    </article>
+
+  </section>
+
+  <!-- ===== RIGHT SIDEBAR ===== -->
+  <aside class="right-sidebar">
+
+    <!-- Recruiting Buzz -->
+    <div class="sidebar-card">
+      <div class="sidebar-card-title">
+        <span class="sct-icon" style="font-weight:800;">&#9733;</span> Recruiting Buzz
+      </div>
+      <div class="recruit-item">
+        <div class="recruit-avatar" style="font-size:13px; font-weight:800; color:var(--forest);">QB</div>
+        <div class="recruit-info">
+          <div class="recruit-name">Keelon Russell</div>
+          <div class="recruit-detail">QB &bull; Duncanville, TX</div>
+          <div class="recruit-stars" style="font-weight:800; font-size:12px; letter-spacing:0;">5-STAR</div>
+          <span class="commit-badge">Committed to Alabama</span>
+        </div>
+      </div>
+      <div class="recruit-item">
+        <div class="recruit-avatar" style="font-size:13px; font-weight:800; color:var(--forest);">WR</div>
+        <div class="recruit-info">
+          <div class="recruit-name">Jeremiah Smith</div>
+          <div class="recruit-detail">WR &bull; Hollywood, FL</div>
+          <div class="recruit-stars" style="font-weight:800; font-size:12px; letter-spacing:0;">5-STAR</div>
+          <span class="commit-badge">Committed to Ohio State</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Transfer Portal -->
+    <div class="sidebar-card">
+      <div class="sidebar-card-title">
+        <span class="sct-icon" style="font-weight:800; font-size:13px;">PTL</span> Transfer Portal
+      </div>
+      <div style="font-size: 13px; color: var(--burnt-orange); font-weight: 700; margin-bottom: 10px;">
+        3 new entries today
+      </div>
+      <div class="portal-item">
+        <span class="portal-arrow">&#8594;</span>
+        <div class="portal-player">
+          <div class="portal-player-name">Drew Allar</div>
+          <div class="portal-player-school">QB &bull; Penn State</div>
+        </div>
+        <span class="portal-tag">NEW</span>
+      </div>
+      <div class="portal-item">
+        <span class="portal-arrow">&#8594;</span>
+        <div class="portal-player">
+          <div class="portal-player-name">Javon Baker</div>
+          <div class="portal-player-school">WR &bull; UCF</div>
+        </div>
+        <span class="portal-tag">NEW</span>
+      </div>
+      <div class="portal-item">
+        <span class="portal-arrow">&#8594;</span>
+        <div class="portal-player">
+          <div class="portal-player-name">TreVeyon Henderson</div>
+          <div class="portal-player-school">RB &bull; Ohio State</div>
+        </div>
+        <span class="portal-tag">NEW</span>
+      </div>
+    </div>
+
+    <!-- Trending Hashtags -->
+    <div class="sidebar-card">
+      <div class="sidebar-card-title">
+        <span class="sct-icon" style="font-weight:800; font-size:13px;">&#8593;</span> Trending
+      </div>
+      <div class="hashtag-list">
+        <span class="hashtag-chip">#GameDay</span>
+        <span class="hashtag-chip">#CFBPlayoff</span>
+        <span class="hashtag-chip">#PortalSeason</span>
+        <span class="hashtag-chip">#NILWatch</span>
+        <span class="hashtag-chip">#RivalryWeek</span>
+        <span class="hashtag-chip">#HeismanRace</span>
+      </div>
+    </div>
+
+    <!-- Suggested Follows -->
+    <div class="sidebar-card">
+      <div class="sidebar-card-title">
+        <span class="sct-icon" style="font-weight:800; font-size:13px;">+</span> Suggested Follows
+      </div>
+      <div class="follow-item">
+        <div class="follow-avatar" style="background: linear-gradient(135deg, #ff6b35, #e85d04);">KW</div>
+        <div class="follow-info">
+          <div class="follow-name">Katie Wilson</div>
+          <div class="follow-handle">@SECInsider</div>
+        </div>
+        <button class="follow-btn">Follow</button>
+      </div>
+      <div class="follow-item">
+        <div class="follow-avatar" style="background: linear-gradient(135deg, #5b2c8e, #8b5cf6);">DM</div>
+        <div class="follow-info">
+          <div class="follow-name">Derek Miles</div>
+          <div class="follow-handle">@Big12Breakdown</div>
+        </div>
+        <button class="follow-btn">Follow</button>
+      </div>
+      <div class="follow-item">
+        <div class="follow-avatar" style="background: linear-gradient(135deg, #0077b6, #48cae4);">RP</div>
+        <div class="follow-info">
+          <div class="follow-name">Rachel Park</div>
+          <div class="follow-handle">@PacificTakes</div>
+        </div>
+        <button class="follow-btn">Follow</button>
+      </div>
+    </div>
+
+    <!-- Tailgate Finder -->
+    <div class="sidebar-card">
+      <div class="sidebar-card-title">
+        <span class="sct-icon" style="font-weight:800; font-size:13px;">TG</span> Tailgate Finder
+      </div>
+      <div class="tailgate-card">
+        <div class="tailgate-map" style="font-size:14px; font-weight:800; color:var(--forest);">MAP</div>
+        <div class="tailgate-info">
+          <div class="tailgate-count">12 tailgates near you</div>
+          <div class="tailgate-loc">Athens, GA &bull; Game Day</div>
+        </div>
+      </div>
+      <a class="tailgate-link">Explore tailgates &#8594;</a>
+    </div>
+
+  </aside>
+
+</main>
+
+<!-- ===== JAVASCRIPT ===== -->
+<script>
+(function() {
+  'use strict';
+
+  // === Feed Tab Switching ===
+  const feedTabs = document.querySelectorAll('.feed-tab');
+  feedTabs.forEach(function(tab) {
+    tab.addEventListener('click', function() {
+      feedTabs.forEach(function(t) { t.classList.remove('active'); });
+      tab.classList.add('active');
+    });
+  });
+
+  // === Quick Link Active State ===
+  const quickLinks = document.querySelectorAll('.quick-link');
+  quickLinks.forEach(function(link) {
+    link.addEventListener('click', function(e) {
+      e.preventDefault();
+      quickLinks.forEach(function(l) { l.classList.remove('active'); });
+      link.classList.add('active');
+    });
+  });
+
+  // === Reaction Pill Toggle ===
+  document.querySelectorAll('.reaction-pill').forEach(function(pill) {
+    pill.addEventListener('click', function() {
+      var countEl = pill.querySelector('.r-count');
+      var count = parseInt(countEl.textContent.replace(/,/g, ''), 10);
+      if (pill.classList.contains('active')) {
+        pill.classList.remove('active');
+        countEl.textContent = (count - 1).toLocaleString();
+      } else {
+        pill.classList.add('active');
+        countEl.textContent = (count + 1).toLocaleString();
+      }
+    });
+  });
+
+  // === Vote Buttons ===
+  document.querySelectorAll('.vote-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var allVotes = btn.parentElement.querySelectorAll('.vote-btn');
+      allVotes.forEach(function(v) {
+        v.style.opacity = '0.5';
+        v.style.transform = 'scale(0.97)';
+      });
+      btn.style.opacity = '1';
+      btn.style.transform = 'scale(1.03)';
+      btn.style.fontWeight = '800';
+      // Simulate vote shift
+      if (btn.classList.contains('osu-vote')) {
+        btn.textContent = 'OSU \u2014 54%';
+        allVotes[1].textContent = 'MICH \u2014 46%';
+      } else {
+        btn.textContent = 'MICH \u2014 51%';
+        allVotes[0].textContent = 'OSU \u2014 49%';
+      }
+    });
+  });
+
+  // === Follow Buttons ===
+  document.querySelectorAll('.follow-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      if (btn.textContent === 'Follow') {
+        btn.textContent = 'Following';
+        btn.style.background = 'var(--cream)';
+        btn.style.color = 'var(--forest)';
+        btn.style.border = '1.5px solid var(--forest)';
+      } else {
+        btn.textContent = 'Follow';
+        btn.style.background = 'var(--forest)';
+        btn.style.color = 'var(--white)';
+        btn.style.border = 'none';
+      }
+    });
+  });
+
+  // === Hashtag Chip Click ===
+  document.querySelectorAll('.hashtag-chip').forEach(function(chip) {
+    chip.addEventListener('click', function() {
+      chip.classList.toggle('selected');
+      if (chip.classList.contains('selected')) {
+        chip.style.background = 'var(--forest)';
+        chip.style.color = 'var(--white)';
+        chip.style.borderColor = 'var(--forest)';
+      } else {
+        chip.style.background = '';
+        chip.style.color = '';
+        chip.style.borderColor = '';
+      }
+    });
+  });
+
+  // === Stories Horizontal Scroll with Drag ===
+  var storiesEl = document.getElementById('storiesScroll');
+  var isDown = false;
+  var startX, scrollLeft;
+
+  storiesEl.addEventListener('mousedown', function(e) {
+    isDown = true;
+    storiesEl.style.cursor = 'grabbing';
+    startX = e.pageX - storiesEl.offsetLeft;
+    scrollLeft = storiesEl.scrollLeft;
+  });
+
+  storiesEl.addEventListener('mouseleave', function() {
+    isDown = false;
+    storiesEl.style.cursor = '';
+  });
+
+  storiesEl.addEventListener('mouseup', function() {
+    isDown = false;
+    storiesEl.style.cursor = '';
+  });
+
+  storiesEl.addEventListener('mousemove', function(e) {
+    if (!isDown) return;
+    e.preventDefault();
+    var x = e.pageX - storiesEl.offsetLeft;
+    var walk = (x - startX) * 1.8;
+    storiesEl.scrollLeft = scrollLeft - walk;
+  });
+
+  // === Story Click Animation ===
+  document.querySelectorAll('.story-item').forEach(function(story) {
+    story.addEventListener('click', function() {
+      var ring = story.querySelector('.story-ring');
+      if (!ring.classList.contains('add-story')) {
+        ring.classList.add('viewed');
+      }
+    });
+  });
+
+  // === Composer Focus Effect ===
+  var composerInput = document.querySelector('.composer-input');
+  composerInput.addEventListener('click', function() {
+    composerInput.style.borderColor = 'var(--forest)';
+    composerInput.style.boxShadow = '0 0 0 3px var(--forest-pale)';
+    composerInput.style.color = 'var(--text-primary)';
+  });
+
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('.post-composer')) {
+      composerInput.style.borderColor = '';
+      composerInput.style.boxShadow = '';
+      composerInput.style.color = '';
+    }
+  });
+
+  // === XP Bar Animate on Scroll ===
+  var xpFill = document.querySelector('.xp-fill');
+  var observed = false;
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting && !observed) {
+        observed = true;
+        xpFill.style.width = '0%';
+        setTimeout(function() {
+          xpFill.style.width = '80%';
+        }, 100);
+      }
+    });
+  }, { threshold: 0.5 });
+  if (xpFill) observer.observe(xpFill);
+
+  // === Post Action Button Hover Ripple ===
+  document.querySelectorAll('.action-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      btn.style.transform = 'scale(0.94)';
+      setTimeout(function() {
+        btn.style.transform = '';
+      }, 150);
+    });
+  });
+
+  // === Save Button Toggle ===
+  document.querySelectorAll('.action-btn').forEach(function(btn) {
+    if (btn.textContent.trim().includes('Save')) {
+      btn.addEventListener('click', function() {
+        if (btn.dataset.saved === 'true') {
+          btn.dataset.saved = 'false';
+          btn.innerHTML = '<span class="ab-icon">--</span> Save';
+          btn.style.color = '';
+        } else {
+          btn.dataset.saved = 'true';
+          btn.innerHTML = '<span class="ab-icon">--</span> Saved';
+          btn.style.color = 'var(--forest)';
+          btn.style.fontWeight = '700';
+        }
+      });
+    }
+  });
+
+  // === Navbar Scroll Shadow ===
+  var nav = document.querySelector('.top-nav');
+  window.addEventListener('scroll', function() {
+    if (window.scrollY > 10) {
+      nav.style.boxShadow = '0 2px 12px rgba(0,0,0,0.1)';
+    } else {
+      nav.style.boxShadow = 'var(--shadow-sm)';
+    }
+  });
+
+})();
+</script>
+
+</body>
+</html>

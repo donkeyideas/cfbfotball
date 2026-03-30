@@ -79,9 +79,9 @@ export default function RegisterScreen() {
         keyboardShouldPersistTaps="handled"
       >
         {/* Header */}
-        <Text style={styles.title}>The Gridiron</Text>
+        <Text style={styles.title}>CFB Social</Text>
         <View style={styles.divider} />
-        <Text style={styles.subtitle}>Join The Gridiron</Text>
+        <Text style={styles.subtitle}>Join CFB Social</Text>
 
         {/* Error */}
         {error && (

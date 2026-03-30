@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 200" width="600" height="200">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&amp;family=Source+Sans+3:wght@400;600&amp;display=swap');
+    </style>
+  </defs>
+  <!-- Parchment background -->
+  <rect width="600" height="200" fill="#f4efe4" rx="4"/>
+
+  <!-- Top double rule -->
+  <line x1="40" y1="30" x2="560" y2="30" stroke="#3b2f1e" stroke-width="3"/>
+  <line x1="40" y1="36" x2="560" y2="36" stroke="#3b2f1e" stroke-width="1"/>
+
+  <!-- Main title -->
+  <text x="300" y="105" text-anchor="middle" font-family="'Playfair Display', Georgia, serif" font-weight="900" font-size="68" fill="#3b2f1e" letter-spacing="10">CFB SOCIAL</text>
+
+  <!-- Football icon centered below -->
+  <ellipse cx="300" cy="132" rx="14" ry="9" fill="none" stroke="#8b1a1a" stroke-width="2"/>
+  <line x1="293" y1="132" x2="307" y2="132" stroke="#8b1a1a" stroke-width="1.5"/>
+  <line x1="296" y1="126" x2="296" y2="138" stroke="#8b1a1a" stroke-width="1"/>
+  <line x1="300" y1="125" x2="300" y2="139" stroke="#8b1a1a" stroke-width="1"/>
+  <line x1="304" y1="126" x2="304" y2="138" stroke="#8b1a1a" stroke-width="1"/>
+
+  <!-- Subtitle -->
+  <text x="300" y="158" text-anchor="middle" font-family="'Source Sans 3', 'Segoe UI', sans-serif" font-weight="600" font-size="13" fill="#6b5d4d" letter-spacing="6">COLLEGE FOOTBALL'S SOCIAL HOME</text>
+
+  <!-- Bottom double rule -->
+  <line x1="40" y1="170" x2="560" y2="170" stroke="#3b2f1e" stroke-width="1"/>
+  <line x1="40" y1="176" x2="560" y2="176" stroke="#3b2f1e" stroke-width="3"/>
+</svg>

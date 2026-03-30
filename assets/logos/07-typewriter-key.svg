@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="300" height="300">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&amp;family=Special+Elite&amp;family=Source+Sans+3:wght@600&amp;display=swap');
+    </style>
+  </defs>
+
+  <!-- Outer key ring -->
+  <circle cx="150" cy="150" r="140" fill="#3b2f1e"/>
+  <circle cx="150" cy="150" r="130" fill="#2a1f14"/>
+
+  <!-- Key face (raised) -->
+  <circle cx="150" cy="150" r="115" fill="#f4efe4"/>
+
+  <!-- Concentric rings -->
+  <circle cx="150" cy="150" r="108" fill="none" stroke="#d4c5a0" stroke-width="1.5"/>
+  <circle cx="150" cy="150" r="100" fill="none" stroke="#3b2f1e" stroke-width="2"/>
+
+  <!-- Center field -->
+  <circle cx="150" cy="145" r="55" fill="#8b1a1a"/>
+  <circle cx="150" cy="145" r="50" fill="none" stroke="#c49a2f" stroke-width="1.5"/>
+
+  <!-- CFB on the key -->
+  <text x="150" y="150" text-anchor="middle" font-family="'Playfair Display', Georgia, serif" font-weight="900" font-size="38" fill="#f4efe4" letter-spacing="4">CFB</text>
+  <!-- S small below -->
+  <text x="150" y="174" text-anchor="middle" font-family="'Playfair Display', Georgia, serif" font-weight="700" font-size="18" fill="#c49a2f" letter-spacing="6">SOCIAL</text>
+
+  <!-- CFB SOCIAL around the rim -->
+  <path id="topRim" d="M55,150 A95,95 0 0,1 245,150" fill="none"/>
+  <text font-family="'Source Sans 3', sans-serif" font-weight="600" font-size="12" fill="#3b2f1e" letter-spacing="3">
+    <textPath href="#topRim" startOffset="50%" text-anchor="middle">COLLEGE FOOTBALL</textPath>
+  </text>
+
+  <!-- Bottom text -->
+  <path id="bottomRim" d="M245,158 A95,95 0 0,1 55,158" fill="none"/>
+  <text font-family="'Special Elite', monospace" font-size="10" fill="#6b5d4d" letter-spacing="3">
+    <textPath href="#bottomRim" startOffset="50%" text-anchor="middle">SOCIAL HOME * EST 2026</textPath>
+  </text>
+
+  <!-- Decorative dots -->
+  <circle cx="55" cy="150" r="3" fill="#3b2f1e"/>
+  <circle cx="245" cy="150" r="3" fill="#3b2f1e"/>
+</svg>

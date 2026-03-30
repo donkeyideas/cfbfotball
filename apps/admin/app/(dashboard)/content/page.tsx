@@ -1,6 +1,8 @@
 import { Suspense } from 'react';
 import { PostTypeChart } from '@/components/dashboard/PostTypeChart';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata = {
   title: 'Content Analytics',
 };

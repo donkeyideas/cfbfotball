@@ -3,6 +3,8 @@ import Link from 'next/link';
 import { ClaimButton } from '@/components/portal/ClaimButton';
 import { SchoolInterestBar } from '@/components/portal/SchoolInterestBar';
 
+export const dynamic = 'force-dynamic';
+
 interface PortalDetailProps {
   params: Promise<{ id: string }>;
 }

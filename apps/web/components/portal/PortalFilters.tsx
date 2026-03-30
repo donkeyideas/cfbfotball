@@ -9,12 +9,12 @@ export function PortalFilters() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const activeStatus = searchParams.get('status') ?? '';
-  const activePosition = searchParams.get('position') ?? '';
-  const activeStars = searchParams.get('stars') ?? '';
+  const activeStatus = searchParams?.get('status') ?? '';
+  const activePosition = searchParams?.get('position') ?? '';
+  const activeStars = searchParams?.get('stars') ?? '';
 
   function updateFilter(key: string, value: string) {
-    const params = new URLSearchParams(searchParams.toString());
+    const params = new URLSearchParams(searchParams?.toString() ?? '');
     if (value) {
       params.set(key, value);
     } else {

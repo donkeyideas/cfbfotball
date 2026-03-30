@@ -10,7 +10,7 @@ const tabs = [
 
 export function RivalryTabs() {
   const searchParams = useSearchParams();
-  const activeTab = searchParams.get('tab') === 'challenges' ? 'challenges' : 'rivalries';
+  const activeTab = searchParams?.get('tab') === 'challenges' ? 'challenges' : 'rivalries';
 
   return (
     <div className="feed-tabs">

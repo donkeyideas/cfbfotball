@@ -1,6 +1,8 @@
 import { Suspense } from 'react';
 import EngagementChart from '@/components/dashboard/EngagementChart';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata = {
   title: 'Engagement',
 };

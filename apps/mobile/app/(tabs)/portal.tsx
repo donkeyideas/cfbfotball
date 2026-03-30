@@ -1,224 +1,230 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import {
   View,
-  Text,
   FlatList,
   StyleSheet,
   RefreshControl,
-  ActivityIndicator,
 } from 'react-native';
 import { supabase } from '@/lib/supabase';
-import { colors } from '@/lib/theme/colors';
-import { typography } from '@/lib/theme/typography';
+import { AppHeader } from '@/components/navigation/AppHeader';
+import { SectionLabel } from '@/components/ui/SectionLabel';
+import { LoadingScreen } from '@/components/ui/LoadingScreen';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { PortalTicker } from '@/components/portal/PortalTicker';
+import {
+  PortalFilters,
+  statusToDb,
+  starToDb,
+  type PortalFilterState,
+} from '@/components/portal/PortalFilters';
+import { PortalCard, type PortalPlayerData } from '@/components/portal/PortalCard';
+import { ClaimModal } from '@/components/portal/ClaimModal';
+import { useColors } from '@/lib/theme/ThemeProvider';
+import { useSchoolTheme } from '@/lib/theme/SchoolThemeProvider';
 
-interface PortalPlayer {
-  id: string;
-  name: string;
-  position: string;
-  status: string;
-  entered_portal_at: string;
-  origin_school: { abbreviation: string; primary_color: string } | null;
-  destination_school: { abbreviation: string; primary_color: string } | null;
-}
+const PORTAL_SELECT = `
+  *,
+  previous_school:schools!portal_players_previous_school_id_fkey(id, name, abbreviation, primary_color, slug),
+  committed_school:schools!portal_players_committed_school_id_fkey(id, name, abbreviation, primary_color, slug)
+`;
+
+const PAGE_SIZE = 20;
 
 export default function PortalScreen() {
-  const [players, setPlayers] = useState<PortalPlayer[]>([]);
+  const colors = useColors();
+  const { dark } = useSchoolTheme();
+  const [players, setPlayers] = useState<PortalPlayerData[]>([]);
+  const [tickerEntries, setTickerEntries] = useState<
+    { id: string; name: string; position: string; status: string | null; previous_school_name: string | null }[]
+  >([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [filters, setFilters] = useState<PortalFilterState>({
+    status: 'All',
+    position: 'All',
+    stars: 'All',
+  });
+  const [claimModalVisible, setClaimModalVisible] = useState(false);
+  const [claimTarget, setClaimTarget] = useState<PortalPlayerData | null>(null);
 
-  const fetchPlayers = useCallback(async () => {
-    const { data, error } = await supabase
+  const offsetRef = useRef(0);
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.paper,
+    },
+    listContent: {
+      padding: 16,
+      gap: 12,
+      paddingBottom: 40,
+    },
+  }), [colors]);
+
+  // ---------------------------------------------------------------
+  // Fetch ticker entries (latest 15)
+  // ---------------------------------------------------------------
+  const fetchTicker = useCallback(async () => {
+    const { data } = await supabase
       .from('portal_players')
-      .select(`
-        id, name, position, status, entered_portal_at,
-        origin_school:schools!portal_players_origin_school_id_fkey(abbreviation, primary_color),
-        destination_school:schools!portal_players_destination_school_id_fkey(abbreviation, primary_color)
-      `)
-      .order('entered_portal_at', { ascending: false })
-      .limit(30);
-
-    if (!error && data) {
-      setPlayers(data as unknown as PortalPlayer[]);
+      .select('id, name, position, status, previous_school_name')
+      .order('created_at', { ascending: false })
+      .limit(15);
+    if (data) {
+      setTickerEntries(data as typeof tickerEntries);
     }
-    setLoading(false);
-    setRefreshing(false);
   }, []);
 
+  // ---------------------------------------------------------------
+  // Build query with filters
+  // ---------------------------------------------------------------
+  const buildQuery = useCallback(
+    (offset: number) => {
+      let query = supabase
+        .from('portal_players')
+        .select(PORTAL_SELECT)
+        .order('created_at', { ascending: false });
+
+      // Status filter
+      const dbStatus = statusToDb(filters.status);
+      if (dbStatus !== 'All') {
+        query = query.eq('status', dbStatus);
+      }
+
+      // Position filter
+      if (filters.position !== 'All') {
+        query = query.eq('position', filters.position);
+      }
+
+      // Star filter
+      const dbStars = starToDb(filters.stars);
+      if (dbStars !== 'All') {
+        query = query.eq('star_rating', parseInt(dbStars, 10));
+      }
+
+      query = query.range(offset, offset + PAGE_SIZE - 1);
+      return query;
+    },
+    [filters]
+  );
+
+  // ---------------------------------------------------------------
+  // Fetch players
+  // ---------------------------------------------------------------
+  const fetchPlayers = useCallback(
+    async (reset = true) => {
+      if (reset) {
+        setLoading(true);
+        offsetRef.current = 0;
+      }
+
+      const { data, error } = await buildQuery(offsetRef.current);
+
+      if (!error && data) {
+        const typed = data as unknown as PortalPlayerData[];
+        if (reset) {
+          setPlayers(typed);
+        } else {
+          setPlayers((prev) => [...prev, ...typed]);
+        }
+        setHasMore(typed.length >= PAGE_SIZE);
+        offsetRef.current += typed.length;
+      }
+
+      setLoading(false);
+      setRefreshing(false);
+      setLoadingMore(false);
+    },
+    [buildQuery]
+  );
+
   useEffect(() => {
-    fetchPlayers();
-  }, [fetchPlayers]);
+    fetchTicker();
+    fetchPlayers(true);
+  }, [fetchTicker, fetchPlayers]);
 
-  function onRefresh() {
+  // ---------------------------------------------------------------
+  // Handlers
+  // ---------------------------------------------------------------
+  const handleRefresh = () => {
     setRefreshing(true);
-    fetchPlayers();
-  }
+    fetchTicker();
+    fetchPlayers(true);
+  };
 
-  function getStatusStyle(status: string) {
-    switch (status) {
-      case 'COMMITTED':
-        return { bg: `${colors.success}20`, text: colors.success };
-      case 'WITHDRAWN':
-        return { bg: `${colors.textMuted}20`, text: colors.textMuted };
-      default:
-        return { bg: `${colors.warning}20`, text: colors.warning };
-    }
-  }
+  const handleLoadMore = () => {
+    if (loadingMore || !hasMore) return;
+    setLoadingMore(true);
+    fetchPlayers(false);
+  };
 
-  if (loading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={colors.crimson} />
-      </View>
-    );
-  }
+  const handleFilterChange = (newFilters: PortalFilterState) => {
+    setFilters(newFilters);
+    // fetchPlayers will re-run due to buildQuery dependency change
+  };
+
+  const handleClaim = (player: PortalPlayerData) => {
+    setClaimTarget(player);
+    setClaimModalVisible(true);
+  };
+
+  const handleClaimCreated = () => {
+    // Refresh the current list
+    fetchPlayers(true);
+  };
+
+  // ---------------------------------------------------------------
+  // Render
+  // ---------------------------------------------------------------
+  const renderItem = ({ item }: { item: PortalPlayerData }) => (
+    <PortalCard player={item} onClaim={handleClaim} />
+  );
 
   return (
     <View style={styles.container}>
-      <Text style={styles.description}>
-        Transfer Portal War Room. Track entries, predict commitments, claim your sources.
-      </Text>
+      <AppHeader />
+      <PortalTicker entries={tickerEntries} />
+      <SectionLabel text="Portal Wire" />
+      <PortalFilters filters={filters} onFilterChange={handleFilterChange} />
 
-      <FlatList
-        data={players}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.listContent}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={colors.crimson}
-          />
-        }
-        renderItem={({ item }) => {
-          const statusStyle = getStatusStyle(item.status);
-          return (
-            <View style={styles.card}>
-              <View style={styles.cardRow}>
-                <View
-                  style={[
-                    styles.avatar,
-                    {
-                      backgroundColor:
-                        item.origin_school?.primary_color ?? colors.crimson,
-                    },
-                  ]}
-                >
-                  <Text style={styles.avatarText}>{item.name[0]}</Text>
-                </View>
-                <View style={styles.playerInfo}>
-                  <Text style={styles.playerName}>{item.name}</Text>
-                  <Text style={styles.playerDetails}>
-                    {item.position} &middot;{' '}
-                    {item.origin_school?.abbreviation ?? 'Unknown'}
-                    {item.destination_school && ` \u2192 ${item.destination_school.abbreviation}`}
-                  </Text>
-                </View>
-                <View style={[styles.statusBadge, { backgroundColor: statusStyle.bg }]}>
-                  <Text style={[styles.statusText, { color: statusStyle.text }]}>
-                    {item.status}
-                  </Text>
-                </View>
-              </View>
-            </View>
-          );
+      {loading ? (
+        <LoadingScreen />
+      ) : (
+        <FlatList
+          data={players}
+          keyExtractor={(item) => item.id}
+          renderItem={renderItem}
+          contentContainerStyle={styles.listContent}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={handleRefresh}
+              tintColor={dark}
+            />
+          }
+          onEndReached={handleLoadMore}
+          onEndReachedThreshold={0.3}
+          ListEmptyComponent={
+            <EmptyState
+              title="No players found"
+              subtitle="Try adjusting your filters or check back later."
+            />
+          }
+        />
+      )}
+
+      <ClaimModal
+        visible={claimModalVisible}
+        playerId={claimTarget?.id ?? null}
+        playerName={claimTarget?.name ?? ''}
+        onClose={() => {
+          setClaimModalVisible(false);
+          setClaimTarget(null);
         }}
-        ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyTitle}>No portal activity</Text>
-            <Text style={styles.emptySubtitle}>
-              Check back when the transfer window opens.
-            </Text>
-          </View>
-        }
+        onCreated={handleClaimCreated}
       />
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.paper,
-  },
-  loadingContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.paper,
-  },
-  description: {
-    fontFamily: typography.sans,
-    fontSize: 14,
-    color: colors.textSecondary,
-    paddingHorizontal: 16,
-    paddingTop: 12,
-  },
-  listContent: {
-    padding: 16,
-    gap: 8,
-  },
-  card: {
-    backgroundColor: colors.surfaceRaised,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 12,
-    padding: 14,
-  },
-  cardRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  avatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  avatarText: {
-    fontFamily: typography.serifBold,
-    fontSize: 18,
-    color: '#ffffff',
-  },
-  playerInfo: {
-    flex: 1,
-  },
-  playerName: {
-    fontFamily: typography.sansSemiBold,
-    fontSize: 15,
-    color: colors.ink,
-  },
-  playerDetails: {
-    fontFamily: typography.sans,
-    fontSize: 13,
-    color: colors.textMuted,
-    marginTop: 2,
-  },
-  statusBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  statusText: {
-    fontFamily: typography.sansSemiBold,
-    fontSize: 10,
-    letterSpacing: 0.5,
-    textTransform: 'uppercase',
-  },
-  emptyContainer: {
-    alignItems: 'center',
-    paddingVertical: 48,
-  },
-  emptyTitle: {
-    fontFamily: typography.serif,
-    fontSize: 20,
-    color: colors.textSecondary,
-  },
-  emptySubtitle: {
-    fontFamily: typography.sans,
-    fontSize: 14,
-    color: colors.textMuted,
-    marginTop: 4,
-  },
-});

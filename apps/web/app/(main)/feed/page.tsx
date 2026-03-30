@@ -6,6 +6,8 @@ import { PostComposer } from '@/components/feed/PostComposer';
 import { NewPostsBanner } from '@/components/feed/NewPostsBanner';
 import { FeedListClient } from '@/components/feed/FeedListClient';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata = {
   title: 'The Feed | College Football Takes, Predictions & Debates',
   description: 'The live college football social feed. Read the latest takes, predictions, receipts, and rivalry debates from CFB fans across 653 schools.',

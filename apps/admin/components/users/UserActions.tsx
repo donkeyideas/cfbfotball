@@ -79,10 +79,10 @@ export function UserActions({ userId, currentRole, currentStatus }: UserActionsP
       <button
         onClick={handleToggleStatus}
         disabled={loading}
-        className={`rounded-md px-3 py-1 text-xs font-semibold ${
+        className={`rounded-md border border-[var(--admin-border)] px-3 py-1 text-xs font-semibold ${
           currentStatus === 'ACTIVE'
-            ? 'bg-[var(--admin-warning)]/20 text-[var(--admin-warning)]'
-            : 'bg-[var(--admin-success)]/20 text-[var(--admin-success)]'
+            ? 'text-[var(--admin-warning)]'
+            : 'text-[var(--admin-success)]'
         }`}
         style={{ opacity: loading ? 0.5 : 1, cursor: loading ? 'not-allowed' : 'pointer' }}
       >

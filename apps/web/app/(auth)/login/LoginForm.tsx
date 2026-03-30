@@ -8,7 +8,7 @@ import { createClient } from '@/lib/supabase/client';
 export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const rawRedirect = searchParams.get('redirect') || '/feed';
+  const rawRedirect = searchParams?.get('redirect') || '/feed';
   // Prevent open redirect — only allow relative paths
   const redirectTo = rawRedirect.startsWith('/') && !rawRedirect.startsWith('//') ? rawRedirect : '/feed';
   const [email, setEmail] = useState('');

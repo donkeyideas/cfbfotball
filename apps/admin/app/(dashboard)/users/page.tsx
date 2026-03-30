@@ -1,6 +1,9 @@
 import { Suspense } from 'react';
-import Link from 'next/link';
-import { UserActions } from '@/components/users/UserActions';
+import { getAllUsers } from '@/lib/actions/users';
+import { UsersClient } from '@/components/users/users-client';
+import { LoadingSkeleton } from '@/components/shared/loading-skeleton';
+
+export const dynamic = 'force-dynamic';
 
 export const metadata = {
   title: 'Users',
@@ -9,9 +12,9 @@ export const metadata = {
 export default async function UsersPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string }>;
+  searchParams: Promise<{ q?: string; role?: string; status?: string; sort?: string }>;
 }) {
-  const { q } = await searchParams;
+  const params = await searchParams;
 
   return (
     <div className="space-y-6">
@@ -19,26 +22,62 @@ export default async function UsersPage({
         <h1 className="text-2xl font-bold">User Management</h1>
       </div>
 
-      {/* Search form */}
+      {/* Filter bar */}
       <div className="admin-card p-4">
-        <form method="GET" action="/users" className="flex items-center gap-3">
+        <form method="GET" action="/users" className="flex flex-wrap items-center gap-3">
           <input
             type="text"
             name="q"
-            defaultValue={q ?? ''}
-            placeholder="Search by username..."
-            className="admin-input flex-1"
+            defaultValue={params.q ?? ''}
+            placeholder="Search by username or email..."
+            className="admin-input flex-1 min-w-[200px]"
           />
+
+          <select
+            name="role"
+            defaultValue={params.role ?? ''}
+            className="admin-select"
+          >
+            <option value="">All Roles</option>
+            <option value="USER">USER</option>
+            <option value="MODERATOR">MODERATOR</option>
+            <option value="ADMIN">ADMIN</option>
+          </select>
+
+          <select
+            name="status"
+            defaultValue={params.status ?? ''}
+            className="admin-select"
+          >
+            <option value="">All Statuses</option>
+            <option value="ACTIVE">ACTIVE</option>
+            <option value="SUSPENDED">SUSPENDED</option>
+            <option value="BANNED">BANNED</option>
+          </select>
+
+          <select
+            name="sort"
+            defaultValue={params.sort ?? 'newest'}
+            className="admin-select"
+          >
+            <option value="newest">Newest</option>
+            <option value="username">Username</option>
+            <option value="xp">XP</option>
+            <option value="level">Level</option>
+            <option value="posts">Posts</option>
+          </select>
+
           <button type="submit" className="btn-admin">
             Search
           </button>
-          {q && (
-            <Link
+
+          {(params.q || params.role || params.status || (params.sort && params.sort !== 'newest')) && (
+            <a
               href="/users"
               className="text-sm text-[var(--admin-text-muted)] hover:text-[var(--admin-text)]"
             >
-              Clear
-            </Link>
+              Clear filters
+            </a>
           )}
         </form>
       </div>
@@ -46,140 +85,65 @@ export default async function UsersPage({
       <Suspense
         fallback={
           <div className="admin-card overflow-hidden">
-            <div className="skeleton h-96 w-full" />
+            <LoadingSkeleton type="table" rows={10} />
           </div>
         }
       >
-        <UsersTable q={q} />
+        <UsersTableLoader
+          q={params.q}
+          role={params.role}
+          status={params.status}
+          sort={params.sort}
+        />
       </Suspense>
     </div>
   );
 }
 
-async function UsersTable({ q }: { q?: string }) {
-  const { createClient } = await import('@/lib/supabase/server');
-  const supabase = await createClient();
+async function UsersTableLoader({
+  q,
+  role,
+  status,
+  sort,
+}: {
+  q?: string;
+  role?: string;
+  status?: string;
+  sort?: string;
+}) {
+  const sortMap: Record<string, { field: string; order: 'asc' | 'desc' }> = {
+    newest: { field: 'created_at', order: 'desc' },
+    username: { field: 'username', order: 'asc' },
+    xp: { field: 'xp', order: 'desc' },
+    level: { field: 'level', order: 'desc' },
+    posts: { field: 'post_count', order: 'desc' },
+  };
 
-  let query = supabase
-    .from('profiles')
-    .select(
-      `
-      id,
-      username,
-      display_name,
-      email,
-      role,
-      status,
-      dynasty_tier,
-      xp,
-      level,
-      post_count,
-      created_at,
-      school:schools!profiles_school_id_fkey(id, name, abbreviation)
-    `,
-    )
-    .order('created_at', { ascending: false })
-    .limit(100);
+  const sortConfig = sortMap[sort ?? 'newest'] ?? sortMap['newest'];
 
-  if (q) {
-    query = query.ilike('username', `%${q}%`);
-  }
+  const { users, total, error } = await getAllUsers({
+    search: q,
+    role: role || undefined,
+    status: status || undefined,
+    sort: sortConfig!.field,
+    order: sortConfig!.order,
+    limit: 100,
+    offset: 0,
+  });
 
-  const { data: users, error } = await query;
-
-  if (error || !users || users.length === 0) {
+  if (error) {
     return (
-      <div className="admin-card p-8 text-center text-[var(--admin-text-muted)]">
-        {q ? `No users found matching "${q}".` : 'No users found.'}
+      <div className="admin-card p-8 text-center text-[var(--admin-error)]">
+        Failed to load users. Please try again.
       </div>
     );
   }
 
-  return (
-    <>
-      <div className="text-sm text-[var(--admin-text-muted)]">
-        Showing {users.length} user{users.length !== 1 ? 's' : ''}
-        {q ? ` matching "${q}"` : ''}
-      </div>
+  // Supabase returns joined relations as arrays; normalize school to single object
+  const normalized = (users ?? []).map((u: Record<string, unknown>) => ({
+    ...u,
+    school: Array.isArray(u.school) ? (u.school[0] ?? null) : (u.school ?? null),
+  }));
 
-      <div className="admin-card overflow-hidden overflow-x-auto">
-        <table className="admin-table">
-          <thead>
-            <tr>
-              <th>User</th>
-              <th>School</th>
-              <th>Role</th>
-              <th>Status</th>
-              <th>Tier</th>
-              <th>XP</th>
-              <th>Level</th>
-              <th>Joined</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map((user) => (
-              <tr key={user.id}>
-                <td>
-                  <Link href={`/users/${user.id}`} className="block">
-                    <p className="font-medium hover:text-[var(--admin-accent)]">
-                      {user.display_name ?? user.username}
-                    </p>
-                    <p className="text-xs text-[var(--admin-text-muted)]">
-                      @{user.username}
-                    </p>
-                  </Link>
-                </td>
-                <td className="text-sm text-[var(--admin-text-secondary)]">
-                  {(user.school as { abbreviation?: string } | null)
-                    ?.abbreviation ?? '-'}
-                </td>
-                <td>
-                  <span
-                    className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
-                      user.role === 'ADMIN'
-                        ? 'bg-[var(--admin-accent)]/20 text-[var(--admin-accent-light)]'
-                        : user.role === 'MODERATOR'
-                          ? 'bg-[var(--admin-warning)]/20 text-[var(--admin-warning)]'
-                          : 'bg-[var(--admin-surface-raised)] text-[var(--admin-text-secondary)]'
-                    }`}
-                  >
-                    {user.role}
-                  </span>
-                </td>
-                <td>
-                  <span
-                    className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
-                      user.status === 'ACTIVE'
-                        ? 'bg-[var(--admin-success)]/20 text-[var(--admin-success)]'
-                        : user.status === 'SUSPENDED'
-                          ? 'bg-[var(--admin-warning)]/20 text-[var(--admin-warning)]'
-                          : 'bg-[var(--admin-error)]/20 text-[var(--admin-error)]'
-                    }`}
-                  >
-                    {user.status}
-                  </span>
-                </td>
-                <td className="text-xs uppercase text-[var(--admin-text-muted)]">
-                  {user.dynasty_tier?.replace('_', ' ') ?? '-'}
-                </td>
-                <td className="text-sm">{user.xp ?? 0}</td>
-                <td className="text-sm">{user.level ?? 0}</td>
-                <td className="text-xs text-[var(--admin-text-muted)]">
-                  {new Date(user.created_at).toLocaleDateString()}
-                </td>
-                <td>
-                  <UserActions
-                    userId={user.id}
-                    currentRole={user.role}
-                    currentStatus={user.status}
-                  />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </>
-  );
+  return <UsersClient users={normalized as Parameters<typeof UsersClient>[0]['users']} total={total} />;
 }

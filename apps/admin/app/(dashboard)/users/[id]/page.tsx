@@ -2,6 +2,8 @@ import { Suspense } from 'react';
 import Link from 'next/link';
 import { UserActions } from '@/components/users/UserActions';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata = {
   title: 'User Detail',
 };
@@ -96,23 +98,23 @@ async function UserDetail({ userId }: { userId: string }) {
                 {user.display_name ?? user.username}
               </h1>
               <span
-                className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
+                className={`text-xs font-semibold ${
                   user.role === 'ADMIN'
-                    ? 'bg-[var(--admin-accent)]/20 text-[var(--admin-accent-light)]'
+                    ? 'text-[var(--admin-accent-light)]'
                     : user.role === 'MODERATOR'
-                      ? 'bg-[var(--admin-warning)]/20 text-[var(--admin-warning)]'
-                      : 'bg-[var(--admin-surface-raised)] text-[var(--admin-text-secondary)]'
+                      ? 'text-[var(--admin-warning)]'
+                      : 'text-[var(--admin-text-secondary)]'
                 }`}
               >
                 {user.role}
               </span>
               <span
-                className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
+                className={`text-xs font-semibold ${
                   user.status === 'ACTIVE'
-                    ? 'bg-[var(--admin-success)]/20 text-[var(--admin-success)]'
+                    ? 'text-[var(--admin-success)]'
                     : user.status === 'SUSPENDED'
-                      ? 'bg-[var(--admin-warning)]/20 text-[var(--admin-warning)]'
-                      : 'bg-[var(--admin-error)]/20 text-[var(--admin-error)]'
+                      ? 'text-[var(--admin-warning)]'
+                      : 'text-[var(--admin-error)]'
                 }`}
               >
                 {user.status}
@@ -224,18 +226,18 @@ async function RecentPosts({ userId }: { userId: string }) {
               <tr key={post.id}>
                 <td className="max-w-[200px] truncate text-sm">{post.content}</td>
                 <td className="text-xs uppercase text-[var(--admin-text-muted)]">
-                  {post.post_type}
+                  {post.post_type.replace(/_/g, ' ')}
                 </td>
                 <td>
                   <span
-                    className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
+                    className={`text-xs font-semibold ${
                       post.status === 'PUBLISHED'
-                        ? 'bg-[var(--admin-success)]/20 text-[var(--admin-success)]'
+                        ? 'text-[var(--admin-success)]'
                         : post.status === 'FLAGGED'
-                          ? 'bg-[var(--admin-warning)]/20 text-[var(--admin-warning)]'
+                          ? 'text-[var(--admin-warning)]'
                           : post.status === 'REMOVED'
-                            ? 'bg-[var(--admin-error)]/20 text-[var(--admin-error)]'
-                            : 'bg-[var(--admin-surface-raised)] text-[var(--admin-text-muted)]'
+                            ? 'text-[var(--admin-error)]'
+                            : 'text-[var(--admin-text-muted)]'
                     }`}
                   >
                     {post.status}
@@ -295,21 +297,21 @@ async function ModerationHistory({ userId }: { userId: string }) {
               return (
                 <tr key={event.id}>
                   <td className="text-xs uppercase text-[var(--admin-text-secondary)]">
-                    {event.event_type}
+                    {event.event_type.replace(/_/g, ' ')}
                   </td>
                   <td>
                     <span
-                      className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
+                      className={`text-xs font-semibold ${
                         event.action_taken === 'REMOVE' || event.action_taken === 'BAN'
-                          ? 'bg-[var(--admin-error)]/20 text-[var(--admin-error)]'
+                          ? 'text-[var(--admin-error)]'
                           : event.action_taken === 'FLAG' || event.action_taken === 'WARN'
-                            ? 'bg-[var(--admin-warning)]/20 text-[var(--admin-warning)]'
+                            ? 'text-[var(--admin-warning)]'
                             : event.action_taken === 'RESTORE'
-                              ? 'bg-[var(--admin-success)]/20 text-[var(--admin-success)]'
-                              : 'bg-[var(--admin-surface-raised)] text-[var(--admin-text-muted)]'
+                              ? 'text-[var(--admin-success)]'
+                              : 'text-[var(--admin-text-muted)]'
                       }`}
                     >
-                      {event.action_taken}
+                      {event.action_taken.replace(/_/g, ' ')}
                     </span>
                   </td>
                   <td className="text-xs text-[var(--admin-text-muted)]">

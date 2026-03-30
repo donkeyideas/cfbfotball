@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&amp;family=Source+Sans+3:wght@400;600;700&amp;family=Special+Elite&amp;display=swap');
+    </style>
+  </defs>
+
+  <!-- Badge body / parchment background -->
+  <rect width="1024" height="1024" rx="180" fill="#f4efe4"/>
+  <rect x="6" y="6" width="1012" height="1012" rx="174" fill="none" stroke="#3b2f1e" stroke-width="10"/>
+
+  <!-- Top crimson bar -->
+  <rect x="6" y="6" width="1012" height="185" rx="174" fill="#8b1a1a"/>
+  <rect x="6" y="120" width="1012" height="71" fill="#8b1a1a"/>
+  <text x="512" y="140" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-weight="700" font-size="72" fill="#f4efe4" letter-spacing="28">PRESS</text>
+
+  <!-- Inner border -->
+  <rect x="60" y="215" width="904" height="765" rx="14" fill="none" stroke="#d4c5a0" stroke-width="5"/>
+
+  <!-- CFB SOCIAL -->
+  <text x="512" y="380" text-anchor="middle" font-family="'Playfair Display', Georgia, serif" font-weight="900" font-size="160" fill="#3b2f1e" letter-spacing="16">CFB</text>
+  <text x="512" y="500" text-anchor="middle" font-family="'Playfair Display', Georgia, serif" font-weight="900" font-size="110" fill="#3b2f1e" letter-spacing="10">SOCIAL</text>
+
+  <!-- Divider -->
+  <line x1="200" y1="540" x2="824" y2="540" stroke="#c49a2f" stroke-width="6"/>
+
+  <!-- Football icon -->
+  <ellipse cx="512" cy="640" rx="100" ry="60" fill="none" stroke="#3b2f1e" stroke-width="8"/>
+  <line x1="460" y1="640" x2="564" y2="640" stroke="#3b2f1e" stroke-width="6"/>
+  <line x1="480" y1="592" x2="480" y2="688" stroke="#3b2f1e" stroke-width="4"/>
+  <line x1="504" y1="585" x2="504" y2="695" stroke="#3b2f1e" stroke-width="4"/>
+  <line x1="520" y1="585" x2="520" y2="695" stroke="#3b2f1e" stroke-width="4"/>
+  <line x1="544" y1="592" x2="544" y2="688" stroke="#3b2f1e" stroke-width="4"/>
+
+  <!-- Tagline -->
+  <text x="512" y="760" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-weight="600" font-size="38" fill="#6b5d4d" letter-spacing="10">COLLEGE FOOTBALL'S</text>
+  <text x="512" y="808" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-weight="600" font-size="38" fill="#6b5d4d" letter-spacing="10">SOCIAL HOME</text>
+
+  <!-- Typewriter-style tagline -->
+  <text x="512" y="870" text-anchor="middle" font-family="'Special Elite', 'Courier New', monospace" font-size="38" fill="#8b1a1a">Stakes. Receipts. Dynasty.</text>
+
+  <!-- Bottom bar -->
+  <rect x="240" y="900" width="544" height="64" rx="10" fill="#3b2f1e"/>
+  <text x="512" y="942" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-weight="600" font-size="36" fill="#c49a2f" letter-spacing="12">EST. 2026</text>
+</svg>

@@ -1,0 +1,2174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CFB Social — Press Box Mobile</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    background: #f5f5f5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 40px 20px 60px;
+    font-family: 'Inter', -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* ========================================
+     PAGE HEADER (outside phone)
+     ======================================== */
+  .page-header {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+
+  .page-header h1 {
+    font-family: 'Libre Baskerville', serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: #111111;
+    margin-bottom: 8px;
+    letter-spacing: 0.5px;
+  }
+
+  .page-header p {
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    font-weight: 400;
+    color: #888888;
+    letter-spacing: 0.2px;
+  }
+
+  /* ========================================
+     SCREEN NAV PILLS (outside phone)
+     ======================================== */
+  .screen-nav {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 32px;
+  }
+
+  .screen-nav button {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    padding: 8px 20px;
+    border-radius: 999px;
+    border: 1.5px solid #cccccc;
+    background: #ffffff;
+    color: #666666;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    outline: none;
+  }
+
+  .screen-nav button:hover {
+    border-color: #c9a84c;
+    color: #c9a84c;
+  }
+
+  .screen-nav button.active {
+    background: #c9a84c;
+    border-color: #c9a84c;
+    color: #ffffff;
+    font-weight: 600;
+  }
+
+  /* ========================================
+     PHONE FRAME
+     ======================================== */
+  .phone-frame {
+    width: 375px;
+    height: 812px;
+    background: #000000;
+    border-radius: 44px;
+    padding: 12px;
+    position: relative;
+    box-shadow:
+      0 30px 70px rgba(0, 0, 0, 0.18),
+      0 8px 24px rgba(0, 0, 0, 0.08);
+  }
+
+  .phone-inner {
+    width: 100%;
+    height: 100%;
+    background: #ffffff;
+    border-radius: 34px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* Notch */
+  .phone-notch {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 150px;
+    height: 28px;
+    background: #000000;
+    border-radius: 0 0 18px 18px;
+    z-index: 200;
+  }
+
+  /* Home Indicator */
+  .home-indicator {
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 134px;
+    height: 5px;
+    background: #333333;
+    border-radius: 3px;
+    z-index: 200;
+  }
+
+  /* ========================================
+     STATUS BAR (inside phone)
+     ======================================== */
+  .status-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px 8px 24px;
+    background: transparent;
+    position: relative;
+    z-index: 150;
+  }
+
+  .status-time {
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    color: #111111;
+    letter-spacing: 0.2px;
+  }
+
+  .status-icons {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* ========================================
+     SCREEN SYSTEM
+     ======================================== */
+  .screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transform: scale(0.96);
+    transition: opacity 0.35s ease, transform 0.35s ease;
+    pointer-events: none;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .screen::-webkit-scrollbar {
+    display: none;
+  }
+
+  .screen.active {
+    opacity: 1;
+    transform: scale(1);
+    pointer-events: auto;
+    z-index: 10;
+  }
+
+  /* ========================================
+     SCREEN 1: SPLASH
+     ======================================== */
+  .splash-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    background: linear-gradient(180deg, #ffffff 0%, #f7f7f5 100%);
+    text-align: center;
+    padding: 40px 32px;
+  }
+
+  .splash-monogram {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: #c9a84c;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 32px;
+  }
+
+  .splash-monogram span {
+    font-family: 'Libre Baskerville', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: 2px;
+  }
+
+  .splash-title {
+    font-family: 'Libre Baskerville', serif;
+    font-size: 30px;
+    font-weight: 700;
+    color: #111111;
+    letter-spacing: 8px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .splash-rule {
+    width: 48px;
+    height: 1px;
+    background: #c9a84c;
+    margin-bottom: 16px;
+  }
+
+  .splash-subtitle {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    color: #999999;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 48px;
+  }
+
+  .splash-loader {
+    width: 60px;
+    height: 2px;
+    background: #e8e8e8;
+    border-radius: 1px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+
+  .splash-loader-fill {
+    width: 0%;
+    height: 100%;
+    background: #c9a84c;
+    border-radius: 1px;
+    animation: loaderExpand 2.4s ease-in-out infinite;
+  }
+
+  @keyframes loaderExpand {
+    0% { width: 0%; margin-left: 0%; }
+    50% { width: 100%; margin-left: 0%; }
+    100% { width: 0%; margin-left: 100%; }
+  }
+
+  .splash-version {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 400;
+    color: #cccccc;
+    letter-spacing: 0.5px;
+  }
+
+  /* ========================================
+     SCREEN 2: LOGIN
+     ======================================== */
+  .login-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 80px 32px 40px;
+    background: #ffffff;
+    height: 100%;
+  }
+
+  .login-monogram {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: #c9a84c;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 28px;
+  }
+
+  .login-monogram span {
+    font-family: 'Libre Baskerville', serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: 1.5px;
+  }
+
+  .login-heading {
+    font-family: 'Libre Baskerville', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: #111111;
+    margin-bottom: 8px;
+    text-align: center;
+  }
+
+  .login-subheading {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    color: #999999;
+    margin-bottom: 32px;
+    text-align: center;
+  }
+
+  .login-form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .login-input {
+    width: 100%;
+    padding: 14px 16px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    color: #111111;
+    background: #ffffff;
+    border: 1.5px solid #dddddd;
+    border-radius: 6px;
+    outline: none;
+    transition: border-color 0.2s ease;
+    letter-spacing: 0.1px;
+  }
+
+  .login-input::placeholder {
+    color: #bbbbbb;
+  }
+
+  .login-input:focus {
+    border-color: #c9a84c;
+  }
+
+  .login-btn {
+    width: 100%;
+    padding: 14px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: #ffffff;
+    background: #111111;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+
+  .login-btn:hover {
+    background: #c9a84c;
+  }
+
+  .login-divider {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    margin-bottom: 24px;
+  }
+
+  .login-divider-line {
+    flex: 1;
+    height: 1px;
+    background: #eeeeee;
+  }
+
+  .login-divider-text {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 400;
+    color: #bbbbbb;
+    text-transform: lowercase;
+  }
+
+  .login-google-btn {
+    width: 100%;
+    padding: 14px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: #333333;
+    background: #ffffff;
+    border: 1.5px solid #dddddd;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: border-color 0.2s ease;
+    margin-bottom: 24px;
+  }
+
+  .login-google-btn:hover {
+    border-color: #c9a84c;
+  }
+
+  .login-signup-link {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    color: #999999;
+  }
+
+  .login-signup-link a {
+    color: #c9a84c;
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  .login-signup-link a:hover {
+    text-decoration: underline;
+  }
+
+  /* ========================================
+     SCREEN 3: FEED
+     ======================================== */
+  .feed-screen {
+    background: #ffffff;
+  }
+
+  /* App Header */
+  .app-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 20px 14px 20px;
+    background: #ffffff;
+  }
+
+  .app-title {
+    font-family: 'Libre Baskerville', serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: #111111;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  /* Profile avatar */
+  .profile-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #e5e5e5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  .profile-avatar .av-head {
+    width: 8px;
+    height: 8px;
+    background: #999999;
+    border-radius: 50%;
+    position: absolute;
+    margin-top: -4px;
+  }
+
+  .profile-avatar .av-body {
+    width: 12px;
+    height: 6px;
+    background: #999999;
+    border-radius: 6px 6px 0 0;
+    margin-top: 10px;
+  }
+
+  /* Section Tabs */
+  .section-tabs {
+    display: flex;
+    gap: 0;
+    padding: 0 20px;
+    border-bottom: 1px solid #eeeeee;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .section-tabs::-webkit-scrollbar { display: none; }
+
+  .tab-item {
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.6px;
+    text-transform: uppercase;
+    color: #999999;
+    padding: 11px 12px;
+    white-space: nowrap;
+    cursor: pointer;
+    position: relative;
+    transition: color 0.2s ease;
+    flex-shrink: 0;
+  }
+
+  .tab-item:first-child { padding-left: 0; }
+
+  .tab-item.active { color: #111111; }
+
+  .tab-item.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: #c9a84c;
+  }
+
+  .tab-item:first-child.active::after { left: 0; }
+
+  /* Hero Card */
+  .hero-card {
+    margin: 16px 20px 0 20px;
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+    height: 150px;
+    background: #c5c5c0;
+    cursor: pointer;
+  }
+
+  .hero-gradient {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.35) 50%, rgba(0,0,0,0.04) 100%);
+  }
+
+  .hero-content {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 16px;
+  }
+
+  .category-tag {
+    font-family: 'Inter', sans-serif;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #c9a84c;
+    margin-bottom: 6px;
+    display: inline-block;
+  }
+
+  .hero-headline {
+    font-family: 'Libre Baskerville', serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: #ffffff;
+    line-height: 1.35;
+    margin-bottom: 6px;
+  }
+
+  .hero-meta {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    color: rgba(255,255,255,0.6);
+    font-weight: 400;
+  }
+
+  .hero-meta .sep { margin: 0 5px; color: rgba(255,255,255,0.3); }
+
+  /* Feed Posts */
+  .feed-content { padding: 0 20px; margin-top: 16px; }
+
+  .feed-divider { height: 1px; background: #eeeeee; }
+
+  .post { padding: 16px 0; }
+
+  .post-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .post-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #e8e8e8;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+
+  .post-avatar .pa-head {
+    width: 7px;
+    height: 7px;
+    background: #aaaaaa;
+    border-radius: 50%;
+    position: absolute;
+    top: 6px;
+  }
+
+  .post-avatar .pa-body {
+    width: 10px;
+    height: 5px;
+    background: #aaaaaa;
+    border-radius: 5px 5px 0 0;
+    position: absolute;
+    bottom: 5px;
+  }
+
+  .post-author-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .post-author {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: #111111;
+  }
+
+  .post-handle {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 400;
+    color: #999999;
+    margin-left: 4px;
+  }
+
+  .post-time {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 400;
+    color: #bbbbbb;
+    flex-shrink: 0;
+  }
+
+  .post-body {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    color: #333333;
+    line-height: 1.6;
+    margin-bottom: 10px;
+  }
+
+  .post-stats {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    color: #bbbbbb;
+    margin-bottom: 10px;
+  }
+
+  .post-stats .sv { color: #999999; font-weight: 500; }
+
+  .post-actions {
+    display: flex;
+    gap: 18px;
+  }
+
+  .post-action {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    color: #aaaaaa;
+    cursor: pointer;
+    transition: color 0.2s ease;
+  }
+
+  .post-action:hover { color: #666666; }
+
+  /* Prediction Tag */
+  .prediction-tag {
+    display: inline-block;
+    font-family: 'Inter', sans-serif;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: #c9a84c;
+    padding: 4px 10px;
+    border: 1px solid rgba(201,168,76,0.3);
+    border-radius: 3px;
+    margin-bottom: 4px;
+  }
+
+  .prediction-revisit {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    color: #bbbbbb;
+    font-style: italic;
+    margin-bottom: 10px;
+  }
+
+  /* Moderation */
+  .moderation-post {
+    background: #f8f8f8;
+    border-left: 4px solid #c9a84c;
+    padding: 16px 18px;
+    margin: 16px 0;
+    border-radius: 0 4px 4px 0;
+  }
+
+  .moderation-text {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-style: italic;
+    color: #777777;
+    line-height: 1.55;
+    margin-bottom: 8px;
+  }
+
+  .moderation-link {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    color: #c9a84c;
+    cursor: pointer;
+    text-decoration: none;
+  }
+
+  .moderation-link:hover { opacity: 0.75; }
+
+  /* Live */
+  .live-label {
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #c9a84c;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .live-dot {
+    width: 6px;
+    height: 6px;
+    background: #c9a84c;
+    border-radius: 50%;
+    animation: livePulse 1.8s ease-in-out infinite;
+  }
+
+  @keyframes livePulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  .live-matchup {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: #111111;
+    margin-bottom: 5px;
+  }
+
+  .live-body {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    color: #555555;
+    line-height: 1.5;
+    margin-bottom: 8px;
+  }
+
+  .verified-badge {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    color: #bbbbbb;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .verified-check {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #c9a84c;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .verified-check::after {
+    content: '';
+    width: 4px;
+    height: 7px;
+    border: solid #ffffff;
+    border-width: 0 1.5px 1.5px 0;
+    transform: rotate(45deg);
+    margin-top: -1px;
+  }
+
+  /* ========================================
+     BOTTOM TAB BAR (shared)
+     ======================================== */
+  .bottom-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 8px 0 28px 0;
+    background: #ffffff;
+    border-top: 1px solid #eeeeee;
+    z-index: 100;
+  }
+
+  .bottom-tab {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    cursor: pointer;
+    min-width: 44px;
+  }
+
+  .bottom-tab-icon {
+    width: 20px;
+    height: 20px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .bottom-tab-label {
+    font-family: 'Inter', sans-serif;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: #bbbbbb;
+    transition: color 0.2s ease;
+  }
+
+  .bottom-tab.active .bottom-tab-label { color: #c9a84c; }
+
+  /* Feed icon */
+  .icon-feed {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    width: 16px;
+  }
+
+  .icon-feed .ln { height: 2px; background: #bbbbbb; border-radius: 1px; }
+  .icon-feed .ln:nth-child(1) { width: 100%; }
+  .icon-feed .ln:nth-child(2) { width: 70%; }
+  .icon-feed .ln:nth-child(3) { width: 100%; }
+  .bottom-tab.active .icon-feed .ln { background: #c9a84c; }
+
+  /* News icon */
+  .icon-news {
+    width: 14px;
+    height: 17px;
+    border: 1.8px solid #bbbbbb;
+    border-radius: 2px;
+    position: relative;
+  }
+
+  .icon-news::before {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 2px;
+    right: 2px;
+    height: 1.5px;
+    background: #bbbbbb;
+    box-shadow: 0 4px 0 #bbbbbb;
+  }
+
+  .bottom-tab.active .icon-news {
+    border-color: #c9a84c;
+  }
+
+  .bottom-tab.active .icon-news::before {
+    background: #c9a84c;
+    box-shadow: 0 4px 0 #c9a84c;
+  }
+
+  /* Recruit icon */
+  .icon-recruit {
+    position: relative;
+    width: 20px;
+    height: 20px;
+  }
+
+  .icon-recruit .rh {
+    width: 7px; height: 7px;
+    background: #bbbbbb;
+    border-radius: 50%;
+    position: absolute;
+    left: 2px; top: 1px;
+  }
+
+  .icon-recruit .rb {
+    width: 12px; height: 6px;
+    border: 1.8px solid #bbbbbb;
+    border-bottom: none;
+    border-radius: 6px 6px 0 0;
+    position: absolute;
+    left: 0; bottom: 3px;
+  }
+
+  .icon-recruit .rph {
+    width: 7px; height: 1.8px;
+    background: #bbbbbb;
+    border-radius: 1px;
+    position: absolute;
+    right: 0; top: 7px;
+  }
+
+  .icon-recruit .rpv {
+    width: 1.8px; height: 7px;
+    background: #bbbbbb;
+    border-radius: 1px;
+    position: absolute;
+    right: 2.6px; top: 4px;
+  }
+
+  .bottom-tab.active .icon-recruit .rh { background: #c9a84c; }
+  .bottom-tab.active .icon-recruit .rb { border-color: #c9a84c; }
+  .bottom-tab.active .icon-recruit .rph { background: #c9a84c; }
+  .bottom-tab.active .icon-recruit .rpv { background: #c9a84c; }
+
+  /* Portal icon */
+  .icon-portal {
+    position: relative;
+    width: 18px;
+    height: 16px;
+  }
+
+  .icon-portal .ar {
+    position: absolute;
+    top: 3px; left: 0;
+    width: 14px; height: 1.8px;
+    background: #bbbbbb;
+    border-radius: 1px;
+  }
+
+  .icon-portal .ar::after {
+    content: '';
+    position: absolute;
+    right: -1px; top: -3px;
+    width: 0; height: 0;
+    border-left: 4px solid #bbbbbb;
+    border-top: 3.5px solid transparent;
+    border-bottom: 3.5px solid transparent;
+  }
+
+  .icon-portal .al {
+    position: absolute;
+    bottom: 3px; right: 0;
+    width: 14px; height: 1.8px;
+    background: #bbbbbb;
+    border-radius: 1px;
+  }
+
+  .icon-portal .al::after {
+    content: '';
+    position: absolute;
+    left: -1px; top: -3px;
+    width: 0; height: 0;
+    border-right: 4px solid #bbbbbb;
+    border-top: 3.5px solid transparent;
+    border-bottom: 3.5px solid transparent;
+  }
+
+  .bottom-tab.active .icon-portal .ar,
+  .bottom-tab.active .icon-portal .al { background: #c9a84c; }
+  .bottom-tab.active .icon-portal .ar::after { border-left-color: #c9a84c; }
+  .bottom-tab.active .icon-portal .al::after { border-right-color: #c9a84c; }
+
+  /* More icon */
+  .icon-more {
+    display: flex;
+    gap: 3px;
+    align-items: center;
+  }
+
+  .icon-more .dt {
+    width: 3.5px; height: 3.5px;
+    background: #bbbbbb;
+    border-radius: 50%;
+  }
+
+  .bottom-tab.active .icon-more .dt { background: #c9a84c; }
+
+  /* ========================================
+     SCREEN 4: ANALYSIS (RIVALRY)
+     ======================================== */
+  .rivalry-screen {
+    background: #ffffff;
+    padding-bottom: 80px;
+  }
+
+  .rivalry-header-bar {
+    padding: 50px 20px 12px;
+    display: flex;
+    align-items: center;
+  }
+
+  .rivalry-header-bar h2 {
+    font-family: 'Libre Baskerville', serif;
+    font-size: 17px;
+    font-weight: 700;
+    color: #111111;
+    letter-spacing: 1px;
+  }
+
+  .rivalry-body {
+    padding: 0 20px;
+  }
+
+  .rivalry-week-label {
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: #c9a84c;
+    margin-bottom: 10px;
+  }
+
+  .rivalry-headline {
+    font-family: 'Libre Baskerville', serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: #111111;
+    line-height: 1.35;
+    margin-bottom: 20px;
+  }
+
+  .rivalry-bar-container {
+    margin-bottom: 24px;
+  }
+
+  .rivalry-bar-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 6px;
+  }
+
+  .rivalry-bar-labels span {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    color: #111111;
+  }
+
+  .rivalry-bar-labels .pct {
+    font-weight: 400;
+    color: #999999;
+    margin-left: 4px;
+  }
+
+  .rivalry-bar {
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    display: flex;
+    overflow: hidden;
+  }
+
+  .rivalry-bar-gold {
+    width: 56%;
+    background: #c9a84c;
+    border-radius: 3px 0 0 3px;
+  }
+
+  .rivalry-bar-black {
+    width: 44%;
+    background: #111111;
+    border-radius: 0 3px 3px 0;
+  }
+
+  .rivalry-commentary {
+    margin-bottom: 24px;
+  }
+
+  .commentary-item {
+    margin-bottom: 18px;
+  }
+
+  .commentary-author {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    color: #111111;
+    margin-bottom: 4px;
+    letter-spacing: 0.2px;
+  }
+
+  .commentary-text {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    color: #555555;
+    line-height: 1.6;
+  }
+
+  .rivalry-discussion-link {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: #c9a84c;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    margin-bottom: 28px;
+  }
+
+  .rivalry-discussion-link:hover { text-decoration: underline; }
+
+  .rivalry-related {
+    border-top: 1px solid #eeeeee;
+    padding-top: 20px;
+  }
+
+  .rivalry-related-heading {
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #999999;
+    margin-bottom: 14px;
+  }
+
+  .related-article {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: #111111;
+    padding: 10px 0;
+    border-bottom: 1px solid #f2f2f2;
+    cursor: pointer;
+    line-height: 1.4;
+  }
+
+  .related-article:last-child { border-bottom: none; }
+  .related-article:hover { color: #c9a84c; }
+
+  /* ========================================
+     SCREEN 5: TRANSFER PORTAL
+     ======================================== */
+  .portal-screen {
+    background: #ffffff;
+    padding-bottom: 80px;
+  }
+
+  .portal-header-bar {
+    padding: 50px 20px 12px;
+  }
+
+  .portal-header-bar h2 {
+    font-family: 'Libre Baskerville', serif;
+    font-size: 17px;
+    font-weight: 700;
+    color: #111111;
+  }
+
+  .portal-body {
+    padding: 0 20px;
+  }
+
+  .portal-entry {
+    padding: 14px 0;
+    border-bottom: 1px solid rgba(201,168,76,0.2);
+  }
+
+  .portal-entry:last-of-type { border-bottom: 1px solid #eeeeee; }
+
+  .portal-entry-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 3px;
+  }
+
+  .portal-player-name {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: #111111;
+  }
+
+  .portal-status {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    padding: 3px 8px;
+    border-radius: 3px;
+  }
+
+  .portal-status.entered {
+    color: #c9a84c;
+    background: rgba(201,168,76,0.1);
+  }
+
+  .portal-status.committed {
+    color: #111111;
+    background: #f0f0f0;
+  }
+
+  .portal-status.exploring {
+    color: #888888;
+    background: #f5f5f5;
+  }
+
+  .portal-entry-detail {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 400;
+    color: #999999;
+  }
+
+  .recruiting-section {
+    margin-top: 24px;
+  }
+
+  .recruiting-heading {
+    font-family: 'Libre Baskerville', serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: #111111;
+    margin-bottom: 16px;
+  }
+
+  .recruiting-item {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 10px 0;
+    border-bottom: 1px solid #f2f2f2;
+  }
+
+  .recruiting-item:last-child { border-bottom: none; }
+
+  .recruiting-bullet {
+    width: 6px;
+    height: 6px;
+    background: #c9a84c;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 5px;
+  }
+
+  .recruiting-item-content {
+    flex: 1;
+  }
+
+  .recruiting-item-headline {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: #111111;
+    line-height: 1.4;
+    margin-bottom: 2px;
+  }
+
+  .recruiting-item-time {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 400;
+    color: #bbbbbb;
+  }
+
+  /* ========================================
+     SCREEN 6: PROFILE
+     ======================================== */
+  .profile-screen {
+    background: #ffffff;
+    padding-bottom: 80px;
+  }
+
+  .profile-header-bar {
+    padding: 50px 20px 12px;
+  }
+
+  .profile-header-bar h2 {
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: #111111;
+    letter-spacing: 0.3px;
+  }
+
+  .profile-body {
+    padding: 0 20px;
+  }
+
+  .profile-user-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 16px 0 20px;
+    border-bottom: 1px solid #eeeeee;
+    margin-bottom: 20px;
+  }
+
+  .profile-avatar-lg {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: #e8e8e8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+    position: relative;
+  }
+
+  .profile-avatar-lg .plg-head {
+    width: 14px;
+    height: 14px;
+    background: #aaaaaa;
+    border-radius: 50%;
+    position: absolute;
+    top: 12px;
+  }
+
+  .profile-avatar-lg .plg-body {
+    width: 22px;
+    height: 10px;
+    background: #aaaaaa;
+    border-radius: 11px 11px 0 0;
+    position: absolute;
+    bottom: 10px;
+  }
+
+  .profile-user-name {
+    font-family: 'Libre Baskerville', serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: #111111;
+    margin-bottom: 2px;
+  }
+
+  .profile-user-handle {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    color: #999999;
+    margin-bottom: 2px;
+  }
+
+  .profile-user-school {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 400;
+    color: #bbbbbb;
+    margin-bottom: 16px;
+  }
+
+  .profile-stats-row {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    margin-bottom: 12px;
+  }
+
+  .profile-stat {
+    text-align: center;
+  }
+
+  .profile-stat-value {
+    font-family: 'Inter', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: #111111;
+    display: block;
+  }
+
+  .profile-stat-label {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 400;
+    color: #999999;
+    letter-spacing: 0.3px;
+  }
+
+  .profile-member-since {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 400;
+    color: #cccccc;
+    text-align: center;
+  }
+
+  .profile-section-heading {
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #999999;
+    margin-bottom: 12px;
+  }
+
+  .reading-list {
+    margin-bottom: 24px;
+  }
+
+  .reading-item {
+    padding: 11px 0;
+    border-bottom: 1px solid #f2f2f2;
+    cursor: pointer;
+  }
+
+  .reading-item:last-child { border-bottom: none; }
+
+  .reading-item-title {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: #111111;
+    line-height: 1.4;
+    margin-bottom: 2px;
+  }
+
+  .reading-item-title:hover { color: #c9a84c; }
+
+  .reading-item-meta {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 400;
+    color: #bbbbbb;
+  }
+
+  .profile-settings-link {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    color: #999999;
+    cursor: pointer;
+    display: block;
+    margin-bottom: 20px;
+  }
+
+  .profile-settings-link:hover { color: #111111; }
+
+  .profile-edit-btn {
+    width: 100%;
+    padding: 12px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: #c9a84c;
+    background: transparent;
+    border: 1.5px solid #c9a84c;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    letter-spacing: 0.3px;
+  }
+
+  .profile-edit-btn:hover {
+    background: #c9a84c;
+    color: #ffffff;
+  }
+</style>
+</head>
+<body>
+
+<!-- ============================================
+     PAGE HEADER (outside phone)
+     ============================================ -->
+<div class="page-header">
+  <h1>CFB Social -- Press Box</h1>
+  <p>Editorial premium theme -- Interactive UI preview</p>
+</div>
+
+<!-- ============================================
+     SCREEN NAV PILLS (outside phone)
+     ============================================ -->
+<div class="screen-nav">
+  <button class="active" onclick="showScreen('splash')">Splash</button>
+  <button onclick="showScreen('login')">Login</button>
+  <button onclick="showScreen('feed')">Feed</button>
+  <button onclick="showScreen('rivalry')">Analysis</button>
+  <button onclick="showScreen('portal')">Portal</button>
+  <button onclick="showScreen('profile')">Profile</button>
+</div>
+
+<!-- ============================================
+     PHONE FRAME
+     ============================================ -->
+<div class="phone-frame">
+  <div class="phone-notch"></div>
+  <div class="phone-inner">
+
+    <!-- ==========================================
+         SCREEN 1: SPLASH
+         ========================================== -->
+    <div class="screen active" id="screen-splash">
+      <div class="splash-screen">
+        <div class="splash-monogram"><span>PB</span></div>
+        <div class="splash-title">Press Box</div>
+        <div class="splash-rule"></div>
+        <div class="splash-subtitle">Premium College Football Coverage</div>
+        <div class="splash-loader">
+          <div class="splash-loader-fill"></div>
+        </div>
+        <div class="splash-version">v1.0.0</div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SCREEN 2: LOGIN
+         ========================================== -->
+    <div class="screen" id="screen-login">
+      <div class="login-screen">
+        <div class="login-monogram"><span>PB</span></div>
+        <div class="login-heading">Welcome to Press Box</div>
+        <div class="login-subheading">Sign in to continue reading</div>
+        <div class="login-form">
+          <input class="login-input" type="text" placeholder="Email address">
+          <input class="login-input" type="password" placeholder="Password">
+          <button class="login-btn" onclick="showScreen('feed')">Sign In</button>
+        </div>
+        <div class="login-divider">
+          <div class="login-divider-line"></div>
+          <span class="login-divider-text">or</span>
+          <div class="login-divider-line"></div>
+        </div>
+        <button class="login-google-btn">Continue with Google</button>
+        <div class="login-signup-link">
+          New subscriber? <a href="#">Create Account</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SCREEN 3: FEED
+         ========================================== -->
+    <div class="screen" id="screen-feed">
+      <div class="feed-screen">
+        <!-- Status Bar -->
+        <div class="status-bar">
+          <span class="status-time">9:41</span>
+          <div class="status-icons">
+            <svg width="16" height="12" viewBox="0 0 16 12" fill="none">
+              <rect x="0" y="8" width="3" height="4" rx="0.5" fill="#111"/>
+              <rect x="4.5" y="5.5" width="3" height="6.5" rx="0.5" fill="#111"/>
+              <rect x="9" y="3" width="3" height="9" rx="0.5" fill="#111"/>
+              <rect x="13.5" y="0" width="3" height="12" rx="0.5" fill="#111"/>
+            </svg>
+            <svg width="16" height="12" viewBox="0 0 16 12" fill="none">
+              <path d="M8 3.6C9.8 3.6 11.4 4.3 12.6 5.4L14 4C12.4 2.5 10.3 1.6 8 1.6C5.7 1.6 3.6 2.5 2 4L3.4 5.4C4.6 4.3 6.2 3.6 8 3.6Z" fill="#111"/>
+              <path d="M8 6.8C9.1 6.8 10.1 7.2 10.9 7.9L12.3 6.5C11.1 5.4 9.6 4.8 8 4.8C6.4 4.8 4.9 5.4 3.7 6.5L5.1 7.9C5.9 7.2 6.9 6.8 8 6.8Z" fill="#111"/>
+              <circle cx="8" cy="10.5" r="1.5" fill="#111"/>
+            </svg>
+            <svg width="27" height="13" viewBox="0 0 27 13" fill="none">
+              <rect x="0.5" y="0.5" width="22" height="12" rx="3" stroke="#111" stroke-width="1.2"/>
+              <rect x="2.5" y="2.5" width="16" height="8" rx="1.5" fill="#111"/>
+              <rect x="24" y="4" width="2.5" height="5" rx="1" fill="#111"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- App Header -->
+        <div class="app-header">
+          <div class="app-title">Press Box</div>
+          <div class="header-actions">
+            <!-- Search icon (SVG) -->
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" style="cursor:pointer;">
+              <circle cx="8.5" cy="8.5" r="6" stroke="#111" stroke-width="2" fill="none"/>
+              <line x1="13" y1="13" x2="18" y2="18" stroke="#111" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <!-- Profile avatar -->
+            <div class="profile-avatar" style="position:relative;">
+              <div class="av-head"></div>
+              <div class="av-body"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section Tabs -->
+        <div class="section-tabs">
+          <div class="tab-item active">Feed</div>
+          <div class="tab-item">News</div>
+          <div class="tab-item">Recruiting</div>
+          <div class="tab-item">Portal</div>
+          <div class="tab-item">Analysis</div>
+        </div>
+
+        <!-- Hero Card -->
+        <div class="hero-card">
+          <div class="hero-gradient"></div>
+          <div class="hero-content">
+            <div class="category-tag">Analysis</div>
+            <div class="hero-headline">The Case for Travis Hunter as the Most Complete Player in History</div>
+            <div class="hero-meta">By James Richardson<span class="sep">|</span>12 min read</div>
+          </div>
+        </div>
+
+        <!-- Feed Content -->
+        <div class="feed-content">
+
+          <!-- Post 1: Sarah Mitchell Editorial Take -->
+          <div class="post">
+            <div class="post-header">
+              <div class="post-avatar">
+                <div class="pa-head"></div>
+                <div class="pa-body"></div>
+              </div>
+              <div class="post-author-info">
+                <span class="post-author">Sarah Mitchell</span>
+                <span class="post-handle">@DawgPound</span>
+              </div>
+              <span class="post-time">2h ago</span>
+            </div>
+            <div class="post-body">Travis Hunter is the best two-way player since Deion Sanders. The stats back it up -- and the film doesn't lie.</div>
+            <div class="post-stats">
+              <span>Touchdown <span class="sv">342</span></span>
+              <span style="margin:0 8px;color:#dddddd;">/</span>
+              <span>Fumble <span class="sv">89</span></span>
+            </div>
+            <div class="post-actions">
+              <span class="post-action">Stat Check</span>
+              <span class="post-action">Challenge</span>
+              <span class="post-action">Reply 24</span>
+            </div>
+          </div>
+
+          <div class="feed-divider"></div>
+
+          <!-- Post 2: Prediction -->
+          <div class="post">
+            <div class="post-header">
+              <div class="post-avatar">
+                <div class="pa-head"></div>
+                <div class="pa-body"></div>
+              </div>
+              <div class="post-author-info">
+                <span class="post-author">@CrimsonTide</span>
+              </div>
+              <span class="post-time">3h ago</span>
+            </div>
+            <div class="post-body">Alabama finishes 11-1. Only loss comes in Athens.</div>
+            <div class="prediction-tag">Prediction Tracked</div>
+            <div class="prediction-revisit">Revisits November 15</div>
+          </div>
+
+          <div class="feed-divider"></div>
+
+          <!-- Post 3: AI Moderation -->
+          <div class="moderation-post">
+            <div class="moderation-text">This post has been removed by our editorial standards system.</div>
+            <a class="moderation-link" href="#">Request a review</a>
+          </div>
+
+          <div class="feed-divider"></div>
+
+          <!-- Post 4: Live -->
+          <div class="post">
+            <div class="live-label">
+              <div class="live-dot"></div>
+              LIVE
+            </div>
+            <div class="live-matchup">Auburn vs LSU -- Q1 4:32</div>
+            <div class="live-body">Auburn's defensive front dominating early. Three sacks through the first eleven minutes of play.</div>
+            <div class="verified-badge">
+              <div class="verified-check"></div>
+              Verified Stats
+            </div>
+          </div>
+
+          <div class="feed-divider"></div>
+        </div>
+
+        <!-- Bottom Tabs -->
+        <div class="bottom-bar">
+          <div class="bottom-tab active" onclick="handleBottomTab(this)">
+            <div class="bottom-tab-icon">
+              <div class="icon-feed"><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+            </div>
+            <span class="bottom-tab-label">Feed</span>
+          </div>
+          <div class="bottom-tab" onclick="handleBottomTab(this)">
+            <div class="bottom-tab-icon">
+              <div class="icon-news"></div>
+            </div>
+            <span class="bottom-tab-label">News</span>
+          </div>
+          <div class="bottom-tab" onclick="handleBottomTab(this)">
+            <div class="bottom-tab-icon">
+              <div class="icon-recruit"><div class="rh"></div><div class="rb"></div><div class="rph"></div><div class="rpv"></div></div>
+            </div>
+            <span class="bottom-tab-label">Recruit</span>
+          </div>
+          <div class="bottom-tab" onclick="handleBottomTab(this)">
+            <div class="bottom-tab-icon">
+              <div class="icon-portal"><div class="ar"></div><div class="al"></div></div>
+            </div>
+            <span class="bottom-tab-label">Portal</span>
+          </div>
+          <div class="bottom-tab" onclick="handleBottomTab(this)">
+            <div class="bottom-tab-icon">
+              <div class="icon-more"><div class="dt"></div><div class="dt"></div><div class="dt"></div></div>
+            </div>
+            <span class="bottom-tab-label">More</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SCREEN 4: ANALYSIS (RIVALRY)
+         ========================================== -->
+    <div class="screen" id="screen-rivalry">
+      <div class="rivalry-screen">
+        <!-- Status Bar -->
+        <div class="status-bar" style="position:absolute; top:0; left:0; right:0; z-index:150;">
+          <span class="status-time">9:41</span>
+          <div class="status-icons">
+            <svg width="16" height="12" viewBox="0 0 16 12" fill="none">
+              <rect x="0" y="8" width="3" height="4" rx="0.5" fill="#111"/>
+              <rect x="4.5" y="5.5" width="3" height="6.5" rx="0.5" fill="#111"/>
+              <rect x="9" y="3" width="3" height="9" rx="0.5" fill="#111"/>
+              <rect x="13.5" y="0" width="3" height="12" rx="0.5" fill="#111"/>
+            </svg>
+            <svg width="16" height="12" viewBox="0 0 16 12" fill="none">
+              <path d="M8 3.6C9.8 3.6 11.4 4.3 12.6 5.4L14 4C12.4 2.5 10.3 1.6 8 1.6C5.7 1.6 3.6 2.5 2 4L3.4 5.4C4.6 4.3 6.2 3.6 8 3.6Z" fill="#111"/>
+              <path d="M8 6.8C9.1 6.8 10.1 7.2 10.9 7.9L12.3 6.5C11.1 5.4 9.6 4.8 8 4.8C6.4 4.8 4.9 5.4 3.7 6.5L5.1 7.9C5.9 7.2 6.9 6.8 8 6.8Z" fill="#111"/>
+              <circle cx="8" cy="10.5" r="1.5" fill="#111"/>
+            </svg>
+            <svg width="27" height="13" viewBox="0 0 27 13" fill="none">
+              <rect x="0.5" y="0.5" width="22" height="12" rx="3" stroke="#111" stroke-width="1.2"/>
+              <rect x="2.5" y="2.5" width="16" height="8" rx="1.5" fill="#111"/>
+              <rect x="24" y="4" width="2.5" height="5" rx="1" fill="#111"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="rivalry-header-bar">
+          <!-- Back arrow -->
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" style="cursor:pointer;margin-right:12px;flex-shrink:0;">
+            <path d="M12 4L6 10L12 16" stroke="#111" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <h2>Rivalry Analysis</h2>
+        </div>
+
+        <div class="rivalry-body">
+          <div class="rivalry-week-label">Rivalry Week</div>
+          <div class="rivalry-headline">Texas vs Oklahoma: A Historical Breakdown</div>
+
+          <!-- Rivalry Bar -->
+          <div class="rivalry-bar-container">
+            <div class="rivalry-bar-labels">
+              <span>Texas <span class="pct">56%</span></span>
+              <span>Oklahoma <span class="pct">44%</span></span>
+            </div>
+            <div class="rivalry-bar">
+              <div class="rivalry-bar-gold"></div>
+              <div class="rivalry-bar-black"></div>
+            </div>
+          </div>
+
+          <!-- Commentary -->
+          <div class="rivalry-commentary">
+            <div class="commentary-item">
+              <div class="commentary-author">Marcus Webb, Senior Writer</div>
+              <div class="commentary-text">The Red River Rivalry transcends regular season stakes. In conference realignment, this game carries more weight than ever. Texas holds the edge in recent matchups, but Oklahoma's defensive retooling changes the calculus significantly.</div>
+            </div>
+            <div class="commentary-item">
+              <div class="commentary-author">Laura Chen, Analytics Editor</div>
+              <div class="commentary-text">The advanced metrics favor Texas in explosive play rate and red zone efficiency. Oklahoma counters with one of the nation's best turnover margins. This game will be decided in the trenches.</div>
+            </div>
+            <div class="commentary-item">
+              <div class="commentary-author">David Hollins, CFB Historian</div>
+              <div class="commentary-text">Since 2000, the team trailing in the series has won the Cotton Bowl matchup 61% of the time. History suggests Oklahoma has the motivational edge heading into Dallas.</div>
+            </div>
+          </div>
+
+          <a class="rivalry-discussion-link" href="#">Join the Discussion</a>
+
+          <!-- Related Articles -->
+          <div class="rivalry-related">
+            <div class="rivalry-related-heading">Related Articles</div>
+            <div class="related-article">Five Keys to the Red River Showdown</div>
+            <div class="related-article">How Conference Realignment Changed This Rivalry</div>
+            <div class="related-article">By the Numbers: Texas-Oklahoma Since 2015</div>
+          </div>
+        </div>
+
+        <!-- Bottom Tabs -->
+        <div class="bottom-bar">
+          <div class="bottom-tab" onclick="handleBottomTab(this)">
+            <div class="bottom-tab-icon">
+              <div class="icon-feed"><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+            </div>
+            <span class="bottom-tab-label">Feed</span>
+          </div>
+          <div class="bottom-tab" onclick="handleBottomTab(this)">
+            <div class="bottom-tab-icon">
+              <div class="icon-news"></div>
+            </div>
+            <span class="bottom-tab-label">News</span>
+          </div>
+          <div class="bottom-tab" onclick="handleBottomTab(this)">
+            <div class="bottom-tab-icon">
+              <div class="icon-recruit"><div class="rh"></div><div class="rb"></div><div class="rph"></div><div class="rpv"></div></div>
+            </div>
+            <span class="bottom-tab-label">Recruit</span>
+          </div>
+          <div class="bottom-tab active" onclick="handleBottomTab(this)">
+            <div class="bottom-tab-icon">
+              <div class="icon-portal"><div class="ar"></div><div class="al"></div></div>
+            </div>
+            <span class="bottom-tab-label">Portal</span>
+          </div>
+          <div class="bottom-tab" onclick="handleBottomTab(this)">
+            <div class="bottom-tab-icon">
+              <div class="icon-more"><div class="dt"></div><div class="dt"></div><div class="dt"></div></div>
+            </div>
+            <span class="bottom-tab-label">More</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SCREEN 5: TRANSFER PORTAL
+         ========================================== -->
+    <div class="screen" id="screen-portal">
+      <div class="portal-screen">
+        <!-- Status Bar -->
+        <div class="status-bar" style="position:absolute; top:0; left:0; right:0; z-index:150;">
+          <span class="status-time">9:41</span>
+          <div class="status-icons">
+            <svg width="16" height="12" viewBox="0 0 16 12" fill="none">
+              <rect x="0" y="8" width="3" height="4" rx="0.5" fill="#111"/>
+              <rect x="4.5" y="5.5" width="3" height="6.5" rx="0.5" fill="#111"/>
+              <rect x="9" y="3" width="3" height="9" rx="0.5" fill="#111"/>
+              <rect x="13.5" y="0" width="3" height="12" rx="0.5" fill="#111"/>
+            </svg>
+            <svg width="16" height="12" viewBox="0 0 16 12" fill="none">
+              <path d="M8 3.6C9.8 3.6 11.4 4.3 12.6 5.4L14 4C12.4 2.5 10.3 1.6 8 1.6C5.7 1.6 3.6 2.5 2 4L3.4 5.4C4.6 4.3 6.2 3.6 8 3.6Z" fill="#111"/>
+              <path d="M8 6.8C9.1 6.8 10.1 7.2 10.9 7.9L12.3 6.5C11.1 5.4 9.6 4.8 8 4.8C6.4 4.8 4.9 5.4 3.7 6.5L5.1 7.9C5.9 7.2 6.9 6.8 8 6.8Z" fill="#111"/>
+              <circle cx="8" cy="10.5" r="1.5" fill="#111"/>
+            </svg>
+            <svg width="27" height="13" viewBox="0 0 27 13" fill="none">
+              <rect x="0.5" y="0.5" width="22" height="12" rx="3" stroke="#111" stroke-width="1.2"/>
+              <rect x="2.5" y="2.5" width="16" height="8" rx="1.5" fill="#111"/>
+              <rect x="24" y="4" width="2.5" height="5" rx="1" fill="#111"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="portal-header-bar">
+          <h2>Portal Intelligence</h2>
+        </div>
+
+        <div class="portal-body">
+          <!-- Portal Entries -->
+          <div class="portal-entry">
+            <div class="portal-entry-top">
+              <span class="portal-player-name">Marcus Williams</span>
+              <span class="portal-status entered">Entered</span>
+            </div>
+            <div class="portal-entry-detail">QB -- Michigan State</div>
+          </div>
+          <div class="portal-entry">
+            <div class="portal-entry-top">
+              <span class="portal-player-name">Jaylen Carter</span>
+              <span class="portal-status committed">Committed</span>
+            </div>
+            <div class="portal-entry-detail">WR -- Oregon to Miami</div>
+          </div>
+          <div class="portal-entry">
+            <div class="portal-entry-top">
+              <span class="portal-player-name">DeAndre Thomas</span>
+              <span class="portal-status exploring">Exploring</span>
+            </div>
+            <div class="portal-entry-detail">LB -- Tennessee</div>
+          </div>
+          <div class="portal-entry">
+            <div class="portal-entry-top">
+              <span class="portal-player-name">Caleb Robinson</span>
+              <span class="portal-status entered">Entered</span>
+            </div>
+            <div class="portal-entry-detail">RB -- Florida State</div>
+          </div>
+
+          <!-- Recruiting Intelligence -->
+          <div class="recruiting-section">
+            <div class="recruiting-heading">Recruiting Intelligence</div>
+            <div class="recruiting-item">
+              <div class="recruiting-bullet"></div>
+              <div class="recruiting-item-content">
+                <div class="recruiting-item-headline">5-Star QB Commits to USC</div>
+                <div class="recruiting-item-time">2 hours ago</div>
+              </div>
+            </div>
+            <div class="recruiting-item">
+              <div class="recruiting-bullet"></div>
+              <div class="recruiting-item-content">
+                <div class="recruiting-item-headline">Top RB Narrows to Three</div>
+                <div class="recruiting-item-time">5 hours ago</div>
+              </div>
+            </div>
+            <div class="recruiting-item">
+              <div class="recruiting-bullet"></div>
+              <div class="recruiting-item-content">
+                <div class="recruiting-item-headline">2027 Early Rankings Released</div>
+                <div class="recruiting-item-time">Yesterday</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom Tabs -->
+        <div class="bottom-bar">
+          <div class="bottom-tab" onclick="handleBottomTab(this)">
+            <div class="bottom-tab-icon">
+              <div class="icon-feed"><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+            </div>
+            <span class="bottom-tab-label">Feed</span>
+          </div>
+          <div class="bottom-tab" onclick="handleBottomTab(this)">
+            <div class="bottom-tab-icon">
+              <div class="icon-news"></div>
+            </div>
+            <span class="bottom-tab-label">News</span>
+          </div>
+          <div class="bottom-tab" onclick="handleBottomTab(this)">
+            <div class="bottom-tab-icon">
+              <div class="icon-recruit"><div class="rh"></div><div class="rb"></div><div class="rph"></div><div class="rpv"></div></div>
+            </div>
+            <span class="bottom-tab-label">Recruit</span>
+          </div>
+          <div class="bottom-tab active" onclick="handleBottomTab(this)">
+            <div class="bottom-tab-icon">
+              <div class="icon-portal"><div class="ar"></div><div class="al"></div></div>
+            </div>
+            <span class="bottom-tab-label">Portal</span>
+          </div>
+          <div class="bottom-tab" onclick="handleBottomTab(this)">
+            <div class="bottom-tab-icon">
+              <div class="icon-more"><div class="dt"></div><div class="dt"></div><div class="dt"></div></div>
+            </div>
+            <span class="bottom-tab-label">More</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SCREEN 6: PROFILE
+         ========================================== -->
+    <div class="screen" id="screen-profile">
+      <div class="profile-screen">
+        <!-- Status Bar -->
+        <div class="status-bar" style="position:absolute; top:0; left:0; right:0; z-index:150;">
+          <span class="status-time">9:41</span>
+          <div class="status-icons">
+            <svg width="16" height="12" viewBox="0 0 16 12" fill="none">
+              <rect x="0" y="8" width="3" height="4" rx="0.5" fill="#111"/>
+              <rect x="4.5" y="5.5" width="3" height="6.5" rx="0.5" fill="#111"/>
+              <rect x="9" y="3" width="3" height="9" rx="0.5" fill="#111"/>
+              <rect x="13.5" y="0" width="3" height="12" rx="0.5" fill="#111"/>
+            </svg>
+            <svg width="16" height="12" viewBox="0 0 16 12" fill="none">
+              <path d="M8 3.6C9.8 3.6 11.4 4.3 12.6 5.4L14 4C12.4 2.5 10.3 1.6 8 1.6C5.7 1.6 3.6 2.5 2 4L3.4 5.4C4.6 4.3 6.2 3.6 8 3.6Z" fill="#111"/>
+              <path d="M8 6.8C9.1 6.8 10.1 7.2 10.9 7.9L12.3 6.5C11.1 5.4 9.6 4.8 8 4.8C6.4 4.8 4.9 5.4 3.7 6.5L5.1 7.9C5.9 7.2 6.9 6.8 8 6.8Z" fill="#111"/>
+              <circle cx="8" cy="10.5" r="1.5" fill="#111"/>
+            </svg>
+            <svg width="27" height="13" viewBox="0 0 27 13" fill="none">
+              <rect x="0.5" y="0.5" width="22" height="12" rx="3" stroke="#111" stroke-width="1.2"/>
+              <rect x="2.5" y="2.5" width="16" height="8" rx="1.5" fill="#111"/>
+              <rect x="24" y="4" width="2.5" height="5" rx="1" fill="#111"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="profile-header-bar">
+          <h2>Your Profile</h2>
+        </div>
+
+        <div class="profile-body">
+          <div class="profile-user-section">
+            <div class="profile-avatar-lg">
+              <div class="plg-head"></div>
+              <div class="plg-body"></div>
+            </div>
+            <div class="profile-user-name">Alex Reeves</div>
+            <div class="profile-user-handle">@AlexReeves_CFB</div>
+            <div class="profile-user-school">Georgia Bulldogs</div>
+            <div class="profile-stats-row">
+              <div class="profile-stat">
+                <span class="profile-stat-value">127</span>
+                <span class="profile-stat-label">Posts</span>
+              </div>
+              <div class="profile-stat">
+                <span class="profile-stat-value">34</span>
+                <span class="profile-stat-label">Predictions</span>
+              </div>
+              <div class="profile-stat">
+                <span class="profile-stat-value">71%</span>
+                <span class="profile-stat-label">Accuracy</span>
+              </div>
+            </div>
+            <div class="profile-member-since">Member since 2026</div>
+          </div>
+
+          <!-- Reading List -->
+          <div class="reading-list">
+            <div class="profile-section-heading">Reading List</div>
+            <div class="reading-item">
+              <div class="reading-item-title">The Case for Travis Hunter as the Most Complete Player in History</div>
+              <div class="reading-item-meta">Saved 2 days ago</div>
+            </div>
+            <div class="reading-item">
+              <div class="reading-item-title">Five Keys to the Red River Showdown</div>
+              <div class="reading-item-meta">Saved 4 days ago</div>
+            </div>
+            <div class="reading-item">
+              <div class="reading-item-title">SEC Championship Preview: What to Watch</div>
+              <div class="reading-item-meta">Saved 1 week ago</div>
+            </div>
+          </div>
+
+          <a class="profile-settings-link" href="#">Account Settings</a>
+
+          <button class="profile-edit-btn">Edit Profile</button>
+        </div>
+
+        <!-- Bottom Tabs -->
+        <div class="bottom-bar">
+          <div class="bottom-tab" onclick="handleBottomTab(this)">
+            <div class="bottom-tab-icon">
+              <div class="icon-feed"><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+            </div>
+            <span class="bottom-tab-label">Feed</span>
+          </div>
+          <div class="bottom-tab" onclick="handleBottomTab(this)">
+            <div class="bottom-tab-icon">
+              <div class="icon-news"></div>
+            </div>
+            <span class="bottom-tab-label">News</span>
+          </div>
+          <div class="bottom-tab" onclick="handleBottomTab(this)">
+            <div class="bottom-tab-icon">
+              <div class="icon-recruit"><div class="rh"></div><div class="rb"></div><div class="rph"></div><div class="rpv"></div></div>
+            </div>
+            <span class="bottom-tab-label">Recruit</span>
+          </div>
+          <div class="bottom-tab" onclick="handleBottomTab(this)">
+            <div class="bottom-tab-icon">
+              <div class="icon-portal"><div class="ar"></div><div class="al"></div></div>
+            </div>
+            <span class="bottom-tab-label">Portal</span>
+          </div>
+          <div class="bottom-tab active" onclick="handleBottomTab(this)">
+            <div class="bottom-tab-icon">
+              <div class="icon-more"><div class="dt"></div><div class="dt"></div><div class="dt"></div></div>
+            </div>
+            <span class="bottom-tab-label">More</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div><!-- .phone-inner -->
+  <div class="home-indicator"></div>
+</div><!-- .phone-frame -->
+
+<script>
+  // ========================================
+  // SCREEN SWITCHING
+  // ========================================
+  function showScreen(name) {
+    // Deactivate all screens
+    document.querySelectorAll('.screen').forEach(function(s) {
+      s.classList.remove('active');
+    });
+
+    // Activate target screen
+    var target = document.getElementById('screen-' + name);
+    if (target) {
+      target.classList.add('active');
+      target.scrollTop = 0;
+    }
+
+    // Update nav pills
+    document.querySelectorAll('.screen-nav button').forEach(function(btn) {
+      btn.classList.remove('active');
+      if (btn.textContent.toLowerCase().replace(/\s+/g, '') === name ||
+          (name === 'rivalry' && btn.textContent === 'Analysis') ||
+          (name === 'splash' && btn.textContent === 'Splash') ||
+          (name === 'login' && btn.textContent === 'Login') ||
+          (name === 'feed' && btn.textContent === 'Feed') ||
+          (name === 'portal' && btn.textContent === 'Portal') ||
+          (name === 'profile' && btn.textContent === 'Profile')) {
+        btn.classList.add('active');
+      }
+    });
+  }
+
+  // ========================================
+  // BOTTOM TAB INTERACTIVITY
+  // ========================================
+  function handleBottomTab(el) {
+    var bar = el.closest('.bottom-bar');
+    bar.querySelectorAll('.bottom-tab').forEach(function(t) {
+      t.classList.remove('active');
+    });
+    el.classList.add('active');
+  }
+
+  // ========================================
+  // SECTION TAB INTERACTIVITY (Feed screen)
+  // ========================================
+  document.querySelectorAll('.tab-item').forEach(function(tab) {
+    tab.addEventListener('click', function() {
+      document.querySelectorAll('.tab-item').forEach(function(t) {
+        t.classList.remove('active');
+      });
+      this.classList.add('active');
+    });
+  });
+</script>
+
+</body>
+</html>

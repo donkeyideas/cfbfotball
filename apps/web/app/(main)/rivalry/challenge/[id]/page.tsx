@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ChallengeDetail } from '@/components/rivalry/ChallengeDetail';
 
+export const dynamic = 'force-dynamic';
+
 interface ChallengePageProps {
   params: Promise<{ id: string }>;
 }

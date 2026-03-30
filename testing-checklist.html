@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CFB Social — Testing Checklist</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #1a1a2e;
+    color: #e0e0e0;
+    line-height: 1.5;
+    padding: 20px;
+  }
+  h1 {
+    font-family: Georgia, serif;
+    text-align: center;
+    color: #c41e3a;
+    font-size: 1.8rem;
+    margin-bottom: 4px;
+  }
+  .subtitle {
+    text-align: center;
+    color: #888;
+    font-size: 0.85rem;
+    margin-bottom: 20px;
+  }
+  .stats-bar {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin-bottom: 20px;
+    padding: 12px;
+    background: #16213e;
+    border-radius: 8px;
+    border: 1px solid #2a2a4a;
+    flex-wrap: wrap;
+  }
+  .stat { text-align: center; }
+  .stat-num { font-size: 1.6rem; font-weight: 700; }
+  .stat-num.green { color: #4caf50; }
+  .stat-num.red { color: #c41e3a; }
+  .stat-num.yellow { color: #f0a030; }
+  .stat-num.blue { color: #5090d0; }
+  .stat-label { font-size: 0.7rem; color: #888; text-transform: uppercase; letter-spacing: 1px; }
+  .progress-bar {
+    width: 100%;
+    height: 6px;
+    background: #2a2a4a;
+    border-radius: 3px;
+    margin-bottom: 24px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #c41e3a, #4caf50);
+    border-radius: 3px;
+    transition: width 0.3s;
+  }
+  .phase {
+    background: #16213e;
+    border: 1px solid #2a2a4a;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+  .phase-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    cursor: pointer;
+    user-select: none;
+    background: #1a1a3e;
+    border-bottom: 1px solid #2a2a4a;
+  }
+  .phase-header:hover { background: #1e2248; }
+  .phase-title {
+    font-family: Georgia, serif;
+    font-size: 1.05rem;
+    color: #c41e3a;
+  }
+  .phase-count {
+    font-size: 0.8rem;
+    color: #888;
+    background: #2a2a4a;
+    padding: 2px 10px;
+    border-radius: 10px;
+  }
+  .phase-body { padding: 8px 0; display: none; }
+  .phase.open .phase-body { display: block; }
+  .phase.open .phase-header { border-bottom: 1px solid #2a2a4a; }
+  .test-item {
+    display: flex;
+    flex-direction: column;
+    border-bottom: 1px solid #1a1a2e;
+    padding: 10px 16px;
+  }
+  .test-item:last-child { border-bottom: none; }
+  .test-top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 6px;
+  }
+  .test-label {
+    flex: 1;
+    font-size: 0.9rem;
+    cursor: default;
+  }
+  .test-item.checked .test-label {
+    color: #666;
+    text-decoration: line-through;
+  }
+  .test-item.fail .test-label { color: #c41e3a; }
+  .status-btns {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+  .status-btn {
+    min-width: 52px;
+    height: 34px;
+    padding: 0 8px;
+    border: 2px solid #333;
+    border-radius: 6px;
+    background: transparent;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #666;
+    letter-spacing: 0.5px;
+    transition: all 0.15s;
+  }
+  .status-btn:hover { border-color: #888; background: #1a1a3e; }
+  .status-btn.pass-btn.active { background: #1a3a1a; border-color: #4caf50; color: #4caf50; }
+  .status-btn.fail-btn.active { background: #3a1a1a; border-color: #c41e3a; color: #c41e3a; }
+  .status-btn.skip-btn.active { background: #2a2a1a; border-color: #f0a030; color: #f0a030; }
+  .test-note {
+    display: flex;
+    align-items: center;
+    padding-left: 0;
+  }
+  .test-note input {
+    width: 100%;
+    background: #1a1a2e;
+    border: 1px solid #2a2a4a;
+    border-radius: 4px;
+    color: #f0a030;
+    font-size: 0.82rem;
+    padding: 6px 10px;
+    font-family: 'Consolas', 'Courier New', monospace;
+  }
+  .test-note input:focus {
+    outline: none;
+    border-color: #c41e3a;
+    background: #12122a;
+  }
+  .test-note input::placeholder { color: #444; }
+  .actions-bar {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin: 20px 0;
+    flex-wrap: wrap;
+  }
+  .action-btn {
+    padding: 10px 24px;
+    border: 2px solid #c41e3a;
+    background: transparent;
+    color: #c41e3a;
+    font-family: Georgia, serif;
+    font-size: 0.95rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .action-btn:hover { background: #c41e3a; color: #fff; }
+  .action-btn.secondary { border-color: #555; color: #888; }
+  .action-btn.secondary:hover { background: #555; color: #fff; }
+  .copy-toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #4caf50;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+    z-index: 999;
+  }
+  .copy-toast.show { opacity: 1; }
+  .legend {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    margin-bottom: 16px;
+    font-size: 0.75rem;
+    color: #888;
+  }
+  .legend span { display: flex; align-items: center; gap: 4px; }
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+  .section-label {
+    padding: 6px 16px;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #556;
+    background: #1a1a30;
+    font-weight: 600;
+  }
+  @media (max-width: 700px) {
+    .test-top { flex-direction: column; align-items: flex-start; gap: 8px; }
+    .status-btns { width: 100%; }
+    .status-btn { flex: 1; }
+  }
+</style>
+</head>
+<body>
+
+<h1>CFB Social Testing Checklist</h1>
+<p class="subtitle">Mark each item: PASS / FAIL / SKIP — add notes for anything broken. Copy results when done.</p>
+
+<div class="legend">
+  <span><span class="legend-dot" style="background:#4caf50"></span> Pass</span>
+  <span><span class="legend-dot" style="background:#c41e3a"></span> Fail</span>
+  <span><span class="legend-dot" style="background:#f0a030"></span> Skip</span>
+  <span style="color:#f0a030; font-family: Consolas, monospace;">Notes = issues for Claude to fix</span>
+</div>
+
+<div class="stats-bar">
+  <div class="stat"><div class="stat-num blue" id="total-count">0</div><div class="stat-label">Total</div></div>
+  <div class="stat"><div class="stat-num green" id="pass-count">0</div><div class="stat-label">Pass</div></div>
+  <div class="stat"><div class="stat-num red" id="fail-count">0</div><div class="stat-label">Fail</div></div>
+  <div class="stat"><div class="stat-num yellow" id="skip-count">0</div><div class="stat-label">Skip</div></div>
+  <div class="stat"><div class="stat-num" id="remaining-count" style="color:#e0e0e0">0</div><div class="stat-label">Remaining</div></div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+
+<div id="phases"></div>
+
+<div class="actions-bar">
+  <button class="action-btn" onclick="copyResults()">Copy All Results for Claude</button>
+  <button class="action-btn secondary" onclick="copyFailsOnly()">Copy Fails Only</button>
+  <button class="action-btn secondary" onclick="expandAll()">Expand All</button>
+  <button class="action-btn secondary" onclick="collapseAll()">Collapse All</button>
+  <button class="action-btn secondary" onclick="resetAll()">Reset All</button>
+</div>
+
+<div class="copy-toast" id="toast">Copied to clipboard!</div>
+
+<script>
+const DATA = [
+  {
+    phase: "Phase 1 — Infrastructure",
+    items: [
+      { id: "1-1", text: "App loads at localhost:4200 without errors" },
+      { id: "1-2", text: "3-column newspaper layout renders (sidebar, main, press box)" },
+      { id: "1-3", text: "Dark mode toggle works" },
+      { id: "1-4", text: "Mobile responsive — sidebar collapses on small screens" },
+      { id: "1-5", text: "No console errors on initial load" },
+    ]
+  },
+  {
+    phase: "Phase 2 — Auth & Profiles",
+    sections: [
+      { label: "Registration & Login", items: [
+        { id: "2-1", text: "Register with email + password + school picker" },
+        { id: "2-2", text: "Redirects to /feed after registration" },
+        { id: "2-3", text: "Log out, then log back in at /login" },
+        { id: "2-4", text: "Google OAuth login (if configured)" },
+      ]},
+      { label: "Profile", items: [
+        { id: "2-5", text: "/profile shows display name, school, stats" },
+        { id: "2-6", text: "DynastyProgress bar renders" },
+        { id: "2-7", text: "ProfileStats section renders" },
+      ]},
+      { label: "Settings", items: [
+        { id: "2-8", text: "/settings sign-out button works" },
+        { id: "2-9", text: "/settings/profile — edit name/bio, save, refresh persists" },
+      ]},
+      { label: "Follow System", items: [
+        { id: "2-10", text: "Visit another profile, click Follow — toggles to Following" },
+        { id: "2-11", text: "Click again to unfollow" },
+      ]},
+      { label: "Protected Routes", items: [
+        { id: "2-12", text: "Logged out: /feed redirects to login" },
+        { id: "2-13", text: "Logged out: /rivalry, /portal, /predictions redirect to login" },
+      ]},
+    ]
+  },
+  {
+    phase: "Phase 3 — Core Feed & Posts",
+    sections: [
+      { label: "Creating Posts", items: [
+        { id: "3-1", text: "Post composer visible on /feed" },
+        { id: "3-2", text: "Write and submit a post (500 char limit enforced)" },
+        { id: "3-3", text: "New post appears at top of feed" },
+        { id: "3-4", text: "School pennant badge shows on post" },
+      ]},
+      { label: "Feed Tabs", items: [
+        { id: "3-5", text: "Latest tab shows all recent posts" },
+        { id: "3-6", text: "Top Takes tab shows highest-voted posts" },
+        { id: "3-7", text: "Receipts tab shows prediction posts" },
+        { id: "3-8", text: "Following tab shows posts from followed users" },
+        { id: "3-9", text: "My School tab filters to your school only" },
+      ]},
+      { label: "Reactions", items: [
+        { id: "3-10", text: "Click reaction (ballot button) — highlights" },
+        { id: "3-11", text: "Click same reaction again — un-votes" },
+        { id: "3-12", text: "Click different reaction — switches vote" },
+      ]},
+      { label: "Post Detail & Replies", items: [
+        { id: "3-13", text: "Click post to open /post/[id]" },
+        { id: "3-14", text: "Write a reply — appears below the post" },
+      ]},
+      { label: "Post Actions", items: [
+        { id: "3-15", text: "Repost button works" },
+        { id: "3-16", text: "Save/Bookmark button toggles" },
+        { id: "3-17", text: "Reply button navigates to detail page" },
+      ]},
+      { label: "Real-time & Pagination", items: [
+        { id: "3-18", text: "New posts banner appears in second tab when post created" },
+        { id: "3-19", text: "Click banner to load new posts" },
+        { id: "3-20", text: "Load More button loads older posts" },
+      ]},
+    ]
+  },
+  {
+    phase: "Phase 4 — Rivalry Ring",
+    items: [
+      { id: "4-1", text: "/rivalry page loads with active matchups" },
+      { id: "4-2", text: "Vote on a rivalry — vote bar updates" },
+      { id: "4-3", text: "Cannot double-vote on same rivalry" },
+      { id: "4-4", text: "Vote counts display correctly" },
+      { id: "4-5", text: "Challenge cards show school colors and status" },
+    ]
+  },
+  {
+    phase: "Phase 5 — Transfer Portal & Predictions",
+    sections: [
+      { label: "Portal Wire", items: [
+        { id: "5-1", text: "/portal loads with player list" },
+        { id: "5-2", text: "Status filter works (In Portal / Committed / Withdrawn)" },
+        { id: "5-3", text: "Position filter works" },
+        { id: "5-4", text: "Stars filter works" },
+        { id: "5-5", text: "Click player opens /portal/[id] detail page" },
+        { id: "5-6", text: "Player detail: school interest bars render" },
+        { id: "5-7", text: "Player detail: Claim Button works" },
+        { id: "5-8", text: "Player detail: existing claims list shows" },
+      ]},
+      { label: "Predictions", items: [
+        { id: "5-9", text: "/predictions loads with tabs" },
+        { id: "5-10", text: "All Predictions tab shows prediction posts" },
+        { id: "5-11", text: "Leaderboard tab shows ranked users" },
+        { id: "5-12", text: "Create a prediction — appears with PENDING badge" },
+      ]},
+      { label: "Aging Takes", items: [
+        { id: "5-13", text: "REVISIT action (clock icon) on post works" },
+        { id: "5-14", text: "AgingTakeTimer countdown appears on marked posts" },
+      ]},
+    ]
+  },
+  {
+    phase: "Phase 6 — AI Moderation",
+    sections: [
+      { label: "Reporting", items: [
+        { id: "6-1", text: "FLAG button on post opens ReportModal" },
+        { id: "6-2", text: "Submit report with reason" },
+      ]},
+      { label: "Admin Panel", items: [
+        { id: "6-3", text: "Admin app: Flagged Posts queue shows reported posts" },
+        { id: "6-4", text: "Admin: Restore/Remove actions work" },
+        { id: "6-5", text: "Admin: Reports queue — Action/Dismiss buttons work" },
+        { id: "6-6", text: "Admin: Appeals queue — Approve/Deny (if applicable)" },
+      ]},
+      { label: "Appeals", items: [
+        { id: "6-7", text: "Moderated post shows Appeal button" },
+        { id: "6-8", text: "Submit appeal — shows in admin queue" },
+      ]},
+    ]
+  },
+  {
+    phase: "Phase 7-9 — Dynasty, Gamification, Polish",
+    items: [
+      { id: "7-1", text: "/dynasty page loads with progress/level" },
+      { id: "7-2", text: "XP tracking visible" },
+      { id: "7-3", text: "/hall-of-fame shows leaderboards" },
+      { id: "7-4", text: "/coaches-call page loads" },
+      { id: "7-5", text: "/notifications page loads with notification list" },
+      { id: "7-6", text: "Actions trigger notifications (follow, reply, etc.)" },
+      { id: "7-7", text: "/vault shows saved/bookmarked content" },
+    ]
+  },
+  {
+    phase: "Phase 10 — School Hubs + Chaos Meter",
+    sections: [
+      { label: "School Hub", items: [
+        { id: "10-1", text: "/school/[slug] loads (try /school/alabama)" },
+        { id: "10-2", text: "School header: name, mascot, conference, stadium, colors" },
+        { id: "10-3", text: "Stats row: fans, takes, portal activity" },
+        { id: "10-4", text: "Color bar matches school primary/secondary colors" },
+        { id: "10-5", text: "Left column: school feed (posts from fans)" },
+        { id: "10-6", text: "Right column: top fans leaderboard + quick links" },
+      ]},
+      { label: "Pennant Links", items: [
+        { id: "10-7", text: "Click pennant badge on any post — goes to school hub" },
+      ]},
+      { label: "Chaos Meter", items: [
+        { id: "10-8", text: "Chaos Meter widget visible in right sidebar" },
+        { id: "10-9", text: "Shows 0-100 score with color-coded bar and label" },
+      ]},
+    ]
+  },
+  {
+    phase: "Phase 11 — War Room",
+    sections: [
+      { label: "Scores Ribbon", items: [
+        { id: "11-1", text: "Scrolling scores ribbon at top of page" },
+        { id: "11-2", text: "Click a score — navigates to /war-room/[gameId]" },
+      ]},
+      { label: "War Room Browse", items: [
+        { id: "11-3", text: "/war-room page loads" },
+        { id: "11-4", text: "LIVE NOW / UPCOMING / FINAL sections display (or empty state)" },
+        { id: "11-5", text: "Auto-refreshes from ESPN (wait 60s or check network tab)" },
+      ]},
+      { label: "Game Thread", items: [
+        { id: "11-6", text: "Click game card — opens /war-room/[gameId]" },
+        { id: "11-7", text: "Dark scoreboard shows team abbreviations + scores" },
+        { id: "11-8", text: "Viewer count badge visible" },
+        { id: "11-9", text: "Type and send a chat message (Enter to send, 300 char max)" },
+        { id: "11-10", text: "Messages appear in real-time (test with 2 tabs)" },
+        { id: "11-11", text: "Quick reaction buttons: TD / INT / SACK / FG / FMB" },
+        { id: "11-12", text: "Reaction messages styled differently in chat" },
+        { id: "11-13", text: "Back link returns to /war-room" },
+      ]},
+    ]
+  },
+  {
+    phase: "Phase 12 — Mascot Wars + Recruiting",
+    sections: [
+      { label: "Mascot Wars", items: [
+        { id: "12-1", text: "/mascot-wars page loads with active bracket" },
+        { id: "12-2", text: "Round header says 'Round of 64'" },
+        { id: "12-3", text: "32 matchup cards display with school avatars + mascot names" },
+        { id: "12-4", text: "Click vote button — highlights your pick" },
+        { id: "12-5", text: "Vote bar updates with percentage split" },
+        { id: "12-6", text: "Cannot double-vote (switching schools works)" },
+        { id: "12-7", text: "Empty state shows if no active bracket" },
+      ]},
+      { label: "Recruiting Desk", items: [
+        { id: "12-8", text: "/recruiting page loads with summary row" },
+        { id: "12-9", text: "Conference filter buttons work (All, SEC, Big Ten, etc.)" },
+        { id: "12-10", text: "Sort dropdown works (Activity / Net / Stars / Name)" },
+        { id: "12-11", text: "School cards show: avatar, name, mascot, conference" },
+        { id: "12-12", text: "Stats row: Lost (red) / Gained (green) / Net / Claims" },
+        { id: "12-13", text: "Activity bar color-coded correctly" },
+        { id: "12-14", text: "Click school card — navigates to /school/[slug]" },
+      ]},
+    ]
+  },
+  {
+    phase: "Cross-Cutting Checks",
+    sections: [
+      { label: "Dark Mode", items: [
+        { id: "x-1", text: "Dark mode works on /feed" },
+        { id: "x-2", text: "Dark mode works on /rivalry" },
+        { id: "x-3", text: "Dark mode works on /portal and /portal/[id]" },
+        { id: "x-4", text: "Dark mode works on /predictions" },
+        { id: "x-5", text: "Dark mode works on /war-room and game threads" },
+        { id: "x-6", text: "Dark mode works on /mascot-wars" },
+        { id: "x-7", text: "Dark mode works on /recruiting" },
+        { id: "x-8", text: "Dark mode works on /school/[slug]" },
+        { id: "x-9", text: "Dark mode works on /dynasty, /hall-of-fame, /vault" },
+      ]},
+      { label: "Mobile Responsive", items: [
+        { id: "x-10", text: "Sidebar collapses at mobile width (~375px)" },
+        { id: "x-11", text: "Content stacks single-column on mobile" },
+        { id: "x-12", text: "CorkboardNav works as mobile menu" },
+        { id: "x-13", text: "Recruiting grid goes to 1 column on mobile" },
+        { id: "x-14", text: "War room cards stack on mobile" },
+      ]},
+      { label: "Navigation", items: [
+        { id: "x-15", text: "CorkboardNav has all 12 links" },
+        { id: "x-16", text: "Every nav link loads its page without errors" },
+        { id: "x-17", text: "No console JS errors on any page" },
+      ]},
+    ]
+  },
+];
+
+function buildPhases() {
+  const container = document.getElementById('phases');
+  DATA.forEach((phase, pi) => {
+    const div = document.createElement('div');
+    div.className = 'phase';
+    div.id = `phase-${pi}`;
+
+    const allItems = phase.items || phase.sections.flatMap(s => s.items);
+    const count = allItems.length;
+
+    div.innerHTML = `
+      <div class="phase-header" onclick="togglePhase(${pi})">
+        <span class="phase-title">${phase.phase}</span>
+        <span class="phase-count" id="pcount-${pi}">0/${count}</span>
+      </div>
+      <div class="phase-body" id="pbody-${pi}"></div>
+    `;
+
+    const body = div.querySelector('.phase-body');
+
+    if (phase.items) {
+      phase.items.forEach(item => body.appendChild(buildItem(item)));
+    } else {
+      phase.sections.forEach(sec => {
+        const lbl = document.createElement('div');
+        lbl.className = 'section-label';
+        lbl.textContent = sec.label;
+        body.appendChild(lbl);
+        sec.items.forEach(item => body.appendChild(buildItem(item)));
+      });
+    }
+
+    container.appendChild(div);
+  });
+}
+
+function buildItem(item) {
+  const row = document.createElement('div');
+  row.className = 'test-item';
+  row.id = `row-${item.id}`;
+  row.dataset.itemId = item.id;
+  row.innerHTML = `
+    <div class="test-top">
+      <div class="status-btns">
+        <button class="status-btn pass-btn" title="Pass" onclick="setStatus('${item.id}','pass')">PASS</button>
+        <button class="status-btn fail-btn" title="Fail" onclick="setStatus('${item.id}','fail')">FAIL</button>
+        <button class="status-btn skip-btn" title="Skip" onclick="setStatus('${item.id}','skip')">SKIP</button>
+      </div>
+      <div class="test-label">${item.text}</div>
+    </div>
+    <div class="test-note">
+      <input type="text" placeholder="type issue here if FAIL..." id="note-${item.id}" onchange="save()" />
+    </div>
+  `;
+  return row;
+}
+
+let state = {};
+
+function loadState() {
+  try {
+    const saved = localStorage.getItem('cfb-test-state');
+    if (saved) state = JSON.parse(saved);
+  } catch {}
+  // Apply saved state
+  Object.keys(state).forEach(id => {
+    const s = state[id];
+    if (s.status) applyStatus(id, s.status);
+    if (s.note) {
+      const inp = document.getElementById(`note-${id}`);
+      if (inp) inp.value = s.note;
+    }
+  });
+}
+
+function save() {
+  // Collect notes
+  document.querySelectorAll('.test-note input').forEach(inp => {
+    const id = inp.id.replace('note-', '');
+    if (!state[id]) state[id] = {};
+    state[id].note = inp.value;
+  });
+  localStorage.setItem('cfb-test-state', JSON.stringify(state));
+  updateCounts();
+}
+
+function setStatus(id, status) {
+  if (!state[id]) state[id] = {};
+  if (state[id].status === status) {
+    state[id].status = '';
+    applyStatus(id, '');
+  } else {
+    state[id].status = status;
+    applyStatus(id, status);
+  }
+  save();
+}
+
+function applyStatus(id, status) {
+  const row = document.getElementById(`row-${id}`);
+  if (!row) return;
+  row.classList.remove('checked', 'fail');
+  row.querySelectorAll('.status-btn').forEach(b => b.classList.remove('active'));
+  if (status === 'pass') {
+    row.classList.add('checked');
+    row.querySelector('.pass-btn').classList.add('active');
+  } else if (status === 'fail') {
+    row.classList.add('fail');
+    row.querySelector('.fail-btn').classList.add('active');
+  } else if (status === 'skip') {
+    row.querySelector('.skip-btn').classList.add('active');
+  }
+}
+
+function updateCounts() {
+  let total = 0, pass = 0, fail = 0, skip = 0;
+  document.querySelectorAll('.test-item').forEach(row => {
+    total++;
+    const id = row.dataset.itemId;
+    const s = state[id]?.status;
+    if (s === 'pass') pass++;
+    else if (s === 'fail') fail++;
+    else if (s === 'skip') skip++;
+  });
+  const remaining = total - pass - fail - skip;
+  document.getElementById('total-count').textContent = total;
+  document.getElementById('pass-count').textContent = pass;
+  document.getElementById('fail-count').textContent = fail;
+  document.getElementById('skip-count').textContent = skip;
+  document.getElementById('remaining-count').textContent = remaining;
+  const pct = total > 0 ? ((pass + fail + skip) / total * 100) : 0;
+  document.getElementById('progress-fill').style.width = pct + '%';
+
+  // Phase counts
+  DATA.forEach((phase, pi) => {
+    const allItems = phase.items || phase.sections.flatMap(s => s.items);
+    let done = 0;
+    allItems.forEach(item => {
+      if (state[item.id]?.status) done++;
+    });
+    const el = document.getElementById(`pcount-${pi}`);
+    if (el) el.textContent = `${done}/${allItems.length}`;
+  });
+}
+
+function togglePhase(pi) {
+  document.getElementById(`phase-${pi}`).classList.toggle('open');
+}
+
+function expandAll() {
+  document.querySelectorAll('.phase').forEach(p => p.classList.add('open'));
+}
+
+function collapseAll() {
+  document.querySelectorAll('.phase').forEach(p => p.classList.remove('open'));
+}
+
+function resetAll() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  state = {};
+  localStorage.removeItem('cfb-test-state');
+  document.querySelectorAll('.test-item').forEach(row => {
+    row.classList.remove('checked', 'fail');
+    row.querySelectorAll('.status-btn').forEach(b => b.classList.remove('active'));
+  });
+  document.querySelectorAll('.test-note input').forEach(inp => inp.value = '');
+  updateCounts();
+}
+
+function formatResults(failsOnly) {
+  let lines = [];
+  lines.push('# CFB Social — Test Results');
+  lines.push('');
+
+  let hasIssues = false;
+
+  DATA.forEach(phase => {
+    const allItems = phase.items || phase.sections.flatMap(s => s.items);
+    const phaseResults = [];
+
+    allItems.forEach(item => {
+      const s = state[item.id]?.status || 'untested';
+      const note = state[item.id]?.note || '';
+
+      if (failsOnly && s !== 'fail') return;
+
+      const marker = s === 'pass' ? 'PASS' : s === 'fail' ? 'FAIL' : s === 'skip' ? 'SKIP' : 'UNTESTED';
+      let line = `[${marker}] ${item.text}`;
+      if (note) line += ` — "${note}"`;
+      phaseResults.push(line);
+
+      if (s === 'fail') hasIssues = true;
+    });
+
+    if (phaseResults.length > 0) {
+      lines.push(`## ${phase.phase}`);
+      phaseResults.forEach(r => lines.push(r));
+      lines.push('');
+    }
+  });
+
+  if (failsOnly && !hasIssues) {
+    return 'No failures found. All tested items passed!';
+  }
+
+  // Summary at top
+  let total = 0, pass = 0, fail = 0, skip = 0;
+  document.querySelectorAll('.test-item').forEach(() => total++);
+  Object.values(state).forEach((s) => {
+    if (s.status === 'pass') pass++;
+    else if (s.status === 'fail') fail++;
+    else if (s.status === 'skip') skip++;
+  });
+
+  const summary = `Summary: ${pass} passed, ${fail} failed, ${skip} skipped, ${total - pass - fail - skip} untested\n`;
+  lines.splice(1, 0, summary);
+
+  if (fail > 0) {
+    lines.push('## Action Items (Failures to Fix)');
+    DATA.forEach(phase => {
+      const allItems = phase.items || phase.sections.flatMap(s => s.items);
+      allItems.forEach(item => {
+        if (state[item.id]?.status === 'fail') {
+          const note = state[item.id]?.note || 'no details given';
+          lines.push(`- ${phase.phase} > ${item.text}: ${note}`);
+        }
+      });
+    });
+  }
+
+  return lines.join('\n');
+}
+
+function copyResults() {
+  const text = formatResults(false);
+  navigator.clipboard.writeText(text).then(() => showToast('Full results copied!'));
+}
+
+function copyFailsOnly() {
+  const text = formatResults(true);
+  navigator.clipboard.writeText(text).then(() => showToast('Failures copied!'));
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+// Init
+buildPhases();
+loadState();
+updateCounts();
+// Open first phase by default
+document.getElementById('phase-0').classList.add('open');
+</script>
+</body>
+</html>

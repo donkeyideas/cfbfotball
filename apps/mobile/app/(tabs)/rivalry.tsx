@@ -1,174 +1,339 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
   FlatList,
   StyleSheet,
   RefreshControl,
-  ActivityIndicator,
+  Pressable,
 } from 'react-native';
 import { supabase } from '@/lib/supabase';
-import { colors } from '@/lib/theme/colors';
+import { useAuth } from '@/lib/auth/AuthProvider';
+import { useSchoolTheme } from '@/lib/theme/SchoolThemeProvider';
+import { AppHeader } from '@/components/navigation/AppHeader';
+import { RivalryTabs, type RivalryTab } from '@/components/rivalry/RivalryTabs';
+import { FightCard, type RivalryData } from '@/components/rivalry/FightCard';
+import { ChallengeCard, type ChallengeData } from '@/components/rivalry/ChallengeCard';
+import { CreateChallengeModal } from '@/components/rivalry/CreateChallengeModal';
+import { ThemedAlert } from '@/components/ui/ThemedAlert';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { LoadingScreen } from '@/components/ui/LoadingScreen';
+import { SectionLabel } from '@/components/ui/SectionLabel';
+import { useColors } from '@/lib/theme/ThemeProvider';
 import { typography } from '@/lib/theme/typography';
 
-interface Challenge {
-  id: string;
-  topic: string;
-  status: string;
-  created_at: string;
-  challenger: { username: string; display_name: string | null } | null;
-  challenged: { username: string; display_name: string | null } | null;
-}
+const RIVALRY_SELECT = `
+  *,
+  school_1:schools!rivalries_school_1_id_fkey(id, name, abbreviation, primary_color, slug, logo_url),
+  school_2:schools!rivalries_school_2_id_fkey(id, name, abbreviation, primary_color, slug, logo_url)
+`;
+
+const CHALLENGE_SELECT = `
+  *,
+  challenger:profiles!challenges_challenger_id_fkey(id, username, display_name, avatar_url, dynasty_tier),
+  challenged:profiles!challenges_challenged_id_fkey(id, username, display_name, avatar_url, dynasty_tier)
+`;
 
 export default function RivalryScreen() {
-  const [challenges, setChallenges] = useState<Challenge[]>([]);
+  const colors = useColors();
+  const { session, userId } = useAuth();
+  const { dark } = useSchoolTheme();
+
+  const [activeTab, setActiveTab] = useState<RivalryTab>('active');
+  const [rivalries, setRivalries] = useState<RivalryData[]>([]);
+  const [challenges, setChallenges] = useState<ChallengeData[]>([]);
+  const [pastRivalries, setPastRivalries] = useState<RivalryData[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [challengeModalVisible, setChallengeModalVisible] = useState(false);
+  const [alertConfig, setAlertConfig] = useState<{
+    visible: boolean;
+    title: string;
+    message: string;
+  }>({ visible: false, title: '', message: '' });
 
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.paper,
+    },
+    listContent: {
+      padding: 16,
+      gap: 14,
+      paddingBottom: 80,
+    },
+    fab: {
+      position: 'absolute',
+      bottom: 24,
+      left: 24,
+      width: 56,
+      height: 56,
+      borderRadius: 28,
+      alignItems: 'center',
+      justifyContent: 'center',
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 3 },
+      shadowOpacity: 0.2,
+      shadowRadius: 5,
+      elevation: 5,
+    },
+    fabText: {
+      fontFamily: typography.sansBold,
+      fontSize: 28,
+      color: colors.textInverse,
+      marginTop: -2,
+    },
+  }), [colors]);
+
+  // ---------------------------------------------------------------
+  // Fetch active rivalries
+  // ---------------------------------------------------------------
+  const fetchActiveRivalries = useCallback(async () => {
+    const { data } = await supabase
+      .from('rivalries')
+      .select(RIVALRY_SELECT)
+      .eq('status', 'ACTIVE')
+      .order('created_at', { ascending: false });
+    if (data) {
+      setRivalries(data as unknown as RivalryData[]);
+    }
+  }, []);
+
+  // ---------------------------------------------------------------
+  // Fetch challenges
+  // ---------------------------------------------------------------
   const fetchChallenges = useCallback(async () => {
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from('challenges')
-      .select(`
-        id, topic, status, created_at,
-        challenger:users!challenges_challenger_id_fkey(username, display_name),
-        challenged:users!challenges_challenged_id_fkey(username, display_name)
-      `)
-      .in('status', ['ACTIVE', 'VOTING'])
+      .select(CHALLENGE_SELECT)
+      .in('status', ['PENDING', 'ACTIVE', 'VOTING'])
       .order('created_at', { ascending: false })
-      .limit(20);
+      .limit(30);
+    if (data) {
+      setChallenges(data as unknown as ChallengeData[]);
+    }
+  }, []);
 
-    if (!error && data) {
-      setChallenges(data as unknown as Challenge[]);
+  // ---------------------------------------------------------------
+  // Fetch past rivalries
+  // ---------------------------------------------------------------
+  const fetchPastRivalries = useCallback(async () => {
+    const { data } = await supabase
+      .from('rivalries')
+      .select(RIVALRY_SELECT)
+      .eq('status', 'COMPLETED')
+      .order('created_at', { ascending: false })
+      .limit(30);
+    if (data) {
+      setPastRivalries(data as unknown as RivalryData[]);
+    }
+  }, []);
+
+  // ---------------------------------------------------------------
+  // Fetch for the active tab
+  // ---------------------------------------------------------------
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    if (activeTab === 'active') {
+      await fetchActiveRivalries();
+    } else if (activeTab === 'challenges') {
+      await fetchChallenges();
+    } else {
+      await fetchPastRivalries();
     }
     setLoading(false);
     setRefreshing(false);
-  }, []);
+  }, [activeTab, fetchActiveRivalries, fetchChallenges, fetchPastRivalries]);
 
   useEffect(() => {
-    fetchChallenges();
-  }, [fetchChallenges]);
+    fetchData();
+  }, [fetchData]);
 
-  function onRefresh() {
+  // ---------------------------------------------------------------
+  // Pull to refresh
+  // ---------------------------------------------------------------
+  const handleRefresh = () => {
     setRefreshing(true);
-    fetchChallenges();
-  }
+    fetchData();
+  };
 
-  if (loading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={colors.crimson} />
-      </View>
+  // ---------------------------------------------------------------
+  // Vote on rivalry
+  // ---------------------------------------------------------------
+  const handleRivalryVote = async (rivalryId: string, schoolId: string) => {
+    if (!userId) return;
+
+    // Check if user already voted
+    const { data: existing } = await supabase
+      .from('rivalry_votes')
+      .select('id')
+      .eq('rivalry_id', rivalryId)
+      .eq('user_id', userId)
+      .maybeSingle();
+
+    if (existing) {
+      setAlertConfig({
+        visible: true,
+        title: 'Already Voted',
+        message: 'You have already cast your vote in this rivalry.',
+      });
+      return;
+    }
+
+    const { error } = await supabase.from('rivalry_votes').insert({
+      rivalry_id: rivalryId,
+      school_id: schoolId,
+      user_id: userId,
+    });
+
+    if (error) {
+      setAlertConfig({
+        visible: true,
+        title: 'Incomplete Pass',
+        message: 'Could not record your vote. Try again.',
+      });
+      return;
+    }
+
+    // Optimistic update: increment vote count locally
+    setRivalries((prev) =>
+      prev.map((r) => {
+        if (r.id !== rivalryId) return r;
+        const isSchool1 = r.school_1?.id === schoolId;
+        return {
+          ...r,
+          school_1_vote_count: (r.school_1_vote_count ?? 0) + (isSchool1 ? 1 : 0),
+          school_2_vote_count: (r.school_2_vote_count ?? 0) + (isSchool1 ? 0 : 1),
+        };
+      })
     );
-  }
+  };
+
+  // ---------------------------------------------------------------
+  // Challenge created callback
+  // ---------------------------------------------------------------
+  const handleChallengeCreated = () => {
+    if (activeTab === 'challenges') {
+      fetchChallenges();
+    }
+  };
+
+  // ---------------------------------------------------------------
+  // Render items
+  // ---------------------------------------------------------------
+  const renderRivalryItem = ({ item }: { item: RivalryData }) => (
+    <FightCard rivalry={item} onVote={handleRivalryVote} />
+  );
+
+  const renderChallengeItem = ({ item }: { item: ChallengeData }) => (
+    <ChallengeCard challenge={item} />
+  );
+
+  const renderPastItem = ({ item }: { item: RivalryData }) => (
+    <FightCard rivalry={item} />
+  );
+
+  // ---------------------------------------------------------------
+  // Empty states
+  // ---------------------------------------------------------------
+  const activeEmpty = (
+    <EmptyState
+      title="No active rivalries"
+      subtitle="Check back when a new matchup drops."
+    />
+  );
+
+  const challengesEmpty = (
+    <EmptyState
+      title="No open challenges"
+      subtitle="Be the first to throw down a challenge."
+    />
+  );
+
+  const pastEmpty = (
+    <EmptyState
+      title="No past results yet"
+      subtitle="Rivalries will appear here after they conclude."
+    />
+  );
 
   return (
     <View style={styles.container}>
-      <Text style={styles.description}>
-        Challenge rival fans to head-to-head debates. Put your record on the line.
-      </Text>
+      <AppHeader />
+      <SectionLabel text="Rivalry Ring" />
+      <RivalryTabs activeTab={activeTab} onTabChange={setActiveTab} />
 
-      <FlatList
-        data={challenges}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.listContent}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={colors.crimson}
-          />
-        }
-        renderItem={({ item }) => (
-          <View style={styles.card}>
-            <Text style={styles.topic}>{item.topic}</Text>
-            <Text style={styles.participants}>
-              {item.challenger?.display_name ?? item.challenger?.username} vs{' '}
-              {item.challenged?.display_name ?? item.challenged?.username}
-            </Text>
-            <View style={styles.statusBadge}>
-              <Text style={styles.statusText}>{item.status}</Text>
-            </View>
-          </View>
-        )}
-        ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyTitle}>No active rivalries</Text>
-            <Text style={styles.emptySubtitle}>Be the first to throw down a challenge.</Text>
-          </View>
-        }
+      {loading ? (
+        <LoadingScreen />
+      ) : activeTab === 'active' ? (
+        <FlatList
+          data={rivalries}
+          keyExtractor={(item) => item.id}
+          renderItem={renderRivalryItem}
+          contentContainerStyle={styles.listContent}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={handleRefresh}
+              tintColor={dark}
+            />
+          }
+          ListEmptyComponent={activeEmpty}
+        />
+      ) : activeTab === 'challenges' ? (
+        <FlatList
+          data={challenges}
+          keyExtractor={(item) => item.id}
+          renderItem={renderChallengeItem}
+          contentContainerStyle={styles.listContent}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={handleRefresh}
+              tintColor={dark}
+            />
+          }
+          ListEmptyComponent={challengesEmpty}
+        />
+      ) : (
+        <FlatList
+          data={pastRivalries}
+          keyExtractor={(item) => item.id}
+          renderItem={renderPastItem}
+          contentContainerStyle={styles.listContent}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={handleRefresh}
+              tintColor={dark}
+            />
+          }
+          ListEmptyComponent={pastEmpty}
+        />
+      )}
+
+      {/* FAB: Create Challenge */}
+      {session && (
+        <Pressable
+          style={[styles.fab, { backgroundColor: dark }]}
+          onPress={() => setChallengeModalVisible(true)}
+        >
+          <Text style={styles.fabText}>+</Text>
+        </Pressable>
+      )}
+
+      <CreateChallengeModal
+        visible={challengeModalVisible}
+        onClose={() => setChallengeModalVisible(false)}
+        onCreated={handleChallengeCreated}
+      />
+
+      <ThemedAlert
+        visible={alertConfig.visible}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        onDismiss={() => setAlertConfig((prev) => ({ ...prev, visible: false }))}
       />
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.paper,
-  },
-  loadingContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.paper,
-  },
-  description: {
-    fontFamily: typography.sans,
-    fontSize: 14,
-    color: colors.textSecondary,
-    paddingHorizontal: 16,
-    paddingTop: 12,
-  },
-  listContent: {
-    padding: 16,
-    gap: 12,
-  },
-  card: {
-    backgroundColor: colors.surfaceRaised,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 12,
-    padding: 16,
-  },
-  topic: {
-    fontFamily: typography.serifBold,
-    fontSize: 18,
-    color: colors.ink,
-  },
-  participants: {
-    fontFamily: typography.sans,
-    fontSize: 14,
-    color: colors.textMuted,
-    marginTop: 4,
-  },
-  statusBadge: {
-    alignSelf: 'flex-start',
-    marginTop: 8,
-    backgroundColor: colors.surface,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 6,
-  },
-  statusText: {
-    fontFamily: typography.mono,
-    fontSize: 10,
-    letterSpacing: 1,
-    textTransform: 'uppercase',
-    color: colors.textMuted,
-  },
-  emptyContainer: {
-    alignItems: 'center',
-    paddingVertical: 48,
-  },
-  emptyTitle: {
-    fontFamily: typography.serif,
-    fontSize: 20,
-    color: colors.textSecondary,
-  },
-  emptySubtitle: {
-    fontFamily: typography.sans,
-    fontSize: 14,
-    color: colors.textMuted,
-    marginTop: 4,
-  },
-});

@@ -4,6 +4,8 @@ import { ChallengeCard } from '@/components/rivalry/ChallengeCard';
 import { CreateChallenge } from '@/components/rivalry/CreateChallenge';
 import { RivalryTabs } from '@/components/rivalry/RivalryTabs';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata = {
   title: 'Rivalry Ring | College Football Rivalries & Debates',
   description: 'Vote on the greatest college football rivalries. Pick sides in school-vs-school debates and issue challenges to other fans.',

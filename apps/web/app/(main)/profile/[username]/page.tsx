@@ -5,6 +5,8 @@ import { ProfileStats } from '@/components/profile/ProfileStats';
 import { DynastyProgress } from '@/components/profile/DynastyProgress';
 import { PostCard } from '@/components/feed/PostCard';
 
+export const dynamic = 'force-dynamic';
+
 export async function generateMetadata({
   params,
 }: {

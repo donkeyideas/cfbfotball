@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&amp;family=Source+Sans+3:wght@600;700&amp;display=swap');
+    </style>
+  </defs>
+
+  <!-- Parchment background -->
+  <rect width="512" height="512" rx="90" fill="#f4efe4"/>
+  <rect x="3" y="3" width="506" height="506" rx="87" fill="none" stroke="#3b2f1e" stroke-width="5"/>
+
+  <!-- Crimson top bar -->
+  <rect x="3" y="3" width="506" height="95" rx="87" fill="#8b1a1a"/>
+  <rect x="3" y="60" width="506" height="38" fill="#8b1a1a"/>
+  <text x="256" y="72" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-weight="700" font-size="36" fill="#f4efe4" letter-spacing="14">PRESS</text>
+
+  <!-- Inner border -->
+  <rect x="30" y="108" width="452" height="380" rx="8" fill="none" stroke="#d4c5a0" stroke-width="2.5"/>
+
+  <!-- CFB SOCIAL -->
+  <text x="256" y="195" text-anchor="middle" font-family="'Playfair Display', Georgia, serif" font-weight="900" font-size="80" fill="#3b2f1e" letter-spacing="8">CFB</text>
+  <text x="256" y="255" text-anchor="middle" font-family="'Playfair Display', Georgia, serif" font-weight="900" font-size="56" fill="#3b2f1e" letter-spacing="5">SOCIAL</text>
+
+  <!-- Divider -->
+  <line x1="100" y1="275" x2="412" y2="275" stroke="#c49a2f" stroke-width="3"/>
+
+  <!-- Football icon -->
+  <ellipse cx="256" cy="330" rx="50" ry="30" fill="none" stroke="#3b2f1e" stroke-width="4"/>
+  <line x1="230" y1="330" x2="282" y2="330" stroke="#3b2f1e" stroke-width="3"/>
+  <line x1="240" y1="306" x2="240" y2="354" stroke="#3b2f1e" stroke-width="2"/>
+  <line x1="252" y1="303" x2="252" y2="357" stroke="#3b2f1e" stroke-width="2"/>
+  <line x1="260" y1="303" x2="260" y2="357" stroke="#3b2f1e" stroke-width="2"/>
+  <line x1="272" y1="306" x2="272" y2="354" stroke="#3b2f1e" stroke-width="2"/>
+
+  <!-- Bottom bar -->
+  <rect x="120" y="455" width="272" height="32" rx="5" fill="#3b2f1e"/>
+  <text x="256" y="477" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-weight="600" font-size="18" fill="#c49a2f" letter-spacing="6">EST. 2026</text>
+</svg>

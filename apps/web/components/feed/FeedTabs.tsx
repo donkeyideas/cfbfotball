@@ -15,7 +15,7 @@ export type FeedTab = (typeof tabs)[number]['value'];
 
 export function FeedTabs() {
   const searchParams = useSearchParams();
-  const activeTab = (searchParams.get('tab') as FeedTab) || 'latest';
+  const activeTab = (searchParams?.get('tab') as FeedTab) || 'latest';
 
   return (
     <div className="feed-tabs">

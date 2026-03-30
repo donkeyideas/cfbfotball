@@ -3,6 +3,8 @@ import { AchievementCard } from '@/components/dynasty/AchievementCard';
 import { DynastyLeaderboard } from '@/components/dynasty/DynastyLeaderboard';
 import { DynastyTierBadge } from '@/components/dynasty/DynastyTierBadge';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata = {
   title: 'Dynasty Mode',
 };

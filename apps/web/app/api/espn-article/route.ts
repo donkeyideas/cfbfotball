@@ -2,7 +2,17 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
   const url = request.nextUrl.searchParams.get('url');
-  if (!url || !url.includes('espn.com')) {
+  if (!url) {
+    return NextResponse.json({ error: 'Invalid URL' }, { status: 400 });
+  }
+
+  // Strict hostname validation to prevent SSRF
+  try {
+    const parsed = new URL(url);
+    if (parsed.protocol !== 'https:' || !parsed.hostname.endsWith('.espn.com') && parsed.hostname !== 'espn.com') {
+      return NextResponse.json({ error: 'Invalid URL' }, { status: 400 });
+    }
+  } catch {
     return NextResponse.json({ error: 'Invalid URL' }, { status: 400 });
   }
 

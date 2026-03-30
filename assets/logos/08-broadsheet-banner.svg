@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 160" width="700" height="160">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&amp;family=Source+Sans+3:wght@400;600&amp;display=swap');
+    </style>
+  </defs>
+
+  <!-- Background -->
+  <rect width="700" height="160" fill="#f4efe4"/>
+
+  <!-- Top thick rule -->
+  <rect x="20" y="10" width="660" height="4" fill="#3b2f1e"/>
+
+  <!-- Thin rule below -->
+  <line x1="20" y1="18" x2="680" y2="18" stroke="#3b2f1e" stroke-width="1"/>
+
+  <!-- Date line left -->
+  <text x="30" y="34" font-family="'Source Sans 3', sans-serif" font-weight="400" font-size="10" fill="#6b5d4d" letter-spacing="1">MARCH 2026</text>
+
+  <!-- Volume line right -->
+  <text x="670" y="34" text-anchor="end" font-family="'Source Sans 3', sans-serif" font-weight="400" font-size="10" fill="#6b5d4d" font-style="italic">Vol. I - No. 1</text>
+
+  <!-- Center ornament line -->
+  <line x1="20" y1="42" x2="680" y2="42" stroke="#3b2f1e" stroke-width="0.5"/>
+
+  <!-- CFB in smaller text -->
+  <text x="350" y="72" text-anchor="middle" font-family="'Playfair Display', Georgia, serif" font-weight="700" font-size="22" fill="#3b2f1e" letter-spacing="14">CFB</text>
+
+  <!-- SOCIAL in large display -->
+  <text x="350" y="118" text-anchor="middle" font-family="'Playfair Display', Georgia, serif" font-weight="900" font-size="58" fill="#3b2f1e" letter-spacing="10">SOCIAL</text>
+
+  <!-- Football flanking left -->
+  <ellipse cx="80" cy="95" rx="16" ry="10" fill="none" stroke="#8b1a1a" stroke-width="2"/>
+  <line x1="72" y1="95" x2="88" y2="95" stroke="#8b1a1a" stroke-width="1.2"/>
+  <line x1="76" y1="88" x2="76" y2="102" stroke="#8b1a1a" stroke-width="0.8"/>
+  <line x1="80" y1="87" x2="80" y2="103" stroke="#8b1a1a" stroke-width="0.8"/>
+  <line x1="84" y1="88" x2="84" y2="102" stroke="#8b1a1a" stroke-width="0.8"/>
+
+  <!-- Football flanking right -->
+  <ellipse cx="620" cy="95" rx="16" ry="10" fill="none" stroke="#8b1a1a" stroke-width="2"/>
+  <line x1="612" y1="95" x2="628" y2="95" stroke="#8b1a1a" stroke-width="1.2"/>
+  <line x1="616" y1="88" x2="616" y2="102" stroke="#8b1a1a" stroke-width="0.8"/>
+  <line x1="620" y1="87" x2="620" y2="103" stroke="#8b1a1a" stroke-width="0.8"/>
+  <line x1="624" y1="88" x2="624" y2="102" stroke="#8b1a1a" stroke-width="0.8"/>
+
+  <!-- Subtitle -->
+  <text x="350" y="138" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-weight="600" font-size="11" fill="#6b5d4d" letter-spacing="6">COLLEGE FOOTBALL'S SOCIAL HOME -- EST. 2026</text>
+
+  <!-- Bottom rules -->
+  <line x1="20" y1="145" x2="680" y2="145" stroke="#3b2f1e" stroke-width="1"/>
+  <rect x="20" y="150" width="660" height="4" fill="#3b2f1e"/>
+</svg>

@@ -1,0 +1,2188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BLITZ — College Football Social</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   RESET & BASE
+   ============================================================ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --deep-purple: #1a0a2e;
+  --dark-purple: #120820;
+  --mid-purple: #2a1248;
+  --light-purple: #3d1a6e;
+  --electric-blue: #00d4ff;
+  --hot-pink: #ff2d7b;
+  --neon-green: #00ff88;
+  --gold: #ffd700;
+  --silver: #c0c0c0;
+  --bronze: #cd7f32;
+  --danger-red: #ff3b3b;
+  --white: #ffffff;
+  --text-primary: #e8e0f0;
+  --text-secondary: #9b8fb8;
+  --text-dim: #6a5f80;
+  --card-bg: #1e0e35;
+  --card-border: #2e1650;
+  --sidebar-bg: #160b28;
+  --font-heading: 'Rajdhani', sans-serif;
+  --font-body: 'Space Grotesk', sans-serif;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--deep-purple);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--dark-purple); }
+::-webkit-scrollbar-thumb { background: var(--mid-purple); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--light-purple); }
+
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
+@keyframes neonBorderFlow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes livePulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.15); }
+}
+
+@keyframes glitchText {
+  0%, 100% { text-shadow: 2px 0 var(--hot-pink), -2px 0 var(--electric-blue); }
+  25% { text-shadow: -2px -1px var(--hot-pink), 2px 1px var(--electric-blue); }
+  50% { text-shadow: 1px 2px var(--hot-pink), -1px -2px var(--electric-blue); }
+  75% { text-shadow: -1px 1px var(--hot-pink), 1px -1px var(--electric-blue); }
+}
+
+@keyframes floatUp {
+  0% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-30px); }
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes scanlineMove {
+  0% { background-position: 0 0; }
+  100% { background-position: 0 100%; }
+}
+
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 0 5px var(--electric-blue), 0 0 10px rgba(0, 212, 255, 0.3); }
+  50% { box-shadow: 0 0 15px var(--electric-blue), 0 0 30px rgba(0, 212, 255, 0.5); }
+}
+
+@keyframes badgeShine {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+@keyframes xpFloat {
+  0% { opacity: 1; transform: translateY(0) scale(1); }
+  50% { opacity: 0.8; transform: translateY(-15px) scale(1.1); }
+  100% { opacity: 0; transform: translateY(-30px) scale(0.9); }
+}
+
+@keyframes borderGlow {
+  0%, 100% { border-color: var(--electric-blue); }
+  33% { border-color: var(--hot-pink); }
+  66% { border-color: var(--neon-green); }
+}
+
+@keyframes countdownPulse {
+  0%, 100% { color: var(--electric-blue); }
+  50% { color: var(--hot-pink); }
+}
+
+/* ============================================================
+   TOP BAR
+   ============================================================ */
+.topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: linear-gradient(135deg, var(--dark-purple) 0%, #0d0618 50%, var(--dark-purple) 100%);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  border-bottom: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.topbar::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--electric-blue), var(--hot-pink), var(--neon-green), var(--electric-blue));
+  background-size: 300% 100%;
+  animation: neonBorderFlow 4s linear infinite;
+}
+
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.logo {
+  font-family: var(--font-heading);
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  color: var(--white);
+  animation: glitchText 3s ease-in-out infinite;
+  cursor: pointer;
+  position: relative;
+}
+
+.logo-subtitle {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--text-secondary);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-top: -4px;
+}
+
+.topbar-center {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.live-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 45, 123, 0.15);
+  border: 1px solid var(--hot-pink);
+  border-radius: 20px;
+  padding: 4px 16px;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 1px;
+}
+
+.live-dot {
+  width: 10px;
+  height: 10px;
+  background: var(--hot-pink);
+  border-radius: 50%;
+  animation: livePulse 1.2s ease-in-out infinite;
+  box-shadow: 0 0 8px var(--hot-pink);
+}
+
+.live-label { color: var(--hot-pink); }
+.live-count { color: var(--text-primary); font-family: var(--font-body); font-weight: 400; font-size: 13px; }
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.xp-display {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, rgba(0, 255, 136, 0.1), rgba(0, 212, 255, 0.1));
+  border: 1px solid rgba(0, 255, 136, 0.3);
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.xp-level {
+  color: var(--neon-green);
+  letter-spacing: 1px;
+}
+
+.xp-divider {
+  color: var(--text-dim);
+  margin: 0 2px;
+}
+
+.xp-amount {
+  color: var(--electric-blue);
+}
+
+.notification-badge {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  background: var(--mid-purple);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: 1px solid var(--card-border);
+  transition: border-color 0.3s;
+}
+
+.notification-badge:hover { border-color: var(--electric-blue); }
+
+.notification-badge svg { width: 18px; height: 18px; fill: var(--text-secondary); }
+
+.notif-count {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: var(--hot-pink);
+  color: var(--white);
+  font-size: 10px;
+  font-weight: 700;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--dark-purple);
+}
+
+.user-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--electric-blue), var(--hot-pink));
+  padding: 2px;
+  cursor: pointer;
+}
+
+.user-avatar-inner {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: var(--mid-purple);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+/* ============================================================
+   LAYOUT
+   ============================================================ */
+.app-layout {
+  display: flex;
+  margin-top: 60px;
+  min-height: calc(100vh - 60px);
+}
+
+/* ============================================================
+   LEFT SIDEBAR
+   ============================================================ */
+.sidebar-left {
+  width: 260px;
+  min-width: 260px;
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--card-border);
+  padding: 16px 0;
+  position: fixed;
+  top: 60px;
+  left: 0;
+  bottom: 0;
+  overflow-y: auto;
+  z-index: 100;
+}
+
+.nav-section {
+  padding: 0 12px;
+  margin-bottom: 20px;
+}
+
+.nav-label {
+  font-family: var(--font-heading);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-dim);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 0 12px;
+  margin-bottom: 8px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 1px;
+  color: var(--text-secondary);
+  position: relative;
+  margin-bottom: 2px;
+}
+
+.nav-item:hover {
+  background: rgba(0, 212, 255, 0.08);
+  color: var(--text-primary);
+}
+
+.nav-item.active {
+  background: rgba(0, 212, 255, 0.12);
+  color: var(--electric-blue);
+  border: 1px solid rgba(0, 212, 255, 0.3);
+  box-shadow: 0 0 12px rgba(0, 212, 255, 0.1);
+}
+
+.nav-icon {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.nav-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.nav-item.active .nav-icon svg { fill: var(--electric-blue); stroke: var(--electric-blue); }
+.nav-item:not(.active) .nav-icon svg { fill: var(--text-dim); stroke: var(--text-dim); }
+
+/* Dynasty XP bar under nav */
+.dynasty-xp-section {
+  margin: 8px 12px 0;
+  padding: 12px;
+  background: rgba(0, 255, 136, 0.05);
+  border: 1px solid rgba(0, 255, 136, 0.15);
+  border-radius: 8px;
+}
+
+.dynasty-xp-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.dynasty-xp-label {
+  font-family: var(--font-heading);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--neon-green);
+  letter-spacing: 1px;
+}
+
+.dynasty-xp-numbers {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.dynasty-xp-numbers span { color: var(--neon-green); font-weight: 600; }
+
+.xp-bar-track {
+  width: 100%;
+  height: 8px;
+  background: rgba(0, 255, 136, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.xp-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  background: linear-gradient(90deg, var(--neon-green), #00cc6a);
+  box-shadow: 0 0 10px rgba(0, 255, 136, 0.4);
+  transition: width 0.5s ease;
+}
+
+/* Mini Leaderboard */
+.mini-leaderboard {
+  margin: 20px 12px 0;
+  padding: 14px;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 10px;
+}
+
+.mini-lb-title {
+  font-family: var(--font-heading);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: 1px;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+}
+
+.lb-entry {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  font-size: 12px;
+}
+
+.lb-rank {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  width: 22px;
+  text-align: center;
+}
+
+.lb-rank.gold { color: var(--gold); text-shadow: 0 0 6px rgba(255, 215, 0, 0.5); }
+.lb-rank.silver { color: var(--silver); text-shadow: 0 0 6px rgba(192, 192, 192, 0.5); }
+.lb-rank.bronze { color: var(--bronze); text-shadow: 0 0 6px rgba(205, 127, 50, 0.5); }
+
+.lb-name {
+  flex: 1;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.lb-xp {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  color: var(--electric-blue);
+  font-size: 11px;
+}
+
+.lb-divider {
+  height: 1px;
+  background: var(--card-border);
+  margin: 8px 0;
+}
+
+.lb-you {
+  color: var(--neon-green);
+  font-weight: 600;
+}
+
+/* ============================================================
+   MAIN FEED
+   ============================================================ */
+.main-feed {
+  flex: 1;
+  max-width: 640px;
+  margin-left: 260px;
+  padding: 20px 24px;
+}
+
+/* Composer */
+.composer {
+  margin-bottom: 24px;
+  position: relative;
+}
+
+.composer-hex {
+  background: var(--card-bg);
+  border: 2px solid var(--card-border);
+  border-radius: 12px;
+  padding: 16px;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.composer-hex:focus-within {
+  border-color: var(--electric-blue);
+  box-shadow: 0 0 20px rgba(0, 212, 255, 0.15);
+}
+
+.composer-input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 15px;
+  resize: none;
+  min-height: 44px;
+}
+
+.composer-input::placeholder { color: var(--text-dim); }
+
+.composer-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--card-border);
+}
+
+.composer-tools {
+  display: flex;
+  gap: 8px;
+}
+
+.composer-tool-btn {
+  background: var(--mid-purple);
+  border: 1px solid var(--card-border);
+  color: var(--text-secondary);
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-family: var(--font-heading);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.composer-tool-btn:hover {
+  border-color: var(--electric-blue);
+  color: var(--electric-blue);
+}
+
+.composer-post-btn {
+  background: linear-gradient(135deg, var(--electric-blue), var(--hot-pink));
+  border: none;
+  color: var(--white);
+  padding: 8px 24px;
+  border-radius: 6px;
+  font-family: var(--font-heading);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.composer-post-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+}
+
+/* Post card base */
+.post-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  margin-bottom: 20px;
+  overflow: hidden;
+  transition: border-color 0.3s;
+}
+
+.post-card:hover {
+  border-color: rgba(0, 212, 255, 0.3);
+}
+
+.post-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 16px 0;
+}
+
+.post-avatar {
+  width: 42px;
+  height: 42px;
+  clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+  flex-shrink: 0;
+}
+
+.post-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.post-user-info {
+  flex: 1;
+}
+
+.post-user-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.post-username {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--text-primary);
+}
+
+.post-team {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.rank-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 10px;
+  border-radius: 4px;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.rank-diamond {
+  background: linear-gradient(135deg, rgba(138, 43, 226, 0.2), rgba(0, 212, 255, 0.2));
+  border: 1px solid rgba(138, 43, 226, 0.4);
+  color: #b366ff;
+}
+
+.rank-platinum {
+  background: linear-gradient(135deg, rgba(192, 192, 192, 0.15), rgba(0, 212, 255, 0.1));
+  border: 1px solid rgba(192, 192, 192, 0.3);
+  color: var(--silver);
+}
+
+.diamond-shape {
+  width: 8px;
+  height: 8px;
+  background: #b366ff;
+  transform: rotate(45deg);
+  display: inline-block;
+}
+
+.platinum-circle {
+  width: 8px;
+  height: 8px;
+  background: var(--silver);
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.post-streak {
+  font-family: var(--font-heading);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  background: linear-gradient(90deg, #ff6b35, var(--hot-pink), #ff6b35);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradientShift 3s linear infinite;
+  margin-top: 2px;
+}
+
+.post-body {
+  padding: 12px 16px;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--text-primary);
+}
+
+/* Reaction bar */
+.reaction-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 16px;
+  margin-bottom: 4px;
+}
+
+.reaction-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 16px;
+  border-radius: 6px;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.2s;
+  clip-path: polygon(8% 0%, 92% 0%, 100% 50%, 92% 100%, 8% 100%, 0% 50%);
+  min-width: 110px;
+  justify-content: center;
+}
+
+.reaction-td {
+  background: rgba(0, 255, 136, 0.12);
+  color: var(--neon-green);
+}
+
+.reaction-td:hover {
+  background: rgba(0, 255, 136, 0.22);
+}
+
+.reaction-fumble {
+  background: rgba(255, 59, 59, 0.12);
+  color: var(--danger-red);
+}
+
+.reaction-fumble:hover {
+  background: rgba(255, 59, 59, 0.22);
+}
+
+.xp-float {
+  font-family: var(--font-heading);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--neon-green);
+  margin-left: auto;
+  animation: xpFloat 2s ease-out infinite;
+}
+
+/* Post actions */
+.post-actions {
+  display: flex;
+  border-top: 1px solid var(--card-border);
+  margin-top: 8px;
+}
+
+.post-action-btn {
+  flex: 1;
+  padding: 10px;
+  text-align: center;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all 0.2s;
+  border-right: 1px solid var(--card-border);
+}
+
+.post-action-btn:last-child { border-right: none; }
+
+.post-action-btn:hover {
+  color: var(--electric-blue);
+  background: rgba(0, 212, 255, 0.06);
+}
+
+/* Receipt banner */
+.receipt-banner {
+  margin: 0 16px 12px;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, rgba(0, 212, 255, 0.08), rgba(255, 45, 123, 0.08));
+  border: 1px solid rgba(0, 212, 255, 0.2);
+  border-radius: 8px;
+}
+
+.receipt-locked {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 2px;
+  color: var(--electric-blue);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.lock-icon {
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--electric-blue);
+  border-radius: 3px;
+  position: relative;
+}
+
+.lock-icon::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 1px;
+  width: 8px;
+  height: 6px;
+  border: 2px solid var(--electric-blue);
+  border-bottom: none;
+  border-radius: 4px 4px 0 0;
+}
+
+.receipt-countdown {
+  font-size: 12px;
+  color: var(--text-secondary);
+  animation: countdownPulse 3s ease infinite;
+}
+
+.receipt-trackers {
+  font-size: 12px;
+  color: var(--text-dim);
+  margin-top: 4px;
+}
+
+.receipt-trackers span { color: var(--hot-pink); font-weight: 600; }
+
+/* Moderation card */
+.violation-card {
+  background: var(--card-bg);
+  border: 2px solid var(--danger-red);
+  border-radius: 12px;
+  margin-bottom: 20px;
+  overflow: hidden;
+  position: relative;
+}
+
+.violation-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(255, 59, 59, 0.03) 2px,
+    rgba(255, 59, 59, 0.03) 4px
+  );
+  pointer-events: none;
+  animation: scanlineMove 8s linear infinite;
+  z-index: 1;
+}
+
+.violation-overlay {
+  background: rgba(255, 59, 59, 0.06);
+  padding: 24px;
+  position: relative;
+  z-index: 2;
+  text-align: center;
+}
+
+.violation-icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 12px;
+  position: relative;
+}
+
+.violation-icon-inner {
+  width: 48px;
+  height: 48px;
+  border: 3px solid var(--danger-red);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.violation-x {
+  font-family: var(--font-heading);
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--danger-red);
+  line-height: 1;
+}
+
+.violation-title {
+  font-family: var(--font-heading);
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: var(--danger-red);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+}
+
+.violation-ref {
+  font-family: var(--font-heading);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+  letter-spacing: 1px;
+}
+
+.violation-ref span {
+  color: var(--hot-pink);
+}
+
+.violation-reason {
+  font-family: var(--font-heading);
+  font-size: 12px;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+}
+
+.violation-msg {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+  font-style: italic;
+}
+
+.violation-appeal-btn {
+  display: inline-block;
+  padding: 8px 24px;
+  border: 2px solid var(--danger-red);
+  border-radius: 6px;
+  color: var(--danger-red);
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 2px;
+  cursor: pointer;
+  background: transparent;
+  transition: all 0.3s;
+  margin-bottom: 12px;
+}
+
+.violation-appeal-btn:hover {
+  background: rgba(255, 59, 59, 0.15);
+  box-shadow: 0 0 15px rgba(255, 59, 59, 0.3);
+}
+
+.violation-penalty {
+  font-size: 12px;
+  color: var(--text-dim);
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 59, 59, 0.2);
+}
+
+.violation-penalty span { color: var(--danger-red); font-weight: 600; }
+
+/* Live game / Play Caller */
+.live-game-card {
+  background: var(--card-bg);
+  border: 1px solid var(--electric-blue);
+  border-radius: 12px;
+  margin-bottom: 20px;
+  overflow: hidden;
+  animation: glowPulse 3s ease infinite;
+}
+
+.live-game-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(255, 45, 123, 0.05));
+  border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+}
+
+.live-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 45, 123, 0.2);
+  border: 1px solid var(--hot-pink);
+  border-radius: 4px;
+  padding: 3px 10px;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--hot-pink);
+}
+
+.live-badge-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--hot-pink);
+  border-radius: 50%;
+  animation: livePulse 1s ease-in-out infinite;
+}
+
+.play-caller-title {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--electric-blue);
+  letter-spacing: 1px;
+}
+
+.play-caller-game {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.play-caller-body {
+  padding: 16px;
+}
+
+.play-caller-question {
+  font-family: var(--font-heading);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.play-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.play-option {
+  background: rgba(0, 212, 255, 0.06);
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  clip-path: polygon(5% 0%, 95% 0%, 100% 50%, 95% 100%, 5% 100%, 0% 50%);
+  min-height: 50px;
+}
+
+.play-option:hover {
+  border-color: var(--electric-blue);
+  background: rgba(0, 212, 255, 0.12);
+}
+
+.play-option.selected {
+  border-color: var(--neon-green);
+  background: rgba(0, 255, 136, 0.1);
+}
+
+.play-option-name {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 1px;
+  color: var(--text-primary);
+}
+
+.play-option-pct {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--electric-blue);
+}
+
+.play-result {
+  text-align: center;
+  padding: 12px;
+  background: rgba(0, 255, 136, 0.08);
+  border: 1px solid rgba(0, 255, 136, 0.2);
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.play-result-label {
+  font-family: var(--font-heading);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+
+.play-result-call {
+  font-family: var(--font-heading);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--neon-green);
+  letter-spacing: 1px;
+}
+
+.play-xp-reward {
+  text-align: center;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--neon-green);
+  text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+  animation: xpFloat 3s ease-out infinite;
+}
+
+/* Rivalry Arena */
+.rivalry-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+.rivalry-header {
+  text-align: center;
+  padding: 14px 16px;
+  background: linear-gradient(90deg, rgba(0, 212, 255, 0.12), rgba(255, 45, 123, 0.12));
+  border-bottom: 1px solid var(--card-border);
+}
+
+.rivalry-header-label {
+  font-family: var(--font-heading);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.rivalry-title {
+  font-family: var(--font-heading);
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+.rivalry-title .vs-blue { color: var(--electric-blue); }
+.rivalry-title .vs-text { color: var(--text-dim); margin: 0 8px; font-size: 14px; }
+.rivalry-title .vs-pink { color: var(--hot-pink); }
+
+.rivalry-body {
+  display: flex;
+}
+
+.rivalry-side {
+  flex: 1;
+  padding: 20px;
+  text-align: center;
+  position: relative;
+}
+
+.rivalry-side-blue {
+  background: linear-gradient(135deg, rgba(0, 212, 255, 0.08), transparent);
+  border-right: 1px solid var(--card-border);
+}
+
+.rivalry-side-pink {
+  background: linear-gradient(135deg, transparent, rgba(255, 45, 123, 0.08));
+}
+
+.rivalry-username {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 15px;
+  margin-bottom: 6px;
+}
+
+.rivalry-side-blue .rivalry-username { color: var(--electric-blue); }
+.rivalry-side-pink .rivalry-username { color: var(--hot-pink); }
+
+.rivalry-score {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 28px;
+}
+
+.rivalry-side-blue .rivalry-score { color: var(--electric-blue); }
+.rivalry-side-pink .rivalry-score { color: var(--hot-pink); }
+
+.rivalry-pts-label {
+  font-size: 11px;
+  color: var(--text-dim);
+  letter-spacing: 1px;
+  font-family: var(--font-heading);
+}
+
+.rivalry-footer {
+  padding: 14px 16px;
+  border-top: 1px solid var(--card-border);
+  text-align: center;
+}
+
+.rivalry-vote-bar {
+  display: flex;
+  height: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.rivalry-vote-blue {
+  background: var(--electric-blue);
+  box-shadow: 0 0 8px rgba(0, 212, 255, 0.4);
+}
+
+.rivalry-vote-pink {
+  background: var(--hot-pink);
+  box-shadow: 0 0 8px rgba(255, 45, 123, 0.4);
+}
+
+.rivalry-vote-label {
+  font-family: var(--font-heading);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+  letter-spacing: 1px;
+}
+
+.rivalry-vote-label .blue-pct { color: var(--electric-blue); }
+.rivalry-vote-label .pink-pct { color: var(--hot-pink); }
+
+.rivalry-join-btn {
+  display: inline-block;
+  padding: 10px 32px;
+  background: linear-gradient(135deg, var(--electric-blue), var(--hot-pink));
+  border: none;
+  border-radius: 8px;
+  color: var(--white);
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-transform: uppercase;
+}
+
+.rivalry-join-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(0, 212, 255, 0.3), 0 4px 20px rgba(255, 45, 123, 0.3);
+}
+
+/* ============================================================
+   RIGHT SIDEBAR
+   ============================================================ */
+.sidebar-right {
+  width: 300px;
+  min-width: 300px;
+  padding: 20px 16px;
+  position: fixed;
+  top: 60px;
+  right: 0;
+  bottom: 0;
+  overflow-y: auto;
+  border-left: 1px solid var(--card-border);
+  background: var(--sidebar-bg);
+}
+
+/* Achievement card */
+.achievement-card {
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.08), rgba(255, 45, 123, 0.06));
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+.achievement-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.1), transparent);
+  animation: badgeShine 3s ease-in-out infinite;
+}
+
+.achievement-header {
+  font-family: var(--font-heading);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--gold);
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+
+.achievement-badge {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.badge-icon {
+  width: 48px;
+  height: 48px;
+  clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+  background: linear-gradient(135deg, var(--gold), #ff8c00);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.badge-icon-inner {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--dark-purple);
+}
+
+.achievement-name {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--gold);
+  margin-bottom: 2px;
+}
+
+.achievement-desc {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+/* Weekly Challenges */
+.challenges-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.challenges-title {
+  font-family: var(--font-heading);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--text-primary);
+  margin-bottom: 14px;
+  text-transform: uppercase;
+}
+
+.challenge-item {
+  margin-bottom: 14px;
+}
+
+.challenge-item:last-child { margin-bottom: 0; }
+
+.challenge-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.challenge-text {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.challenge-progress-text {
+  font-family: var(--font-heading);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--electric-blue);
+}
+
+.challenge-bar-track {
+  width: 100%;
+  height: 6px;
+  background: rgba(0, 212, 255, 0.1);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.challenge-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--electric-blue), var(--hot-pink));
+  transition: width 0.5s ease;
+}
+
+/* Recruiting Board */
+.recruiting-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.recruiting-title {
+  font-family: var(--font-heading);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+}
+
+.recruit-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--card-border);
+}
+
+.recruit-item:last-child { border-bottom: none; }
+
+.recruit-rank {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--text-dim);
+  width: 24px;
+  text-align: center;
+}
+
+.recruit-info { flex: 1; }
+
+.recruit-name {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.recruit-details {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.recruit-stars {
+  display: flex;
+  gap: 2px;
+}
+
+.star {
+  width: 12px;
+  height: 12px;
+  position: relative;
+}
+
+.star::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 2px;
+  width: 8px;
+  height: 8px;
+  background: var(--gold);
+  clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+}
+
+.star.empty::before { background: var(--text-dim); }
+
+/* Transfer Portal Alert */
+.portal-alert {
+  background: linear-gradient(135deg, rgba(0, 212, 255, 0.08), rgba(255, 45, 123, 0.06));
+  border: 1px solid rgba(0, 212, 255, 0.25);
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.portal-alert-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.portal-icon {
+  width: 32px;
+  height: 32px;
+  border: 2px solid var(--electric-blue);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.portal-icon-arrow {
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-bottom: 8px solid var(--electric-blue);
+}
+
+.portal-label {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--text-primary);
+  letter-spacing: 1px;
+}
+
+.portal-count-badge {
+  background: var(--hot-pink);
+  color: var(--white);
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  letter-spacing: 1px;
+  animation: livePulse 2s ease-in-out infinite;
+}
+
+/* Trending Tags */
+.trending-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 10px;
+  padding: 16px;
+}
+
+.trending-title {
+  font-family: var(--font-heading);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+}
+
+.trending-tag {
+  display: inline-block;
+  padding: 6px 14px;
+  margin: 0 6px 8px 0;
+  border-radius: 6px;
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid var(--card-border);
+  color: var(--text-secondary);
+  background: rgba(0, 212, 255, 0.04);
+}
+
+.trending-tag:hover {
+  border-color: var(--electric-blue);
+  color: var(--electric-blue);
+  background: rgba(0, 212, 255, 0.1);
+}
+
+.trending-tag:nth-child(2) { border-color: rgba(255, 45, 123, 0.3); color: var(--hot-pink); }
+.trending-tag:nth-child(2):hover { background: rgba(255, 45, 123, 0.1); }
+.trending-tag:nth-child(4) { border-color: rgba(0, 255, 136, 0.3); color: var(--neon-green); }
+.trending-tag:nth-child(4):hover { background: rgba(0, 255, 136, 0.1); }
+
+/* ============================================================
+   AVATAR COLORS
+   ============================================================ */
+.avatar-red { background: linear-gradient(135deg, #cc0000, #880000); }
+.avatar-crimson { background: linear-gradient(135deg, #9e1b32, #6b1222); }
+.avatar-blue { background: linear-gradient(135deg, var(--electric-blue), #0088aa); }
+.avatar-orange { background: linear-gradient(135deg, #dd5500, #993300); }
+.avatar-purple { background: linear-gradient(135deg, #6a0dad, #4a0080); }
+
+/* ============================================================
+   RESPONSIVE LAYOUT HELPERS (content area between sidebars)
+   ============================================================ */
+.content-area {
+  margin-left: 260px;
+  margin-right: 300px;
+  display: flex;
+  justify-content: center;
+  padding: 20px 24px;
+}
+
+.feed-column {
+  width: 100%;
+  max-width: 640px;
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     TOP BAR
+     ============================================================ -->
+<header class="topbar">
+  <div class="topbar-left">
+    <div>
+      <div class="logo">BLITZ</div>
+      <div class="logo-subtitle">College Football Social</div>
+    </div>
+  </div>
+
+  <div class="topbar-center">
+    <div class="live-indicator">
+      <span class="live-dot"></span>
+      <span class="live-label">LIVE</span>
+      <span class="live-count">3 Games In Progress</span>
+    </div>
+  </div>
+
+  <div class="topbar-right">
+    <div class="xp-display">
+      <span class="xp-level">LVL 24</span>
+      <span class="xp-divider">|</span>
+      <span class="xp-amount">5,680 XP</span>
+    </div>
+
+    <div class="notification-badge">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="var(--text-secondary)" fill="none"/>
+        <path d="M13.73 21a2 2 0 0 1-3.46 0" stroke="var(--text-secondary)" fill="none"/>
+      </svg>
+      <span class="notif-count">7</span>
+    </div>
+
+    <div class="user-avatar">
+      <div class="user-avatar-inner">BZ</div>
+    </div>
+  </div>
+</header>
+
+<!-- ============================================================
+     LAYOUT
+     ============================================================ -->
+<div class="app-layout">
+
+  <!-- ============================================================
+       LEFT SIDEBAR
+       ============================================================ -->
+  <aside class="sidebar-left">
+    <nav class="nav-section">
+      <div class="nav-label">MAIN</div>
+
+      <!-- FEED (active) -->
+      <div class="nav-item active">
+        <div class="nav-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7" rx="1"/>
+            <rect x="14" y="3" width="7" height="7" rx="1"/>
+            <rect x="3" y="14" width="7" height="7" rx="1"/>
+            <rect x="14" y="14" width="7" height="7" rx="1"/>
+          </svg>
+        </div>
+        FEED
+      </div>
+
+      <!-- TRENDING -->
+      <div class="nav-item">
+        <div class="nav-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+            <path d="M12 2C8 8 4 10 4 14a8 8 0 0 0 16 0c0-4-4-6-8-12z"/>
+          </svg>
+        </div>
+        TRENDING
+      </div>
+
+      <!-- RIVALRY ARENA -->
+      <div class="nav-item">
+        <div class="nav-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+            <line x1="4" y1="20" x2="20" y2="4"/>
+            <line x1="20" y1="20" x2="4" y2="4"/>
+            <polyline points="4,4 4,10 10,4"/>
+            <polyline points="20,20 20,14 14,20"/>
+          </svg>
+        </div>
+        RIVALRY ARENA
+      </div>
+
+      <!-- PLAY CALLER -->
+      <div class="nav-item">
+        <div class="nav-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+            <rect x="4" y="6" width="16" height="12" rx="3"/>
+            <circle cx="9" cy="12" r="1.5"/>
+            <circle cx="15" cy="9.5" r="1"/>
+            <circle cx="15" cy="14.5" r="1"/>
+            <circle cx="17.5" cy="12" r="1"/>
+            <circle cx="12.5" cy="12" r="1"/>
+          </svg>
+        </div>
+        PLAY CALLER
+      </div>
+
+      <!-- DYNASTY MODE -->
+      <div class="nav-item">
+        <div class="nav-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+            <path d="M6 9H3l3-6h12l3 6h-3"/>
+            <path d="M6 9l6 11 6-11"/>
+            <path d="M3 9h18"/>
+          </svg>
+        </div>
+        DYNASTY MODE
+      </div>
+
+      <!-- TRANSFER PORTAL -->
+      <div class="nav-item">
+        <div class="nav-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+            <rect x="6" y="3" width="12" height="18" rx="2"/>
+            <line x1="9" y1="7" x2="15" y2="7"/>
+            <line x1="9" y1="11" x2="15" y2="11"/>
+            <line x1="9" y1="15" x2="13" y2="15"/>
+          </svg>
+        </div>
+        TRANSFER PORTAL
+      </div>
+
+      <!-- RECRUITING -->
+      <div class="nav-item">
+        <div class="nav-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+            <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
+          </svg>
+        </div>
+        RECRUITING
+      </div>
+
+      <!-- LEADERBOARDS -->
+      <div class="nav-item">
+        <div class="nav-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+            <rect x="3" y="12" width="5" height="9"/>
+            <rect x="10" y="5" width="5" height="16"/>
+            <rect x="17" y="9" width="5" height="12"/>
+          </svg>
+        </div>
+        LEADERBOARDS
+      </div>
+
+      <!-- THE VAULT -->
+      <div class="nav-item">
+        <div class="nav-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+            <rect x="5" y="11" width="14" height="10" rx="2"/>
+            <path d="M8 11V7a4 4 0 0 1 8 0v4"/>
+            <circle cx="12" cy="16" r="1.5"/>
+          </svg>
+        </div>
+        THE VAULT
+      </div>
+    </nav>
+
+    <!-- Dynasty XP bar -->
+    <div class="dynasty-xp-section">
+      <div class="dynasty-xp-header">
+        <span class="dynasty-xp-label">DYNASTY MODE - LVL 24</span>
+        <span class="dynasty-xp-numbers"><span>5,680</span> / 6,000 XP</span>
+      </div>
+      <div class="xp-bar-track">
+        <div class="xp-bar-fill" style="width: 94.6%;"></div>
+      </div>
+    </div>
+
+    <!-- Mini Leaderboard -->
+    <div class="mini-leaderboard">
+      <div class="mini-lb-title">TOP DYNASTY PLAYERS</div>
+
+      <div class="lb-entry">
+        <span class="lb-rank gold">#1</span>
+        <span class="lb-name">@GridironKing</span>
+        <span class="lb-xp">12,450 XP</span>
+      </div>
+
+      <div class="lb-entry">
+        <span class="lb-rank silver">#2</span>
+        <span class="lb-name">@TDMachine</span>
+        <span class="lb-xp">11,200 XP</span>
+      </div>
+
+      <div class="lb-entry">
+        <span class="lb-rank bronze">#3</span>
+        <span class="lb-name">@BlitzMaster</span>
+        <span class="lb-xp">10,800 XP</span>
+      </div>
+
+      <div class="lb-divider"></div>
+
+      <div class="lb-entry">
+        <span class="lb-rank" style="color: var(--text-dim);">#847</span>
+        <span class="lb-name lb-you">You</span>
+        <span class="lb-xp" style="color: var(--neon-green);">5,680 XP</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============================================================
+       MAIN CONTENT AREA
+       ============================================================ -->
+  <div class="content-area">
+    <div class="feed-column">
+
+      <!-- COMPOSER -->
+      <div class="composer">
+        <div class="composer-hex">
+          <textarea class="composer-input" placeholder="Drop your take..." rows="2"></textarea>
+          <div class="composer-actions">
+            <div class="composer-tools">
+              <button class="composer-tool-btn">POLL</button>
+              <button class="composer-tool-btn">RECEIPT</button>
+              <button class="composer-tool-btn">MEDIA</button>
+              <button class="composer-tool-btn">CHALLENGE</button>
+            </div>
+            <button class="composer-post-btn">POST</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================================
+           POST 1 — Normal with gamified reactions
+           ============================================================ -->
+      <div class="post-card">
+        <div class="post-header">
+          <div class="post-avatar avatar-red">
+            <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:var(--font-heading);font-weight:700;font-size:14px;color:#fff;">BN</div>
+          </div>
+          <div class="post-user-info">
+            <div class="post-user-top">
+              <span class="post-username">@BuckeyeNation</span>
+              <span class="post-team">Ohio State</span>
+              <span class="rank-badge rank-diamond">
+                <span class="diamond-shape"></span>
+                DIAMOND III
+              </span>
+            </div>
+            <div class="post-streak">7-DAY HOT STREAK</div>
+          </div>
+        </div>
+        <div class="post-body">
+          Travis Hunter is the best two-way player since Deion Sanders. Not even close.
+        </div>
+        <div class="reaction-bar">
+          <div class="reaction-btn reaction-td">TD: 342</div>
+          <div class="reaction-btn reaction-fumble">FUMBLE: 89</div>
+          <span class="xp-float">+15 XP</span>
+        </div>
+        <div class="post-actions">
+          <div class="post-action-btn">STAT CHECK</div>
+          <div class="post-action-btn">CHALLENGE</div>
+          <div class="post-action-btn">AGE THIS</div>
+          <div class="post-action-btn">REPLY</div>
+        </div>
+      </div>
+
+      <!-- ============================================================
+           POST 2 — Receipt / Prediction
+           ============================================================ -->
+      <div class="post-card">
+        <div class="post-header">
+          <div class="post-avatar avatar-crimson">
+            <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:var(--font-heading);font-weight:700;font-size:14px;color:#fff;">TR</div>
+          </div>
+          <div class="post-user-info">
+            <div class="post-user-top">
+              <span class="post-username">@TideRollin</span>
+              <span class="post-team">Alabama</span>
+              <span class="rank-badge rank-platinum">
+                <span class="platinum-circle"></span>
+                PLATINUM I
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="post-body">
+          Alabama going 11-1 this season. Book it. Only loss at Georgia.
+        </div>
+        <div class="receipt-banner">
+          <div class="receipt-locked">
+            <div class="lock-icon"></div>
+            RECEIPT LOCKED
+          </div>
+          <div class="receipt-countdown">Revisits: Week 12 -- 34 days remaining</div>
+          <div class="receipt-trackers"><span>412</span> users tracking this receipt</div>
+        </div>
+        <div class="reaction-bar">
+          <div class="reaction-btn reaction-td">TD: 234</div>
+          <div class="reaction-btn reaction-fumble">FUMBLE: 156</div>
+        </div>
+        <div class="post-actions">
+          <div class="post-action-btn">STAT CHECK</div>
+          <div class="post-action-btn">CHALLENGE</div>
+          <div class="post-action-btn">AGE THIS</div>
+          <div class="post-action-btn">REPLY</div>
+        </div>
+      </div>
+
+      <!-- ============================================================
+           POST 3 — AI Moderation / Violation
+           ============================================================ -->
+      <div class="violation-card">
+        <div class="violation-overlay">
+          <div class="violation-icon">
+            <div class="violation-icon-inner">
+              <span class="violation-x">X</span>
+            </div>
+          </div>
+          <div class="violation-title">VIOLATION DETECTED</div>
+          <div class="violation-ref">
+            AI REFEREE has flagged this content: <span>Political / Off-Topic</span>
+          </div>
+          <div class="violation-msg">
+            "Content removed from the field. This is a college football zone."
+          </div>
+          <button class="violation-appeal-btn">APPEAL</button>
+          <div class="violation-penalty">
+            Player has <span>2 warnings</span> -- 1 more = temp ban
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================================
+           POST 4 — Live Game / Play Caller
+           ============================================================ -->
+      <div class="live-game-card">
+        <div class="live-game-header">
+          <div>
+            <div class="play-caller-title">PLAY CALLER</div>
+            <div class="play-caller-game">Auburn vs LSU -- Q1 4:32</div>
+          </div>
+          <div class="live-badge">
+            <span class="live-badge-dot"></span>
+            LIVE
+          </div>
+        </div>
+        <div class="play-caller-body">
+          <div class="play-caller-question">What should Auburn call on 3rd &amp; 7?</div>
+          <div class="play-options">
+            <div class="play-option">
+              <span class="play-option-name">Deep Pass</span>
+              <span class="play-option-pct">34%</span>
+            </div>
+            <div class="play-option selected">
+              <span class="play-option-name">Screen Play</span>
+              <span class="play-option-pct">28%</span>
+            </div>
+            <div class="play-option">
+              <span class="play-option-name">QB Run</span>
+              <span class="play-option-pct">22%</span>
+            </div>
+            <div class="play-option">
+              <span class="play-option-name">Play Action</span>
+              <span class="play-option-pct">16%</span>
+            </div>
+          </div>
+          <div class="play-result">
+            <div class="play-result-label">COACH CALLED</div>
+            <div class="play-result-call">Screen Play -- CROWD MATCHES!</div>
+          </div>
+          <div class="play-xp-reward">+25 XP for correct call</div>
+        </div>
+      </div>
+
+      <!-- ============================================================
+           POST 5 — Rivalry Arena
+           ============================================================ -->
+      <div class="rivalry-card">
+        <div class="rivalry-header">
+          <div class="rivalry-header-label">RIVALRY ARENA</div>
+          <div class="rivalry-title">
+            <span class="vs-blue">Texas</span>
+            <span class="vs-text">vs</span>
+            <span class="vs-pink">Oklahoma</span>
+          </div>
+        </div>
+        <div class="rivalry-body">
+          <div class="rivalry-side rivalry-side-blue">
+            <div class="rivalry-username">@HookEm</div>
+            <div class="rivalry-score">1,240</div>
+            <div class="rivalry-pts-label">PTS</div>
+          </div>
+          <div class="rivalry-side rivalry-side-pink">
+            <div class="rivalry-username">@BoomerSooner</div>
+            <div class="rivalry-score">1,180</div>
+            <div class="rivalry-pts-label">PTS</div>
+          </div>
+        </div>
+        <div class="rivalry-footer">
+          <div class="rivalry-vote-bar">
+            <div class="rivalry-vote-blue" style="width: 56%;"></div>
+            <div class="rivalry-vote-pink" style="width: 44%;"></div>
+          </div>
+          <div class="rivalry-vote-label">
+            COMMUNITY VOTE: <span class="blue-pct">56%</span> -- <span class="pink-pct">44%</span>
+          </div>
+          <button class="rivalry-join-btn">JOIN THE ARENA</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================
+       RIGHT SIDEBAR
+       ============================================================ -->
+  <aside class="sidebar-right">
+
+    <!-- Achievement Unlocked -->
+    <div class="achievement-card">
+      <div class="achievement-header">ACHIEVEMENT UNLOCKED</div>
+      <div class="achievement-badge">
+        <div class="badge-icon">
+          <div class="badge-icon-inner">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#1a0a2e" stroke-width="2.5">
+              <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
+            </svg>
+          </div>
+        </div>
+        <div>
+          <div class="achievement-name">First Rivalry Win</div>
+          <div class="achievement-desc">Won your first head-to-head debate in the Rivalry Arena</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Weekly Challenges -->
+    <div class="challenges-card">
+      <div class="challenges-title">WEEKLY CHALLENGES</div>
+
+      <div class="challenge-item">
+        <div class="challenge-label">
+          <span class="challenge-text">Make 10 correct predictions</span>
+          <span class="challenge-progress-text">7 / 10</span>
+        </div>
+        <div class="challenge-bar-track">
+          <div class="challenge-bar-fill" style="width: 70%;"></div>
+        </div>
+      </div>
+
+      <div class="challenge-item">
+        <div class="challenge-label">
+          <span class="challenge-text">Win 3 challenges</span>
+          <span class="challenge-progress-text">2 / 3</span>
+        </div>
+        <div class="challenge-bar-track">
+          <div class="challenge-bar-fill" style="width: 66.6%;"></div>
+        </div>
+      </div>
+
+      <div class="challenge-item">
+        <div class="challenge-label">
+          <span class="challenge-text">Post during 5 live games</span>
+          <span class="challenge-progress-text">3 / 5</span>
+        </div>
+        <div class="challenge-bar-track">
+          <div class="challenge-bar-fill" style="width: 60%;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recruiting Board -->
+    <div class="recruiting-card">
+      <div class="recruiting-title">RECRUITING BOARD</div>
+
+      <div class="recruit-item">
+        <span class="recruit-rank">1</span>
+        <div class="recruit-info">
+          <div class="recruit-name">Keelon Russell</div>
+          <div class="recruit-details">QB -- Duncanville, TX</div>
+        </div>
+        <div class="recruit-stars">
+          <span class="star"></span>
+          <span class="star"></span>
+          <span class="star"></span>
+          <span class="star"></span>
+          <span class="star"></span>
+        </div>
+      </div>
+
+      <div class="recruit-item">
+        <span class="recruit-rank">2</span>
+        <div class="recruit-info">
+          <div class="recruit-name">Tavien St. Clair</div>
+          <div class="recruit-details">QB -- Bellefontaine, OH</div>
+        </div>
+        <div class="recruit-stars">
+          <span class="star"></span>
+          <span class="star"></span>
+          <span class="star"></span>
+          <span class="star"></span>
+          <span class="star"></span>
+        </div>
+      </div>
+
+      <div class="recruit-item">
+        <span class="recruit-rank">3</span>
+        <div class="recruit-info">
+          <div class="recruit-name">DJ Lagway</div>
+          <div class="recruit-details">ATH -- Willis, TX</div>
+        </div>
+        <div class="recruit-stars">
+          <span class="star"></span>
+          <span class="star"></span>
+          <span class="star"></span>
+          <span class="star"></span>
+          <span class="star"></span>
+        </div>
+      </div>
+
+      <div class="recruit-item">
+        <span class="recruit-rank">4</span>
+        <div class="recruit-info">
+          <div class="recruit-name">Na'eem Offord</div>
+          <div class="recruit-details">CB -- Birmingham, AL</div>
+        </div>
+        <div class="recruit-stars">
+          <span class="star"></span>
+          <span class="star"></span>
+          <span class="star"></span>
+          <span class="star"></span>
+          <span class="star empty"></span>
+        </div>
+      </div>
+
+      <div class="recruit-item">
+        <span class="recruit-rank">5</span>
+        <div class="recruit-info">
+          <div class="recruit-name">Bryce Underwood</div>
+          <div class="recruit-details">QB -- Belleville, MI</div>
+        </div>
+        <div class="recruit-stars">
+          <span class="star"></span>
+          <span class="star"></span>
+          <span class="star"></span>
+          <span class="star"></span>
+          <span class="star"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Transfer Portal Alert -->
+    <div class="portal-alert">
+      <div class="portal-alert-left">
+        <div class="portal-icon">
+          <div class="portal-icon-arrow"></div>
+        </div>
+        <span class="portal-label">TRANSFER PORTAL</span>
+      </div>
+      <span class="portal-count-badge">3 NEW ENTRIES</span>
+    </div>
+
+    <!-- Trending Tags -->
+    <div class="trending-card">
+      <div class="trending-title">TRENDING TAGS</div>
+      <span class="trending-tag">#RivalryWeek</span>
+      <span class="trending-tag">#CFBPlayoff</span>
+      <span class="trending-tag">#HeismanWatch</span>
+      <span class="trending-tag">#PortalSeason</span>
+    </div>
+
+  </aside>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,1607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CFB Social — Press Box</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ===== RESET & BASE ===== */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --white: #ffffff;
+  --black: #111111;
+  --gold: #c9a84c;
+  --gold-hover: #b8953e;
+  --grey-100: #fafafa;
+  --grey-150: #f8f8f8;
+  --grey-200: #f0f0f0;
+  --grey-300: #e0e0e0;
+  --grey-400: #c0c0c0;
+  --grey-500: #999999;
+  --grey-600: #777777;
+  --grey-700: #555555;
+  --grey-800: #333333;
+  --serif: 'Libre Baskerville', Georgia, 'Times New Roman', serif;
+  --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--sans);
+  color: var(--black);
+  background: var(--white);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: var(--gold);
+}
+
+::selection {
+  background: var(--gold);
+  color: var(--white);
+}
+
+/* ===== TOP NAVIGATION ===== */
+.nav-wrapper {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--white);
+  border-bottom: 1px solid var(--gold);
+}
+
+.nav-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 48px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.nav-brand {
+  font-family: var(--serif);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 6px;
+  text-transform: uppercase;
+  color: var(--black);
+  white-space: nowrap;
+  user-select: none;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 36px;
+}
+
+.nav-links a {
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--grey-700);
+  transition: color 0.2s ease;
+  position: relative;
+}
+
+.nav-links a:hover {
+  color: var(--black);
+}
+
+.nav-links a.active {
+  color: var(--black);
+}
+
+.nav-links a.active::after {
+  content: '';
+  position: absolute;
+  bottom: -22px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--gold);
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+/* CSS Magnifying Glass */
+.search-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  width: 32px;
+  height: 32px;
+}
+
+.search-icon {
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--grey-700);
+  border-radius: 50%;
+  position: relative;
+  display: inline-block;
+}
+
+.search-icon::after {
+  content: '';
+  position: absolute;
+  width: 7px;
+  height: 2px;
+  background: var(--grey-700);
+  bottom: -4px;
+  right: -6px;
+  transform: rotate(45deg);
+  border-radius: 1px;
+}
+
+.search-btn:hover .search-icon {
+  border-color: var(--black);
+}
+
+.search-btn:hover .search-icon::after {
+  background: var(--black);
+}
+
+.subscribe-btn {
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  background: var(--gold);
+  color: var(--white);
+  border: none;
+  padding: 8px 20px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.subscribe-btn:hover {
+  background: var(--gold-hover);
+}
+
+.nav-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--grey-200);
+  border: 1px solid var(--grey-300);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.nav-avatar-inner {
+  width: 14px;
+  height: 14px;
+  position: relative;
+}
+
+.nav-avatar-head {
+  width: 8px;
+  height: 8px;
+  background: var(--grey-400);
+  border-radius: 50%;
+  margin: 0 auto;
+}
+
+.nav-avatar-body {
+  width: 14px;
+  height: 6px;
+  background: var(--grey-400);
+  border-radius: 7px 7px 0 0;
+  margin-top: 2px;
+}
+
+/* ===== HERO SECTION ===== */
+.hero-wrapper {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 32px 48px 0;
+}
+
+.hero-card {
+  position: relative;
+  width: 100%;
+  height: 600px;
+  background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 40%, #0d0d0d 100%);
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.hero-texture {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 30% 50%, rgba(201, 168, 76, 0.06) 0%, transparent 60%),
+    radial-gradient(ellipse at 70% 30%, rgba(255,255,255,0.03) 0%, transparent 50%);
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(0,0,0,0.85) 0%,
+    rgba(0,0,0,0.5) 35%,
+    rgba(0,0,0,0.2) 60%,
+    rgba(0,0,0,0.1) 100%
+  );
+}
+
+.hero-content {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 60px 72px;
+}
+
+.hero-category {
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 20px;
+  display: inline-block;
+}
+
+.hero-headline {
+  font-family: var(--serif);
+  font-size: 42px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--white);
+  max-width: 750px;
+  margin-bottom: 24px;
+}
+
+.hero-byline {
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 400;
+  color: rgba(255,255,255,0.6);
+  margin-bottom: 28px;
+  letter-spacing: 0.3px;
+}
+
+.hero-byline span {
+  color: rgba(255,255,255,0.35);
+  margin: 0 10px;
+}
+
+.hero-read-more {
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--gold);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: gap 0.3s ease;
+}
+
+.hero-read-more:hover {
+  gap: 14px;
+  color: var(--gold);
+}
+
+.hero-arrow {
+  display: inline-block;
+  width: 20px;
+  height: 1px;
+  background: var(--gold);
+  position: relative;
+}
+
+.hero-arrow::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: -3px;
+  width: 7px;
+  height: 7px;
+  border-right: 1px solid var(--gold);
+  border-top: 1px solid var(--gold);
+  transform: rotate(45deg);
+}
+
+/* ===== MAIN LAYOUT ===== */
+.main-wrapper {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 48px 48px 80px;
+  display: grid;
+  grid-template-columns: 1fr 350px;
+  gap: 64px;
+}
+
+/* ===== FEED COLUMN ===== */
+.feed-header {
+  font-family: var(--serif);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--grey-500);
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--grey-300);
+  margin-bottom: 0;
+}
+
+/* ===== POST STYLES ===== */
+.post {
+  padding: 36px 0;
+  border-bottom: 1px solid var(--grey-300);
+}
+
+.post:last-child {
+  border-bottom: none;
+}
+
+.post-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.post-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.avatar-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--white);
+}
+
+.avatar-1 { background: #3a3a3a; }
+.avatar-2 { background: #8b1a1a; }
+.avatar-3 { background: var(--grey-400); }
+.avatar-4 { background: #1a365d; }
+.avatar-5 { background: #7c2d12; }
+
+.post-author {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.post-author-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.post-name {
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--black);
+}
+
+.post-handle {
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--grey-500);
+}
+
+.post-author-bottom {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.post-team-tag {
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--grey-600);
+  background: var(--grey-200);
+  padding: 2px 8px;
+  border-radius: 2px;
+  letter-spacing: 0.3px;
+}
+
+.post-timestamp {
+  font-family: var(--sans);
+  font-size: 12px;
+  color: var(--grey-500);
+}
+
+.post-body {
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.75;
+  color: var(--grey-800);
+  margin-bottom: 20px;
+  max-width: 640px;
+}
+
+.post-reactions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 16px;
+  font-family: var(--sans);
+  font-size: 13px;
+  color: var(--grey-600);
+}
+
+.reaction-td {
+  font-weight: 600;
+  color: var(--gold);
+}
+
+.reaction-sep {
+  color: var(--grey-400);
+  margin: 0 8px;
+}
+
+.reaction-fumble {
+  font-weight: 500;
+  color: var(--grey-600);
+}
+
+.post-actions {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.post-action {
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--grey-500);
+  cursor: pointer;
+  transition: color 0.2s ease;
+  letter-spacing: 0.2px;
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+.post-action:hover {
+  color: var(--gold);
+}
+
+.action-divider {
+  width: 1px;
+  height: 12px;
+  background: var(--grey-300);
+}
+
+/* Prediction Tag */
+.prediction-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 8px;
+}
+
+.prediction-dot {
+  width: 5px;
+  height: 5px;
+  background: var(--gold);
+  border-radius: 50%;
+}
+
+.prediction-revisit {
+  font-family: var(--sans);
+  font-size: 13px;
+  font-style: italic;
+  color: var(--grey-500);
+  margin-bottom: 20px;
+}
+
+/* AI Moderation Post */
+.post-moderated {
+  background: var(--grey-150);
+  border-left: 3px solid var(--gold);
+  padding: 28px 32px;
+  margin: 36px 0;
+  border-bottom: none;
+}
+
+.moderated-text {
+  font-family: var(--serif);
+  font-size: 14px;
+  font-style: italic;
+  color: var(--grey-700);
+  line-height: 1.7;
+  margin-bottom: 12px;
+}
+
+.moderated-reason {
+  font-family: var(--sans);
+  font-size: 13px;
+  color: var(--grey-600);
+  margin-bottom: 8px;
+}
+
+.moderated-appeal {
+  font-family: var(--sans);
+  font-size: 13px;
+  color: var(--grey-500);
+}
+
+.moderated-appeal a {
+  color: var(--gold);
+  font-weight: 500;
+}
+
+/* Live Report */
+.live-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 12px;
+}
+
+.live-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--gold);
+  border-radius: 50%;
+  animation: livePulse 2s ease-in-out infinite;
+}
+
+@keyframes livePulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.live-subhead {
+  font-family: var(--serif);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--black);
+  margin-bottom: 16px;
+  line-height: 1.4;
+}
+
+.verified-mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--grey-500);
+  margin-top: 8px;
+}
+
+.verified-check {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1.5px solid var(--grey-500);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.verified-check::after {
+  content: '';
+  width: 5px;
+  height: 8px;
+  border-right: 1.5px solid var(--grey-500);
+  border-bottom: 1.5px solid var(--grey-500);
+  transform: rotate(45deg);
+  margin-top: -2px;
+}
+
+/* Rivalry Post */
+.rivalry-category {
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 10px;
+}
+
+.rivalry-headline {
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--black);
+  margin-bottom: 16px;
+  line-height: 1.35;
+}
+
+.rivalry-summary {
+  font-family: var(--sans);
+  font-size: 14px;
+  color: var(--grey-700);
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+
+.poll-bar-container {
+  margin-bottom: 20px;
+}
+
+.poll-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.poll-label {
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--grey-800);
+}
+
+.poll-label span {
+  font-weight: 400;
+  color: var(--grey-500);
+  margin-left: 6px;
+}
+
+.poll-bar-track {
+  width: 100%;
+  height: 6px;
+  background: var(--grey-200);
+  border-radius: 3px;
+  overflow: hidden;
+  display: flex;
+}
+
+.poll-bar-gold {
+  height: 100%;
+  background: var(--gold);
+  border-radius: 3px 0 0 3px;
+  transition: width 0.6s ease;
+}
+
+.poll-bar-black {
+  height: 100%;
+  background: var(--black);
+  border-radius: 0 3px 3px 0;
+  transition: width 0.6s ease;
+}
+
+.poll-contributors {
+  font-family: var(--sans);
+  font-size: 13px;
+  color: var(--grey-500);
+  margin-top: 12px;
+}
+
+.poll-contributors a {
+  color: var(--gold);
+  font-weight: 500;
+}
+
+/* ===== SIDEBAR ===== */
+.sidebar {
+  padding-top: 8px;
+}
+
+.sidebar-section {
+  margin-bottom: 48px;
+}
+
+.sidebar-heading {
+  font-family: var(--serif);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--black);
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--gold);
+  margin-bottom: 20px;
+}
+
+/* Editor's Picks */
+.editor-card {
+  display: flex;
+  gap: 16px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--grey-200);
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.editor-card:hover {
+  opacity: 0.75;
+}
+
+.editor-card:last-child {
+  border-bottom: none;
+}
+
+.editor-thumb {
+  width: 80px;
+  height: 60px;
+  background: var(--grey-200);
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.editor-thumb::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, transparent 40%, rgba(0,0,0,0.05) 100%);
+}
+
+.editor-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.editor-title {
+  font-family: var(--serif);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--black);
+  margin-bottom: 6px;
+}
+
+.editor-byline {
+  font-family: var(--sans);
+  font-size: 12px;
+  color: var(--grey-500);
+}
+
+/* Recruiting Intelligence */
+.recruiting-item {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--grey-200);
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.recruiting-item:last-child {
+  border-bottom: none;
+}
+
+.recruiting-bullet {
+  width: 5px;
+  height: 5px;
+  background: var(--gold);
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 7px;
+}
+
+.recruiting-content {
+  flex: 1;
+}
+
+.recruiting-headline {
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--black);
+  line-height: 1.45;
+  margin-bottom: 4px;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.recruiting-headline:hover {
+  color: var(--gold);
+}
+
+.recruiting-time {
+  font-family: var(--sans);
+  font-size: 12px;
+  color: var(--grey-500);
+}
+
+/* Transfer Portal */
+.portal-item {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--grey-200);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.portal-item:last-child {
+  border-bottom: none;
+}
+
+.portal-player {
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--black);
+}
+
+.portal-detail {
+  font-family: var(--sans);
+  font-size: 12px;
+  color: var(--grey-500);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.portal-dash {
+  color: var(--grey-400);
+}
+
+.portal-status {
+  font-weight: 500;
+  color: var(--gold);
+}
+
+/* Trending */
+.trending-item {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--grey-200);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.trending-item:hover {
+  opacity: 0.7;
+}
+
+.trending-item:last-child {
+  border-bottom: none;
+}
+
+.trending-tag {
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--black);
+}
+
+.trending-count {
+  font-family: var(--sans);
+  font-size: 12px;
+  color: var(--grey-500);
+}
+
+/* The Vault */
+.vault-content {
+  padding-top: 4px;
+}
+
+.vault-date {
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--grey-500);
+  margin-bottom: 10px;
+}
+
+.vault-text {
+  font-family: var(--serif);
+  font-size: 15px;
+  font-style: italic;
+  line-height: 1.65;
+  color: var(--grey-800);
+  margin-bottom: 16px;
+}
+
+.vault-link {
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--gold);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: gap 0.3s ease;
+}
+
+.vault-link:hover {
+  gap: 10px;
+  color: var(--gold);
+}
+
+.vault-arrow {
+  display: inline-block;
+  width: 14px;
+  height: 1px;
+  background: var(--gold);
+  position: relative;
+}
+
+.vault-arrow::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: -2px;
+  width: 5px;
+  height: 5px;
+  border-right: 1px solid var(--gold);
+  border-top: 1px solid var(--gold);
+  transform: rotate(45deg);
+}
+
+/* ===== FOOTER ===== */
+.footer-wrapper {
+  border-top: 1px solid var(--grey-300);
+  background: var(--white);
+}
+
+.footer-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 48px 48px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.footer-left {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.footer-brand {
+  font-family: var(--serif);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--black);
+}
+
+.footer-tagline {
+  font-family: var(--sans);
+  font-size: 13px;
+  color: var(--grey-500);
+  max-width: 320px;
+  line-height: 1.6;
+}
+
+.footer-links {
+  display: flex;
+  gap: 32px;
+}
+
+.footer-link-col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.footer-link-heading {
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--black);
+  margin-bottom: 4px;
+}
+
+.footer-link {
+  font-family: var(--sans);
+  font-size: 13px;
+  color: var(--grey-500);
+}
+
+.footer-link:hover {
+  color: var(--gold);
+}
+
+.footer-bottom {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 48px 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid var(--grey-200);
+  padding-top: 24px;
+}
+
+.footer-copyright {
+  font-family: var(--sans);
+  font-size: 12px;
+  color: var(--grey-500);
+}
+
+.footer-legal {
+  display: flex;
+  gap: 20px;
+}
+
+.footer-legal a {
+  font-family: var(--sans);
+  font-size: 12px;
+  color: var(--grey-500);
+}
+
+/* ===== SCROLL-TO-TOP ===== */
+.scroll-top {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  width: 40px;
+  height: 40px;
+  background: var(--white);
+  border: 1px solid var(--grey-300);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease, border-color 0.2s ease;
+  pointer-events: none;
+  z-index: 50;
+}
+
+.scroll-top.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.scroll-top:hover {
+  border-color: var(--gold);
+}
+
+.scroll-top-arrow {
+  width: 10px;
+  height: 10px;
+  border-left: 1.5px solid var(--grey-700);
+  border-top: 1.5px solid var(--grey-700);
+  transform: rotate(45deg);
+  margin-top: 3px;
+}
+
+.scroll-top:hover .scroll-top-arrow {
+  border-color: var(--gold);
+}
+</style>
+</head>
+
+<body>
+
+<!-- ===== TOP NAVIGATION ===== -->
+<nav class="nav-wrapper">
+  <div class="nav-inner">
+    <div class="nav-brand">PRESS BOX</div>
+    <div class="nav-links">
+      <a href="#" class="active">Feed</a>
+      <a href="#">News</a>
+      <a href="#">Recruiting</a>
+      <a href="#">Portal</a>
+      <a href="#">Rivalry</a>
+      <a href="#">Analysis</a>
+    </div>
+    <div class="nav-right">
+      <button class="search-btn" aria-label="Search">
+        <span class="search-icon"></span>
+      </button>
+      <button class="subscribe-btn">Subscribe</button>
+      <div class="nav-avatar">
+        <div class="nav-avatar-inner">
+          <div class="nav-avatar-head"></div>
+          <div class="nav-avatar-body"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ===== HERO SECTION ===== -->
+<section class="hero-wrapper">
+  <div class="hero-card" id="heroCard">
+    <div class="hero-texture"></div>
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <span class="hero-category">Analysis</span>
+      <h1 class="hero-headline">The Case for Travis Hunter as the Most Complete Player in College Football History</h1>
+      <div class="hero-byline">By James Richardson <span>|</span> 12 min read</div>
+      <a href="#" class="hero-read-more">Read More <span class="hero-arrow"></span></a>
+    </div>
+  </div>
+</section>
+
+<!-- ===== MAIN CONTENT ===== -->
+<main class="main-wrapper">
+
+  <!-- FEED COLUMN -->
+  <div class="feed-column">
+    <div class="feed-header">The Feed</div>
+
+    <!-- POST 1: Editorial Take -->
+    <article class="post">
+      <div class="post-meta">
+        <div class="post-avatar">
+          <div class="avatar-placeholder avatar-1">SM</div>
+        </div>
+        <div class="post-author">
+          <div class="post-author-top">
+            <span class="post-name">Sarah Mitchell</span>
+            <span class="post-handle">@DawgPound</span>
+          </div>
+          <div class="post-author-bottom">
+            <span class="post-team-tag">Georgia</span>
+            <span class="post-timestamp">2h ago</span>
+          </div>
+        </div>
+      </div>
+      <div class="post-body">
+        Travis Hunter is the best two-way player since Deion Sanders walked the earth. The stats back it up: 14 interceptions and 72 receptions in two seasons. We haven't seen anything like this.
+      </div>
+      <div class="post-reactions">
+        <span class="reaction-td">Touchdown 342</span>
+        <span class="reaction-sep">/</span>
+        <span class="reaction-fumble">Fumble 89</span>
+      </div>
+      <div class="post-actions">
+        <button class="post-action">Stat Check</button>
+        <div class="action-divider"></div>
+        <button class="post-action">Challenge</button>
+        <div class="action-divider"></div>
+        <button class="post-action">Set Revisit</button>
+        <div class="action-divider"></div>
+        <button class="post-action">Reply 24</button>
+        <div class="action-divider"></div>
+        <button class="post-action">Share</button>
+      </div>
+    </article>
+
+    <!-- POST 2: Prediction with Receipt -->
+    <article class="post">
+      <div class="post-meta">
+        <div class="post-avatar">
+          <div class="avatar-placeholder avatar-2">CT</div>
+        </div>
+        <div class="post-author">
+          <div class="post-author-top">
+            <span class="post-name">Marcus Johnson</span>
+            <span class="post-handle">@CrimsonTide</span>
+          </div>
+          <div class="post-author-bottom">
+            <span class="post-team-tag">Alabama</span>
+            <span class="post-timestamp">3h ago</span>
+          </div>
+        </div>
+      </div>
+      <div class="post-body">
+        Alabama finishes 11-1 this season. The only loss comes in Athens, where Georgia's defense proves too physical for Milroe. Every other game is manageable.
+      </div>
+      <div class="prediction-tag">
+        <span class="prediction-dot"></span>
+        Prediction Tracked
+      </div>
+      <div class="prediction-revisit">This take will be revisited on November 15</div>
+      <div class="post-reactions">
+        <span class="reaction-td">Touchdown 234</span>
+        <span class="reaction-sep">/</span>
+        <span class="reaction-fumble">Fumble 156</span>
+      </div>
+      <div class="post-actions">
+        <button class="post-action">Stat Check</button>
+        <div class="action-divider"></div>
+        <button class="post-action">Challenge</button>
+        <div class="action-divider"></div>
+        <button class="post-action">Set Revisit</button>
+        <div class="action-divider"></div>
+        <button class="post-action">Reply 18</button>
+        <div class="action-divider"></div>
+        <button class="post-action">Share</button>
+      </div>
+    </article>
+
+    <!-- POST 3: AI Moderation -->
+    <div class="post-moderated">
+      <div class="moderated-text">
+        This post has been removed by our editorial standards system.
+      </div>
+      <div class="moderated-reason">
+        Reason: Content outside the scope of college football discussion.
+      </div>
+      <div class="moderated-appeal">
+        If you believe this was an error, you may <a href="#">request a review</a>.
+      </div>
+    </div>
+
+    <!-- POST 4: Live Sideline Report -->
+    <article class="post">
+      <div class="live-label">
+        <span class="live-dot"></span>
+        Live Report
+      </div>
+      <h3 class="live-subhead">Auburn vs LSU -- First Quarter, 4:32 Remaining</h3>
+      <div class="post-meta">
+        <div class="post-avatar">
+          <div class="avatar-placeholder avatar-4">WE</div>
+        </div>
+        <div class="post-author">
+          <div class="post-author-top">
+            <span class="post-name">Daniel Torres</span>
+            <span class="post-handle">@WarEagle</span>
+          </div>
+          <div class="post-author-bottom">
+            <span class="post-team-tag">Auburn</span>
+            <span class="post-timestamp">Live</span>
+          </div>
+        </div>
+      </div>
+      <div class="post-body">
+        Auburn's defensive front is dominating early. Three sacks through the first 11 minutes. LSU can't establish any rhythm.
+      </div>
+      <div class="verified-mark">
+        <span class="verified-check"></span>
+        Stat claims verified
+      </div>
+      <div style="margin-top: 16px;">
+        <div class="post-reactions">
+          <span class="reaction-td">Touchdown 187</span>
+          <span class="reaction-sep">/</span>
+          <span class="reaction-fumble">Fumble 42</span>
+        </div>
+        <div class="post-actions">
+          <button class="post-action">Stat Check</button>
+          <div class="action-divider"></div>
+          <button class="post-action">Challenge</button>
+          <div class="action-divider"></div>
+          <button class="post-action">Set Revisit</button>
+          <div class="action-divider"></div>
+          <button class="post-action">Reply 31</button>
+          <div class="action-divider"></div>
+          <button class="post-action">Share</button>
+        </div>
+      </div>
+    </article>
+
+    <!-- POST 5: Rivalry Analysis -->
+    <article class="post">
+      <div class="rivalry-category">Rivalry Week</div>
+      <h3 class="rivalry-headline">Texas vs Oklahoma: A Historical Breakdown</h3>
+      <div class="rivalry-summary">
+        The community weighs in: 56% favor Texas, 44% favor Oklahoma
+      </div>
+      <div class="poll-bar-container">
+        <div class="poll-labels">
+          <span class="poll-label">Texas <span>56%</span></span>
+          <span class="poll-label">Oklahoma <span>44%</span></span>
+        </div>
+        <div class="poll-bar-track">
+          <div class="poll-bar-gold" style="width: 56%;"></div>
+          <div class="poll-bar-black" style="width: 44%;"></div>
+        </div>
+      </div>
+      <div class="poll-contributors">
+        <a href="#">Join the discussion</a> -- 247 contributors so far
+      </div>
+      <div style="margin-top: 20px;">
+        <div class="post-actions">
+          <button class="post-action">Stat Check</button>
+          <div class="action-divider"></div>
+          <button class="post-action">Challenge</button>
+          <div class="action-divider"></div>
+          <button class="post-action">Reply 63</button>
+          <div class="action-divider"></div>
+          <button class="post-action">Share</button>
+        </div>
+      </div>
+    </article>
+  </div>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+
+    <!-- Editor's Picks -->
+    <div class="sidebar-section">
+      <h3 class="sidebar-heading">Editor's Picks</h3>
+      <div class="editor-card">
+        <div class="editor-thumb"></div>
+        <div class="editor-info">
+          <div class="editor-title">Why the 12-Team Playoff Changes Everything for Mid-Majors</div>
+          <div class="editor-byline">By Katherine Wells -- 8 min</div>
+        </div>
+      </div>
+      <div class="editor-card">
+        <div class="editor-thumb"></div>
+        <div class="editor-info">
+          <div class="editor-title">Inside Ohio State's Defensive Rebuild Under New Coordinator</div>
+          <div class="editor-byline">By David Chen -- 11 min</div>
+        </div>
+      </div>
+      <div class="editor-card">
+        <div class="editor-thumb"></div>
+        <div class="editor-info">
+          <div class="editor-title">The NIL Era: How Collectives Are Reshaping Recruiting</div>
+          <div class="editor-byline">By Rachel Adams -- 14 min</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recruiting Intelligence -->
+    <div class="sidebar-section">
+      <h3 class="sidebar-heading">Recruiting Intelligence</h3>
+      <div class="recruiting-item">
+        <span class="recruiting-bullet"></span>
+        <div class="recruiting-content">
+          <div class="recruiting-headline">Five-Star Quarterback Commits to USC</div>
+          <div class="recruiting-time">45 minutes ago</div>
+        </div>
+      </div>
+      <div class="recruiting-item">
+        <span class="recruiting-bullet"></span>
+        <div class="recruiting-content">
+          <div class="recruiting-headline">Top Running Back Narrows List to Three Programs</div>
+          <div class="recruiting-time">2 hours ago</div>
+        </div>
+      </div>
+      <div class="recruiting-item">
+        <span class="recruiting-bullet"></span>
+        <div class="recruiting-content">
+          <div class="recruiting-headline">2027 Class Early Rankings Released</div>
+          <div class="recruiting-time">4 hours ago</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Transfer Portal Updates -->
+    <div class="sidebar-section">
+      <h3 class="sidebar-heading">Transfer Portal</h3>
+      <div class="portal-item">
+        <span class="portal-player">Jordan Davis</span>
+        <div class="portal-detail">
+          Oregon <span class="portal-dash">--</span> <span class="portal-status">Committed</span>
+        </div>
+      </div>
+      <div class="portal-item">
+        <span class="portal-player">Chris Thompson</span>
+        <div class="portal-detail">
+          LSU <span class="portal-dash">--</span> <span class="portal-status">Exploring</span>
+        </div>
+      </div>
+      <div class="portal-item">
+        <span class="portal-player">Tyler Brooks</span>
+        <div class="portal-detail">
+          Penn State <span class="portal-dash">--</span> <span class="portal-status">Visiting</span>
+        </div>
+      </div>
+      <div class="portal-item">
+        <span class="portal-player">Marcus Reed</span>
+        <div class="portal-detail">
+          Miami <span class="portal-dash">--</span> <span class="portal-status">In Portal</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Trending Conversations -->
+    <div class="sidebar-section">
+      <h3 class="sidebar-heading">Trending</h3>
+      <div class="trending-item">
+        <span class="trending-tag">#RivalryWeek</span>
+        <span class="trending-count">1.2K posts</span>
+      </div>
+      <div class="trending-item">
+        <span class="trending-tag">#CFBPlayoff</span>
+        <span class="trending-count">890 posts</span>
+      </div>
+      <div class="trending-item">
+        <span class="trending-tag">#HeismanWatch</span>
+        <span class="trending-count">654 posts</span>
+      </div>
+      <div class="trending-item">
+        <span class="trending-tag">#TransferPortal</span>
+        <span class="trending-count">2.1K posts</span>
+      </div>
+    </div>
+
+    <!-- The Vault -->
+    <div class="sidebar-section">
+      <h3 class="sidebar-heading">The Vault</h3>
+      <div class="vault-content">
+        <div class="vault-date">March 26, 2006</div>
+        <div class="vault-text">
+          Vince Young's legendary Rose Bowl performance reshapes the championship landscape
+        </div>
+        <a href="#" class="vault-link">
+          Read the full story <span class="vault-arrow"></span>
+        </a>
+      </div>
+    </div>
+
+  </aside>
+</main>
+
+<!-- ===== FOOTER ===== -->
+<footer class="footer-wrapper">
+  <div class="footer-inner">
+    <div class="footer-left">
+      <div class="footer-brand">CFB Social</div>
+      <div class="footer-tagline">
+        Premium college football discourse. Built for fans who demand better conversation.
+      </div>
+    </div>
+    <div class="footer-links">
+      <div class="footer-link-col">
+        <span class="footer-link-heading">Platform</span>
+        <a href="#" class="footer-link">About</a>
+        <a href="#" class="footer-link">Careers</a>
+        <a href="#" class="footer-link">Press</a>
+        <a href="#" class="footer-link">Contact</a>
+      </div>
+      <div class="footer-link-col">
+        <span class="footer-link-heading">Community</span>
+        <a href="#" class="footer-link">Guidelines</a>
+        <a href="#" class="footer-link">Dynasty Rules</a>
+        <a href="#" class="footer-link">Rivalries</a>
+        <a href="#" class="footer-link">Help Center</a>
+      </div>
+      <div class="footer-link-col">
+        <span class="footer-link-heading">Subscribe</span>
+        <a href="#" class="footer-link">Press Box</a>
+        <a href="#" class="footer-link">Press Box+</a>
+        <a href="#" class="footer-link">Gift Cards</a>
+        <a href="#" class="footer-link">Student Discount</a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span class="footer-copyright">2026 CFB Social. All rights reserved.</span>
+    <div class="footer-legal">
+      <a href="#">Privacy</a>
+      <a href="#">Terms</a>
+      <a href="#">Accessibility</a>
+    </div>
+  </div>
+</footer>
+
+<!-- Scroll-to-top button -->
+<button class="scroll-top" id="scrollTop" aria-label="Back to top">
+  <span class="scroll-top-arrow"></span>
+</button>
+
+<script>
+// Scroll-to-top visibility
+(function() {
+  var btn = document.getElementById('scrollTop');
+  window.addEventListener('scroll', function() {
+    if (window.scrollY > 400) {
+      btn.classList.add('visible');
+    } else {
+      btn.classList.remove('visible');
+    }
+  });
+  btn.addEventListener('click', function() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+})();
+
+// Subtle hover parallax on hero card
+(function() {
+  var hero = document.getElementById('heroCard');
+  if (!hero) return;
+  var content = hero.querySelector('.hero-content');
+  hero.addEventListener('mousemove', function(e) {
+    var rect = hero.getBoundingClientRect();
+    var x = (e.clientX - rect.left) / rect.width - 0.5;
+    var y = (e.clientY - rect.top) / rect.height - 0.5;
+    content.style.transform = 'translate(' + (x * -6) + 'px, ' + (y * -4) + 'px)';
+  });
+  hero.addEventListener('mouseleave', function() {
+    content.style.transform = 'translate(0, 0)';
+    content.style.transition = 'transform 0.4s ease';
+    setTimeout(function() { content.style.transition = ''; }, 400);
+  });
+})();
+
+// Animate poll bar on scroll into view
+(function() {
+  var goldBar = document.querySelector('.poll-bar-gold');
+  var blackBar = document.querySelector('.poll-bar-black');
+  if (!goldBar || !blackBar) return;
+  var goldTarget = goldBar.style.width;
+  var blackTarget = blackBar.style.width;
+  goldBar.style.width = '0%';
+  blackBar.style.width = '0%';
+  var animated = false;
+
+  function checkScroll() {
+    if (animated) return;
+    var rect = goldBar.getBoundingClientRect();
+    if (rect.top < window.innerHeight - 60) {
+      animated = true;
+      goldBar.style.width = goldTarget;
+      blackBar.style.width = blackTarget;
+    }
+  }
+
+  window.addEventListener('scroll', checkScroll);
+  checkScroll();
+})();
+
+// Subtle live pulse for live report timestamp
+(function() {
+  var liveMeta = document.querySelectorAll('.post-timestamp');
+  liveMeta.forEach(function(el) {
+    if (el.textContent.trim() === 'Live') {
+      el.style.color = '#c9a84c';
+      el.style.fontWeight = '600';
+    }
+  });
+})();
+</script>
+
+</body>
+</html>

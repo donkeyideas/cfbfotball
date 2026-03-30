@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Script from 'next/script';
 import { Playfair_Display, Source_Sans_3, Special_Elite } from 'next/font/google';
 import { WebsiteJsonLd, OrganizationJsonLd } from '@/components/seo/JsonLd';
 import './globals.css';
@@ -79,6 +80,16 @@ export default function RootLayout({
         <OrganizationJsonLd />
       </head>
       <body className="min-h-screen bg-paper text-ink antialiased">
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-6K18TPL4B2"
+          strategy="afterInteractive"
+        />
+        <Script id="gtag-init" strategy="afterInteractive">
+          {`window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-6K18TPL4B2');`}
+        </Script>
         {children}
         <script
           dangerouslySetInnerHTML={{

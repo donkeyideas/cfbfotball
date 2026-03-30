@@ -1,0 +1,2360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CFB Social — THE STADIUM Mobile Mock</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ===== RESET & PAGE ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', -apple-system, sans-serif;
+  background: #0d0d1a;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  padding: 24px 16px;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 {
+  font-family: 'Oswald', sans-serif;
+  line-height: 1.2;
+}
+
+/* ===== PAGE HEADER ===== */
+.page-header {
+  text-align: center;
+  margin-bottom: 32px;
+  max-width: 600px;
+}
+.page-header h1 {
+  font-size: 1.8rem;
+  color: #f5c518;
+  margin-bottom: 8px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+.page-header p {
+  color: #888;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  font-family: 'Inter', sans-serif;
+}
+
+/* ===== SCREEN SELECTOR ===== */
+.screen-nav {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.screen-nav button {
+  padding: 8px 20px;
+  border: 2px solid #2a2a3e;
+  background: #1a1a2e;
+  border-radius: 999px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #888;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.screen-nav button:hover {
+  border-color: #f5c518;
+  color: #f5c518;
+}
+.screen-nav button.active {
+  background: #f5c518;
+  border-color: #f5c518;
+  color: #1a1a2e;
+  font-weight: 700;
+}
+
+/* ===== PHONE FRAME ===== */
+.phone-frame {
+  width: 375px;
+  height: 812px;
+  border-radius: 44px;
+  background: #000;
+  padding: 12px;
+  box-shadow: 0 25px 80px rgba(0,0,0,0.5), 0 0 0 2px #333;
+  position: relative;
+}
+.phone-inner {
+  width: 100%;
+  height: 100%;
+  border-radius: 34px;
+  overflow: hidden;
+  position: relative;
+  background: #1a1a2e;
+}
+
+/* Notch */
+.phone-notch {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 126px;
+  height: 34px;
+  background: #000;
+  border-radius: 0 0 20px 20px;
+  z-index: 100;
+}
+
+/* Status Bar */
+.status-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 54px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 0 28px 8px;
+  z-index: 99;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #fff;
+}
+.status-bar .time { font-size: 0.8rem; font-weight: 700; }
+.status-bar .icons { display: flex; gap: 5px; align-items: center; font-size: 0.7rem; }
+
+/* Home Indicator */
+.home-indicator {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 134px;
+  height: 5px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 3px;
+  z-index: 100;
+}
+
+/* ===== SCREENS ===== */
+.screen {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease, transform 0.35s ease;
+  transform: scale(0.97);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.screen.active {
+  opacity: 1;
+  pointer-events: all;
+  transform: scale(1);
+}
+.screen::-webkit-scrollbar { display: none; }
+
+/* ===== SHARED THEME TOKENS ===== */
+:root {
+  --bg: #1a1a2e;
+  --surface: #22223a;
+  --card-bg: #22223a;
+  --text: #ffffff;
+  --muted: #888;
+  --border: rgba(255,255,255,0.08);
+  --yellow: #f5c518;
+  --yellow-dark: #e6a800;
+  --yellow-glow: rgba(245,197,24,0.15);
+  --red: #e74c3c;
+  --green: #2ecc71;
+}
+
+/* =========================================================
+   SCREEN 1: SPLASH
+   ========================================================= */
+.splash-screen {
+  background: linear-gradient(160deg, #1a1a2e 0%, #12122a 40%, #0d0d1a 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: #fff;
+}
+
+.splash-icon {
+  width: 96px;
+  height: 96px;
+  margin-bottom: 28px;
+  position: relative;
+}
+.splash-icon svg {
+  width: 96px;
+  height: 96px;
+}
+
+.splash-brand {
+  font-family: 'Oswald', sans-serif;
+  font-size: 2.8rem;
+  font-weight: 700;
+  letter-spacing: 4px;
+  color: #f5c518;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.splash-tagline {
+  font-size: 0.95rem;
+  opacity: 0.7;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  color: #ccc;
+}
+.splash-loader {
+  position: absolute;
+  bottom: 100px;
+  display: flex;
+  gap: 8px;
+}
+.splash-loader span {
+  width: 8px;
+  height: 8px;
+  background: rgba(245,197,24,0.4);
+  border-radius: 50%;
+  animation: dot-bounce 1.4s ease-in-out infinite;
+}
+.splash-loader span:nth-child(2) { animation-delay: 0.16s; }
+.splash-loader span:nth-child(3) { animation-delay: 0.32s; }
+@keyframes dot-bounce {
+  0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+  40% { transform: scale(1); opacity: 1; }
+}
+.splash-version {
+  position: absolute;
+  bottom: 60px;
+  font-size: 0.7rem;
+  opacity: 0.4;
+  color: #888;
+}
+
+/* =========================================================
+   SCREEN 2: LOGIN
+   ========================================================= */
+.login-screen {
+  background: var(--bg);
+  padding: 54px 0 0;
+}
+
+.login-header {
+  text-align: center;
+  padding: 40px 28px 0;
+}
+.login-logo-small {
+  width: 56px;
+  height: 56px;
+  background: var(--yellow);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+}
+.login-logo-small svg { width: 30px; height: 30px; }
+.login-header h2 {
+  font-size: 1.5rem;
+  color: var(--text);
+  margin-bottom: 6px;
+  font-family: 'Oswald', sans-serif;
+}
+.login-header p {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.login-form {
+  padding: 32px 28px;
+}
+.form-group {
+  margin-bottom: 18px;
+}
+.form-label {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 6px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+.form-input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1.5px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.95rem;
+  color: var(--text);
+  background: var(--surface);
+  transition: border-color 0.2s;
+  outline: none;
+}
+.form-input::placeholder { color: var(--muted); opacity: 0.6; }
+.form-input:focus { border-color: var(--yellow); }
+
+.btn-primary {
+  width: 100%;
+  padding: 15px;
+  background: var(--yellow);
+  color: #1a1a2e;
+  border: none;
+  border-radius: 10px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-top: 6px;
+}
+.btn-primary:hover { background: var(--yellow-dark); }
+.btn-primary:active { transform: scale(0.98); }
+
+.login-divider {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 24px 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+.login-divider::before, .login-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(255,255,255,0.1);
+}
+
+.social-btn {
+  width: 100%;
+  padding: 14px;
+  background: var(--surface);
+  border: 1.5px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.social-btn:hover { border-color: var(--yellow); background: var(--yellow-glow); }
+.social-btn svg { width: 20px; height: 20px; }
+
+.login-footer {
+  text-align: center;
+  padding: 24px 28px;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.login-footer a {
+  color: var(--yellow);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+/* =========================================================
+   SCREEN 3: FEED
+   ========================================================= */
+.feed-screen {
+  background: var(--bg);
+  padding: 54px 0 0;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* App Header */
+.app-header {
+  padding: 8px 16px 10px;
+  background: var(--bg);
+  border-bottom: 1px solid rgba(245,197,24,0.12);
+  flex-shrink: 0;
+}
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.logo {
+  font-family: 'Oswald', sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  color: #f5c518;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+.logo span { color: #ffffff; font-weight: 400; }
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.notif-bell {
+  position: relative;
+  font-size: 11px;
+  font-weight: 600;
+  color: #e0e0e0;
+  cursor: pointer;
+  background: var(--surface);
+  padding: 5px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+.notif-bell .badge {
+  position: absolute;
+  top: -5px;
+  right: -6px;
+  width: 16px;
+  height: 16px;
+  background: var(--red);
+  border-radius: 50%;
+  font-size: 9px;
+  font-weight: 700;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--bg);
+}
+.user-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f5c518, #e6a800);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: #1a1a2e;
+  cursor: pointer;
+}
+.live-ticker {
+  background: rgba(245,197,24,0.08);
+  border: 1px solid rgba(245,197,24,0.15);
+  border-radius: 8px;
+  padding: 6px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: #ffffff;
+}
+.live-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--red);
+  border-radius: 50%;
+  animation: pulse-dot 1.4s ease-in-out infinite;
+  flex-shrink: 0;
+}
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+.ticker-label {
+  font-weight: 700;
+  color: var(--red);
+  text-transform: uppercase;
+  font-size: 9px;
+  letter-spacing: 1px;
+}
+.ticker-score {
+  font-family: 'Oswald', sans-serif;
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+}
+.ticker-score .yellow { color: #f5c518; }
+.ticker-quarter {
+  font-size: 10px;
+  color: #888;
+  margin-left: auto;
+}
+
+/* Tab Pills */
+.tab-bar {
+  display: flex;
+  gap: 8px;
+  padding: 10px 16px;
+  overflow-x: auto;
+  flex-shrink: 0;
+  background: var(--bg);
+  scrollbar-width: none;
+}
+.tab-bar::-webkit-scrollbar { display: none; }
+.tab-pill {
+  flex-shrink: 0;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #999;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.tab-pill.active {
+  background: rgba(245,197,24,0.15);
+  color: #f5c518;
+  border-color: rgba(245,197,24,0.3);
+}
+.tab-pill:hover:not(.active) {
+  background: rgba(255,255,255,0.08);
+  color: #ccc;
+}
+
+/* Scrollable Content */
+.content-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 12px 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  scrollbar-width: none;
+}
+.content-area::-webkit-scrollbar { display: none; }
+
+/* Composer */
+.composer {
+  background: var(--surface);
+  border-radius: 14px;
+  padding: 14px;
+  border: 1px solid var(--border);
+}
+.composer-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.composer-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f5c518, #e6a800);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: #1a1a2e;
+  flex-shrink: 0;
+}
+.composer-input {
+  flex: 1;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 20px;
+  padding: 8px 14px;
+  color: #888;
+  font-size: 13px;
+  font-family: 'Inter', sans-serif;
+}
+.composer-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-left: 42px;
+}
+.composer-tools {
+  display: flex;
+  gap: 12px;
+  font-size: 11px;
+}
+.composer-tool {
+  color: #666;
+  cursor: pointer;
+  transition: color 0.2s;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+.composer-tool:hover { color: #f5c518; }
+.composer-btn {
+  background: #f5c518;
+  color: #1a1a2e;
+  border: none;
+  border-radius: 16px;
+  padding: 5px 16px;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: 'Oswald', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.composer-btn:hover { background: #e6a800; }
+
+/* Post Cards */
+.post-card {
+  background: var(--surface);
+  border-radius: 14px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+}
+.post-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.post-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.post-avatar.osu { background: #bb0000; color: #fff; }
+.post-avatar.bama { background: #9e1b32; color: #fff; }
+.post-avatar.auburn { background: #0c2340; color: #f26522; }
+.post-user-info { flex: 1; min-width: 0; }
+.post-username {
+  font-size: 13px;
+  font-weight: 700;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.flair {
+  font-size: 9px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+.flair.osu { background: rgba(187,0,0,0.2); color: #ff4444; }
+.flair.bama { background: rgba(158,27,50,0.2); color: #e85d75; }
+.flair.auburn { background: rgba(12,35,64,0.3); color: #f26522; }
+.post-meta {
+  font-size: 10px;
+  color: #666;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+}
+.badge-heisman {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 9px;
+  padding: 2px 7px;
+  border-radius: 10px;
+  background: rgba(245,197,24,0.12);
+  color: #f5c518;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.post-body {
+  font-size: 14px;
+  color: #e0e0e0;
+  line-height: 1.5;
+  margin-bottom: 12px;
+  padding-left: 44px;
+}
+.post-engagement {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-left: 44px;
+  margin-bottom: 10px;
+  font-size: 12px;
+  color: #999;
+}
+.engagement-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.engagement-item:hover { color: #f5c518; }
+.engagement-item .count { font-weight: 600; }
+.label-td {
+  font-family: 'Oswald', sans-serif;
+  font-weight: 700;
+  font-size: 11px;
+  color: #f5c518;
+  letter-spacing: 0.04em;
+}
+.label-fum {
+  font-family: 'Oswald', sans-serif;
+  font-weight: 700;
+  font-size: 11px;
+  color: #888;
+  letter-spacing: 0.04em;
+}
+.label-cmt {
+  font-family: 'Oswald', sans-serif;
+  font-weight: 700;
+  font-size: 11px;
+  color: #666;
+  letter-spacing: 0.04em;
+}
+
+.post-actions {
+  display: flex;
+  gap: 4px;
+  padding-left: 44px;
+  flex-wrap: wrap;
+}
+.action-btn {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.06);
+  color: #888;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.action-btn:hover {
+  background: rgba(245,197,24,0.1);
+  border-color: rgba(245,197,24,0.2);
+  color: #f5c518;
+}
+
+/* Receipt Tag */
+.receipt-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: 44px;
+  margin-bottom: 10px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: rgba(245,197,24,0.1);
+  border: 1px solid rgba(245,197,24,0.2);
+  font-size: 10px;
+  font-weight: 700;
+  color: #f5c518;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+/* Moderation Flag Card */
+.post-card.flagged {
+  border: 1px solid rgba(245,197,24,0.3);
+  background: linear-gradient(135deg, rgba(245,197,24,0.06), var(--surface));
+}
+.flag-overlay {
+  text-align: center;
+  padding: 20px 16px;
+}
+.flag-icon-text {
+  font-family: 'Oswald', sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  color: #f5c518;
+  letter-spacing: 0.1em;
+  border: 2px solid #f5c518;
+  padding: 4px 14px;
+  border-radius: 6px;
+  display: inline-block;
+  margin-bottom: 10px;
+}
+.flag-title {
+  font-family: 'Oswald', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #f5c518;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.flag-desc {
+  font-size: 12px;
+  color: #999;
+  margin-bottom: 14px;
+  line-height: 1.5;
+}
+.flag-appeal-btn {
+  display: inline-block;
+  padding: 7px 20px;
+  border-radius: 20px;
+  background: transparent;
+  border: 1px solid rgba(245,197,24,0.4);
+  color: #f5c518;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Inter', sans-serif;
+}
+.flag-appeal-btn:hover {
+  background: rgba(245,197,24,0.1);
+  border-color: #f5c518;
+}
+
+/* Stat Verified */
+.stat-verified {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 44px;
+  margin-bottom: 10px;
+  padding: 3px 9px;
+  border-radius: 6px;
+  background: rgba(46,204,113,0.1);
+  border: 1px solid rgba(46,204,113,0.2);
+  font-size: 10px;
+  font-weight: 600;
+  color: #2ecc71;
+  letter-spacing: 0.3px;
+}
+.sideline-tag {
+  font-size: 10px;
+  color: #f5c518;
+  font-weight: 500;
+}
+
+/* Dynasty Widget */
+.dynasty-widget {
+  background: linear-gradient(135deg, var(--surface), #2a2a45);
+  border-radius: 14px;
+  padding: 16px;
+  border: 1px solid rgba(245,197,24,0.12);
+}
+.dynasty-header {
+  font-family: 'Oswald', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #f5c518;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.xp-section { margin-bottom: 10px; }
+.xp-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #ccc;
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+.xp-label span { color: #888; font-weight: 400; }
+.xp-bar-track {
+  width: 100%;
+  height: 8px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.xp-bar-fill {
+  height: 100%;
+  width: 81.67%;
+  background: linear-gradient(90deg, #f5c518, #e6a800);
+  border-radius: 4px;
+  position: relative;
+}
+.xp-bar-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 20px;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3));
+  border-radius: 0 4px 4px 0;
+}
+.dynasty-rank {
+  font-size: 12px;
+  color: #ccc;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.dynasty-rank strong {
+  color: #f5c518;
+  font-family: 'Oswald', sans-serif;
+  font-size: 14px;
+}
+
+.feed-divider {
+  width: 40px;
+  height: 2px;
+  background: rgba(245,197,24,0.15);
+  border-radius: 1px;
+  margin: 2px auto;
+}
+
+/* ===== BOTTOM TAB BAR (shared across screens) ===== */
+.bottom-nav {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 70px;
+  background: #16162a;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-start;
+  padding-top: 8px;
+  z-index: 50;
+}
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 48px;
+}
+.nav-icon-text {
+  font-family: 'Oswald', sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  color: inherit;
+}
+.nav-label {
+  font-size: 9px;
+  font-weight: 600;
+  color: #555;
+  letter-spacing: 0.3px;
+}
+.nav-item.active .nav-label { color: #f5c518; }
+.nav-item.active .nav-icon-text { color: #f5c518; }
+.nav-item:not(.active) { opacity: 0.5; }
+.nav-item:not(.active):hover { opacity: 0.75; }
+
+/* =========================================================
+   SCREEN 4: RIVALRY ARENA
+   ========================================================= */
+.rivalry-screen {
+  background: var(--bg);
+  padding: 54px 0 0;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.section-header {
+  padding: 16px 16px 12px;
+  background: var(--bg);
+  border-bottom: 1px solid rgba(245,197,24,0.12);
+  flex-shrink: 0;
+}
+.section-header h2 {
+  font-family: 'Oswald', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--yellow);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+.section-header p {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.rivalry-card {
+  background: var(--surface);
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+.rivalry-split {
+  display: flex;
+  height: 80px;
+}
+.rivalry-side {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+}
+.rivalry-side.left { background: rgba(187,0,0,0.15); }
+.rivalry-side.right { background: rgba(29,41,81,0.3); }
+.rivalry-side .team-name {
+  font-family: 'Oswald', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 1px;
+}
+.rivalry-side .team-sub {
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+.rivalry-vs {
+  width: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Oswald', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--yellow);
+  background: var(--surface);
+}
+
+.vote-bar-container {
+  padding: 14px 16px;
+}
+.vote-bar-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.vote-bar-labels .osu-vote { color: #ff4444; }
+.vote-bar-labels .mich-vote { color: #4488ff; }
+.vote-bar-track {
+  width: 100%;
+  height: 10px;
+  background: rgba(68,136,255,0.3);
+  border-radius: 5px;
+  overflow: hidden;
+}
+.vote-bar-fill {
+  height: 100%;
+  width: 56%;
+  background: linear-gradient(90deg, #bb0000, #ff4444);
+  border-radius: 5px 0 0 5px;
+  transition: width 1s ease;
+}
+
+.debate-thread {
+  padding: 0 16px 14px;
+}
+.debate-item {
+  display: flex;
+  gap: 8px;
+  padding: 8px 0;
+  border-top: 1px solid var(--border);
+}
+.debate-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: 700;
+  flex-shrink: 0;
+  color: #fff;
+}
+.debate-avatar.osu-side { background: #bb0000; }
+.debate-avatar.mich-side { background: #1d2951; }
+.debate-text {
+  font-size: 12px;
+  color: #ccc;
+  line-height: 1.4;
+}
+.debate-text .handle {
+  font-weight: 700;
+  color: #fff;
+  margin-right: 4px;
+}
+
+.join-debate-btn {
+  display: block;
+  width: calc(100% - 32px);
+  margin: 0 16px 14px;
+  padding: 12px;
+  background: var(--yellow);
+  color: #1a1a2e;
+  border: none;
+  border-radius: 10px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.2s;
+}
+.join-debate-btn:hover { background: var(--yellow-dark); }
+
+.past-result-card {
+  background: var(--surface);
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  padding: 14px 16px;
+}
+.past-result-label {
+  font-size: 10px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+.past-result-text {
+  font-size: 14px;
+  color: #fff;
+  font-weight: 600;
+}
+.past-result-text .winner { color: var(--yellow); }
+
+/* =========================================================
+   SCREEN 5: TRANSFER PORTAL
+   ========================================================= */
+.portal-screen {
+  background: var(--bg);
+  padding: 54px 0 0;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.team-picker {
+  padding: 12px 16px;
+  background: var(--bg);
+  flex-shrink: 0;
+}
+.team-picker label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: block;
+  margin-bottom: 6px;
+}
+.team-picker select {
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--surface);
+  border: 1.5px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+.team-picker select:focus { border-color: var(--yellow); }
+
+.portal-player-card {
+  background: var(--surface);
+  border-radius: 14px;
+  padding: 14px;
+  border: 1px solid var(--border);
+}
+.player-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+.player-info h4 {
+  font-family: 'Oswald', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 2px;
+}
+.player-info .player-detail {
+  font-size: 11px;
+  color: var(--muted);
+}
+.star-rating {
+  display: flex;
+  gap: 2px;
+}
+.star {
+  width: 14px;
+  height: 14px;
+  position: relative;
+}
+.star svg { width: 14px; height: 14px; }
+.star.filled svg { fill: var(--yellow); stroke: var(--yellow); }
+.star.empty svg { fill: none; stroke: #555; }
+
+.claim-btn {
+  width: 100%;
+  padding: 8px;
+  margin-top: 10px;
+  background: transparent;
+  border: 1.5px solid rgba(245,197,24,0.4);
+  border-radius: 8px;
+  color: var(--yellow);
+  font-family: 'Oswald', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.claim-btn:hover {
+  background: var(--yellow-glow);
+  border-color: var(--yellow);
+}
+
+.leaderboard-card {
+  background: var(--surface);
+  border-radius: 14px;
+  padding: 14px;
+  border: 1px solid var(--border);
+}
+.leaderboard-card h4 {
+  font-family: 'Oswald', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--yellow);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.lb-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-top: 1px solid var(--border);
+}
+.lb-rank {
+  font-family: 'Oswald', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--yellow);
+  width: 24px;
+  text-align: center;
+}
+.lb-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #2a2a45;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  color: #ccc;
+}
+.lb-info { flex: 1; }
+.lb-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+}
+.lb-accuracy {
+  font-size: 10px;
+  color: var(--muted);
+}
+.lb-pct {
+  font-family: 'Oswald', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--green);
+}
+
+.alert-banner {
+  background: rgba(245,197,24,0.1);
+  border: 1px solid rgba(245,197,24,0.25);
+  border-radius: 10px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.alert-banner .alert-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--yellow);
+  border-radius: 50%;
+  flex-shrink: 0;
+  animation: pulse-dot 1.4s ease-in-out infinite;
+}
+.alert-banner .alert-text {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--yellow);
+}
+
+/* =========================================================
+   SCREEN 6: PROFILE / DYNASTY
+   ========================================================= */
+.profile-screen {
+  background: var(--bg);
+  padding: 54px 0 0;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.profile-header {
+  text-align: center;
+  padding: 24px 16px 20px;
+  background: linear-gradient(180deg, #22223a, var(--bg));
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.profile-avatar-lg {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--yellow), var(--yellow-dark));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Oswald', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin: 0 auto 12px;
+  border: 3px solid rgba(245,197,24,0.3);
+}
+.profile-name {
+  font-family: 'Oswald', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 2px;
+}
+.profile-handle {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+.profile-school {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  background: rgba(187,0,0,0.15);
+  border: 1px solid rgba(187,0,0,0.3);
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #ff4444;
+}
+.profile-school .school-dot {
+  width: 8px;
+  height: 8px;
+  background: #bb0000;
+  border-radius: 50%;
+}
+
+.dynasty-stats-card {
+  background: var(--surface);
+  border-radius: 14px;
+  padding: 16px;
+  border: 1px solid var(--border);
+}
+.dynasty-stats-card .card-title {
+  font-family: 'Oswald', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--yellow);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 14px;
+}
+.stat-box {
+  background: rgba(255,255,255,0.03);
+  border-radius: 10px;
+  padding: 12px;
+  text-align: center;
+  border: 1px solid var(--border);
+}
+.stat-value {
+  font-family: 'Oswald', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 2px;
+}
+.stat-value.yellow { color: var(--yellow); }
+.stat-value.green { color: var(--green); }
+.stat-label-text {
+  font-size: 10px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 500;
+}
+
+.badges-section {
+  background: var(--surface);
+  border-radius: 14px;
+  padding: 16px;
+  border: 1px solid var(--border);
+}
+.badges-section .card-title {
+  font-family: 'Oswald', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--yellow);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.badges-row {
+  display: flex;
+  gap: 10px;
+}
+.badge-item {
+  flex: 1;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 8px;
+  text-align: center;
+}
+.badge-icon-shape {
+  width: 36px;
+  height: 36px;
+  margin: 0 auto 8px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Oswald', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+}
+.badge-icon-shape.first-take {
+  background: rgba(245,197,24,0.2);
+  border: 1.5px solid rgba(245,197,24,0.4);
+  color: var(--yellow);
+}
+.badge-icon-shape.receipt-master {
+  background: rgba(46,204,113,0.15);
+  border: 1.5px solid rgba(46,204,113,0.3);
+  color: var(--green);
+}
+.badge-icon-shape.rivalry-victor {
+  background: rgba(231,76,60,0.15);
+  border: 1.5px solid rgba(231,76,60,0.3);
+  color: var(--red);
+}
+.badge-name {
+  font-size: 10px;
+  font-weight: 600;
+  color: #ccc;
+  letter-spacing: 0.3px;
+}
+
+.recent-activity {
+  background: var(--surface);
+  border-radius: 14px;
+  padding: 16px;
+  border: 1px solid var(--border);
+}
+.recent-activity .card-title {
+  font-family: 'Oswald', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--yellow);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.activity-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-top: 1px solid var(--border);
+}
+.activity-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.activity-dot.yellow { background: var(--yellow); }
+.activity-dot.green { background: var(--green); }
+.activity-dot.red { background: var(--red); }
+.activity-dot.blue { background: #4488ff; }
+.activity-text {
+  font-size: 12px;
+  color: #ccc;
+  flex: 1;
+  line-height: 1.4;
+}
+.activity-time {
+  font-size: 10px;
+  color: #555;
+  flex-shrink: 0;
+}
+
+.edit-profile-btn {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  background: var(--yellow);
+  color: #1a1a2e;
+  border: none;
+  border-radius: 10px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.2s;
+}
+.edit-profile-btn:hover { background: var(--yellow-dark); }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 420px) {
+  .phone-frame {
+    width: 100%;
+    height: 100vh;
+    border-radius: 0;
+    padding: 0;
+    box-shadow: none;
+  }
+  .phone-inner { border-radius: 0; }
+  .phone-notch { display: none; }
+  .page-header, .screen-nav { display: none; }
+  body { padding: 0; }
+}
+</style>
+</head>
+<body>
+
+<!-- Page Header -->
+<div class="page-header">
+  <h1>CFB Social -- The Stadium</h1>
+  <p>Dark mode sports theme -- Interactive UI preview. Click screen buttons to navigate.</p>
+</div>
+
+<!-- Screen Navigation -->
+<div class="screen-nav">
+  <button class="active" onclick="showScreen('splash')">Splash</button>
+  <button onclick="showScreen('login')">Login</button>
+  <button onclick="showScreen('feed')">Feed</button>
+  <button onclick="showScreen('rivalry')">Rivalry Arena</button>
+  <button onclick="showScreen('portal')">Transfer Portal</button>
+  <button onclick="showScreen('profile')">Profile</button>
+</div>
+
+<!-- Phone Frame -->
+<div class="phone-frame">
+  <div class="phone-notch"></div>
+  <div class="phone-inner" id="phoneInner">
+
+    <!-- Status Bar (shared) -->
+    <div class="status-bar" id="statusBar">
+      <span class="time">9:41</span>
+      <span class="icons">
+        <svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor"><rect x="0" y="6" width="3" height="6" rx="1"/><rect x="4.5" y="4" width="3" height="8" rx="1"/><rect x="9" y="2" width="3" height="10" rx="1"/><rect x="13.5" y="0" width="3" height="12" rx="1" opacity="0.3"/></svg>
+        <svg width="16" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><circle cx="12" cy="20" r="1" fill="currentColor"/></svg>
+        <svg width="24" height="12" viewBox="0 0 28 14" fill="currentColor"><rect x="0" y="1" width="24" height="12" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="2.5" y="3.5" width="16" height="7" rx="1.5" fill="currentColor"/><rect x="25.5" y="4.5" width="2" height="5" rx="1" opacity="0.4"/></svg>
+      </span>
+    </div>
+
+    <!-- Home Indicator -->
+    <div class="home-indicator" id="homeIndicator"></div>
+
+    <!-- ==================== SCREEN 1: SPLASH ==================== -->
+    <div class="screen splash-screen active" id="screen-splash">
+      <div class="splash-icon">
+        <svg viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Shield shape -->
+          <path d="M48 8 L80 24 L80 56 Q80 76 48 90 Q16 76 16 56 L16 24 Z" stroke="#f5c518" stroke-width="3" fill="rgba(245,197,24,0.08)"/>
+          <path d="M48 8 L80 24 L80 56 Q80 76 48 90 Q16 76 16 56 L16 24 Z" stroke="rgba(245,197,24,0.3)" stroke-width="1" fill="none" stroke-dasharray="4 4"/>
+          <!-- Football laces -->
+          <line x1="38" y1="48" x2="58" y2="48" stroke="#f5c518" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="44" y1="40" x2="44" y2="56" stroke="#f5c518" stroke-width="2" stroke-linecap="round"/>
+          <line x1="48" y1="38" x2="48" y2="58" stroke="#f5c518" stroke-width="2" stroke-linecap="round"/>
+          <line x1="52" y1="40" x2="52" y2="56" stroke="#f5c518" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="splash-brand">CFB Social</div>
+      <div class="splash-tagline">College Football's Home</div>
+      <div class="splash-loader">
+        <span></span><span></span><span></span>
+      </div>
+      <div class="splash-version">v1.0.0</div>
+    </div>
+
+    <!-- ==================== SCREEN 2: LOGIN ==================== -->
+    <div class="screen login-screen" id="screen-login">
+      <div class="login-header">
+        <div class="login-logo-small">
+          <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M24 4 L40 12 L40 28 Q40 38 24 45 Q8 38 8 28 L8 12 Z" stroke="#1a1a2e" stroke-width="2.5" fill="rgba(26,26,46,0.3)"/>
+            <line x1="19" y1="24" x2="29" y2="24" stroke="#1a1a2e" stroke-width="2" stroke-linecap="round"/>
+            <line x1="22" y1="19" x2="22" y2="29" stroke="#1a1a2e" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="26" y1="19" x2="26" y2="29" stroke="#1a1a2e" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <h2>Welcome Back</h2>
+        <p>Sign in to CFB Social</p>
+      </div>
+
+      <div class="login-form">
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" class="form-input" placeholder="your@email.com">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" class="form-input" placeholder="Enter password">
+        </div>
+        <button class="btn-primary" id="loginBtn">Sign In</button>
+        <div class="login-divider">or continue with</div>
+        <button class="social-btn">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
+            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+          </svg>
+          Sign in with Google
+        </button>
+      </div>
+
+      <div class="login-footer">
+        Don't have an account? <a href="#" onclick="event.preventDefault()">Sign Up</a>
+      </div>
+    </div>
+
+    <!-- ==================== SCREEN 3: FEED ==================== -->
+    <div class="screen feed-screen" id="screen-feed">
+
+      <!-- App Header -->
+      <div class="app-header">
+        <div class="header-top">
+          <div class="logo">CFB <span>SOCIAL</span></div>
+          <div class="header-actions">
+            <div class="notif-bell">
+              Alerts
+              <div class="badge">3</div>
+            </div>
+            <div class="user-avatar">JD</div>
+          </div>
+        </div>
+        <div class="live-ticker">
+          <div class="live-dot"></div>
+          <span class="ticker-label">Live</span>
+          <span class="ticker-score"><span class="yellow">OSU</span> 24 &mdash; MICH 21</span>
+          <span class="ticker-quarter">Q3 -- 5:42</span>
+        </div>
+      </div>
+
+      <!-- Tab Bar -->
+      <div class="tab-bar">
+        <div class="tab-pill active">Feed</div>
+        <div class="tab-pill">Trending</div>
+        <div class="tab-pill">Rivalry</div>
+        <div class="tab-pill">Portal</div>
+        <div class="tab-pill">News</div>
+      </div>
+
+      <!-- Scrollable Content -->
+      <div class="content-area">
+
+        <!-- Composer -->
+        <div class="composer">
+          <div class="composer-top">
+            <div class="composer-avatar">JD</div>
+            <div class="composer-input">What's your take?</div>
+          </div>
+          <div class="composer-actions">
+            <div class="composer-tools">
+              <span class="composer-tool">IMG</span>
+              <span class="composer-tool">POLL</span>
+              <span class="composer-tool">TAG</span>
+              <span class="composer-tool">GIF</span>
+            </div>
+            <button class="composer-btn">Post</button>
+          </div>
+        </div>
+
+        <!-- Post 1: BuckeyeNation -->
+        <div class="post-card">
+          <div class="post-header">
+            <div class="post-avatar osu">BN</div>
+            <div class="post-user-info">
+              <div class="post-username">
+                @BuckeyeNation
+                <span class="flair osu">Ohio State</span>
+              </div>
+              <div class="post-meta">
+                <span>2h ago</span>
+                <span style="color:#555;">--</span>
+                <span class="badge-heisman">Heisman Streak</span>
+              </div>
+            </div>
+          </div>
+          <div class="post-body">
+            Travis Hunter is the best two-way player since Deion Sanders. Not even debatable.
+          </div>
+          <div class="post-engagement">
+            <div class="engagement-item">
+              <span class="label-td">TD</span>
+              <span class="count" style="color:#f5c518;">342</span>
+            </div>
+            <div class="engagement-item">
+              <span class="label-fum">FUM</span>
+              <span class="count" style="color:#888;">89</span>
+            </div>
+            <div class="engagement-item" style="margin-left:auto;">
+              <span class="label-cmt">CMT</span>
+              <span class="count" style="color:#666;">47</span>
+            </div>
+          </div>
+          <div class="post-actions">
+            <div class="action-btn">Stat Check</div>
+            <div class="action-btn">Challenge</div>
+            <div class="action-btn">Age</div>
+            <div class="action-btn">Reply</div>
+          </div>
+        </div>
+
+        <!-- Post 2: TideRollin -->
+        <div class="post-card">
+          <div class="post-header">
+            <div class="post-avatar bama">TR</div>
+            <div class="post-user-info">
+              <div class="post-username">
+                @TideRollin
+                <span class="flair bama">Alabama</span>
+              </div>
+              <div class="post-meta">
+                <span>4h ago</span>
+                <span style="color:#555;">--</span>
+                <span>Preseason Take</span>
+              </div>
+            </div>
+          </div>
+          <div class="post-body">
+            Alabama going 11-1 this season. Only loss at Georgia. Book it.
+          </div>
+          <div class="receipt-tag">RECEIPT TRACKED</div>
+          <div class="post-engagement">
+            <div class="engagement-item">
+              <span class="label-td">TD</span>
+              <span class="count" style="color:#f5c518;">234</span>
+            </div>
+            <div class="engagement-item">
+              <span class="label-fum">FUM</span>
+              <span class="count" style="color:#888;">156</span>
+            </div>
+            <div class="engagement-item" style="margin-left:auto;">
+              <span class="label-cmt">CMT</span>
+              <span class="count" style="color:#666;">92</span>
+            </div>
+          </div>
+          <div class="post-actions">
+            <div class="action-btn">Stat Check</div>
+            <div class="action-btn">Challenge</div>
+            <div class="action-btn">Reply</div>
+          </div>
+        </div>
+
+        <div class="feed-divider"></div>
+
+        <!-- Dynasty Mode Widget -->
+        <div class="dynasty-widget">
+          <div class="dynasty-header">Dynasty Mode</div>
+          <div class="xp-section">
+            <div class="xp-label">
+              Level 12 <span>2,450 / 3,000 XP</span>
+            </div>
+            <div class="xp-bar-track">
+              <div class="xp-bar-fill"></div>
+            </div>
+          </div>
+          <div class="dynasty-rank">
+            Dynasty Rank: <strong>#847</strong> nationally
+          </div>
+        </div>
+
+        <div class="feed-divider"></div>
+
+        <!-- Post 3: AI Moderation Flag -->
+        <div class="post-card flagged">
+          <div class="flag-overlay">
+            <div class="flag-icon-text">FLAG</div>
+            <div class="flag-title">Flag on the Play</div>
+            <div class="flag-desc">
+              Off-topic political content hidden by AI referee.<br>
+              <span style="color:#666; font-size:10px;">This post was reviewed and flagged automatically.</span>
+            </div>
+            <button class="flag-appeal-btn">Appeal This Call?</button>
+          </div>
+        </div>
+
+        <!-- Post 4: WarEagle -->
+        <div class="post-card">
+          <div class="post-header">
+            <div class="post-avatar auburn">WE</div>
+            <div class="post-user-info">
+              <div class="post-username">
+                @WarEagle
+                <span class="flair auburn">Auburn</span>
+              </div>
+              <div class="post-meta">
+                <span class="sideline-tag">Q1 4:32 -- Auburn vs LSU</span>
+              </div>
+            </div>
+          </div>
+          <div class="post-body">
+            Auburn's defense COOKING! 3 sacks in Q1! This pass rush is relentless.
+          </div>
+          <div class="stat-verified">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2ecc71" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Stat Verified
+          </div>
+          <div class="post-engagement">
+            <div class="engagement-item">
+              <span class="label-td">TD</span>
+              <span class="count" style="color:#f5c518;">189</span>
+            </div>
+            <div class="engagement-item">
+              <span class="label-fum">FUM</span>
+              <span class="count" style="color:#888;">12</span>
+            </div>
+            <div class="engagement-item" style="margin-left:auto;">
+              <span class="label-cmt">CMT</span>
+              <span class="count" style="color:#666;">31</span>
+            </div>
+          </div>
+          <div class="post-actions">
+            <div class="action-btn">Stat Check</div>
+            <div class="action-btn">Challenge</div>
+            <div class="action-btn">Age</div>
+            <div class="action-btn">Reply</div>
+          </div>
+        </div>
+
+        <div style="height: 12px;"></div>
+      </div>
+
+      <!-- Bottom Navigation -->
+      <div class="bottom-nav">
+        <div class="nav-item active" onclick="showScreen('feed')">
+          <span class="nav-icon-text">FD</span>
+          <span class="nav-label">Feed</span>
+        </div>
+        <div class="nav-item" onclick="showScreen('rivalry')">
+          <span class="nav-icon-text">VS</span>
+          <span class="nav-label">Rivals</span>
+        </div>
+        <div class="nav-item">
+          <span class="nav-icon-text">PC</span>
+          <span class="nav-label">Play Call</span>
+        </div>
+        <div class="nav-item" onclick="showScreen('portal')">
+          <span class="nav-icon-text">TP</span>
+          <span class="nav-label">Portal</span>
+        </div>
+        <div class="nav-item" onclick="showScreen('profile')">
+          <span class="nav-icon-text">ME</span>
+          <span class="nav-label">Profile</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ==================== SCREEN 4: RIVALRY ARENA ==================== -->
+    <div class="screen rivalry-screen" id="screen-rivalry">
+
+      <div class="section-header">
+        <h2>Rivalry Arena</h2>
+        <p>The biggest matchups. Pick your side.</p>
+      </div>
+
+      <div class="content-area">
+
+        <!-- Featured Rivalry -->
+        <div class="rivalry-card">
+          <div class="rivalry-split">
+            <div class="rivalry-side left">
+              <div class="team-name">OHIO STATE</div>
+              <div class="team-sub">Buckeyes</div>
+            </div>
+            <div class="rivalry-vs">VS</div>
+            <div class="rivalry-side right">
+              <div class="team-name">MICHIGAN</div>
+              <div class="team-sub">Wolverines</div>
+            </div>
+          </div>
+          <div class="vote-bar-container">
+            <div class="vote-bar-labels">
+              <span class="osu-vote">OSU 56%</span>
+              <span class="mich-vote">MICH 44%</span>
+            </div>
+            <div class="vote-bar-track">
+              <div class="vote-bar-fill" id="voteBarFill"></div>
+            </div>
+          </div>
+          <div class="debate-thread">
+            <div class="debate-item">
+              <div class="debate-avatar osu-side">BN</div>
+              <div class="debate-text"><span class="handle">@BuckeyeNation</span> Our defense is elite this year. Michigan can't keep up.</div>
+            </div>
+            <div class="debate-item">
+              <div class="debate-avatar mich-side">WV</div>
+              <div class="debate-text"><span class="handle">@WolverineWill</span> Bold words for a team that lost The Game last year.</div>
+            </div>
+            <div class="debate-item">
+              <div class="debate-avatar osu-side">SC</div>
+              <div class="debate-text"><span class="handle">@ScarletCrush</span> Check the recruiting rankings. OSU by 14.</div>
+            </div>
+            <div class="debate-item">
+              <div class="debate-avatar mich-side">BB</div>
+              <div class="debate-text"><span class="handle">@BigBlue88</span> Rankings don't play football. See you in Ann Arbor.</div>
+            </div>
+          </div>
+        </div>
+
+        <button class="join-debate-btn">Join the Debate</button>
+
+        <!-- Past Rivalry Result -->
+        <div class="past-result-card">
+          <div class="past-result-label">Last Week's Rivalry</div>
+          <div class="past-result-text">
+            <span class="winner">Texas 62%</span> beat Oklahoma 38%
+          </div>
+        </div>
+
+        <div style="height: 12px;"></div>
+      </div>
+
+      <!-- Bottom Navigation -->
+      <div class="bottom-nav">
+        <div class="nav-item" onclick="showScreen('feed')">
+          <span class="nav-icon-text">FD</span>
+          <span class="nav-label">Feed</span>
+        </div>
+        <div class="nav-item active" onclick="showScreen('rivalry')">
+          <span class="nav-icon-text">VS</span>
+          <span class="nav-label">Rivals</span>
+        </div>
+        <div class="nav-item">
+          <span class="nav-icon-text">PC</span>
+          <span class="nav-label">Play Call</span>
+        </div>
+        <div class="nav-item" onclick="showScreen('portal')">
+          <span class="nav-icon-text">TP</span>
+          <span class="nav-label">Portal</span>
+        </div>
+        <div class="nav-item" onclick="showScreen('profile')">
+          <span class="nav-icon-text">ME</span>
+          <span class="nav-label">Profile</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ==================== SCREEN 5: TRANSFER PORTAL ==================== -->
+    <div class="screen portal-screen" id="screen-portal">
+
+      <div class="section-header">
+        <h2>Transfer Portal War Room</h2>
+        <p>Build your roster. Predict the moves.</p>
+      </div>
+
+      <div class="content-area">
+
+        <!-- Alert Banner -->
+        <div class="alert-banner">
+          <div class="alert-dot"></div>
+          <span class="alert-text">3 New Portal Entries Today</span>
+        </div>
+
+        <!-- Team Picker -->
+        <div class="team-picker" style="padding:0;">
+          <label>Build Your Roster</label>
+          <select>
+            <option>Select a team...</option>
+            <option>Ohio State Buckeyes</option>
+            <option>Alabama Crimson Tide</option>
+            <option>Georgia Bulldogs</option>
+            <option>Texas Longhorns</option>
+            <option>Michigan Wolverines</option>
+          </select>
+        </div>
+
+        <!-- Portal Player 1 -->
+        <div class="portal-player-card">
+          <div class="player-card-top">
+            <div class="player-info">
+              <h4>Marcus Williams</h4>
+              <div class="player-detail">QB -- Transfer from USC</div>
+            </div>
+            <div class="star-rating">
+              <div class="star filled"><svg viewBox="0 0 24 24" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+              <div class="star filled"><svg viewBox="0 0 24 24" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+              <div class="star filled"><svg viewBox="0 0 24 24" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+              <div class="star filled"><svg viewBox="0 0 24 24" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+              <div class="star empty"><svg viewBox="0 0 24 24" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+            </div>
+          </div>
+          <button class="claim-btn">Claim for Ohio State</button>
+        </div>
+
+        <!-- Portal Player 2 -->
+        <div class="portal-player-card">
+          <div class="player-card-top">
+            <div class="player-info">
+              <h4>Jaylen Carter</h4>
+              <div class="player-detail">WR -- Transfer from Oregon</div>
+            </div>
+            <div class="star-rating">
+              <div class="star filled"><svg viewBox="0 0 24 24" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+              <div class="star filled"><svg viewBox="0 0 24 24" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+              <div class="star filled"><svg viewBox="0 0 24 24" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+              <div class="star filled"><svg viewBox="0 0 24 24" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+              <div class="star filled"><svg viewBox="0 0 24 24" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+            </div>
+          </div>
+          <button class="claim-btn">Claim for Ohio State</button>
+        </div>
+
+        <!-- Portal Player 3 -->
+        <div class="portal-player-card">
+          <div class="player-card-top">
+            <div class="player-info">
+              <h4>Devon Brooks</h4>
+              <div class="player-detail">DE -- Transfer from Clemson</div>
+            </div>
+            <div class="star-rating">
+              <div class="star filled"><svg viewBox="0 0 24 24" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+              <div class="star filled"><svg viewBox="0 0 24 24" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+              <div class="star filled"><svg viewBox="0 0 24 24" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+              <div class="star empty"><svg viewBox="0 0 24 24" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+              <div class="star empty"><svg viewBox="0 0 24 24" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+            </div>
+          </div>
+          <button class="claim-btn">Claim for Ohio State</button>
+        </div>
+
+        <!-- Leaderboard -->
+        <div class="leaderboard-card">
+          <h4>Top GMs</h4>
+          <div class="lb-item">
+            <div class="lb-rank">1</div>
+            <div class="lb-avatar">PK</div>
+            <div class="lb-info">
+              <div class="lb-name">@PortalKing</div>
+              <div class="lb-accuracy">42 predictions</div>
+            </div>
+            <div class="lb-pct">89%</div>
+          </div>
+          <div class="lb-item">
+            <div class="lb-rank">2</div>
+            <div class="lb-avatar">RS</div>
+            <div class="lb-info">
+              <div class="lb-name">@RecruitScout</div>
+              <div class="lb-accuracy">38 predictions</div>
+            </div>
+            <div class="lb-pct">84%</div>
+          </div>
+          <div class="lb-item">
+            <div class="lb-rank">3</div>
+            <div class="lb-avatar">TG</div>
+            <div class="lb-info">
+              <div class="lb-name">@TransferGuru</div>
+              <div class="lb-accuracy">51 predictions</div>
+            </div>
+            <div class="lb-pct">81%</div>
+          </div>
+        </div>
+
+        <div style="height: 12px;"></div>
+      </div>
+
+      <!-- Bottom Navigation -->
+      <div class="bottom-nav">
+        <div class="nav-item" onclick="showScreen('feed')">
+          <span class="nav-icon-text">FD</span>
+          <span class="nav-label">Feed</span>
+        </div>
+        <div class="nav-item" onclick="showScreen('rivalry')">
+          <span class="nav-icon-text">VS</span>
+          <span class="nav-label">Rivals</span>
+        </div>
+        <div class="nav-item">
+          <span class="nav-icon-text">PC</span>
+          <span class="nav-label">Play Call</span>
+        </div>
+        <div class="nav-item active" onclick="showScreen('portal')">
+          <span class="nav-icon-text">TP</span>
+          <span class="nav-label">Portal</span>
+        </div>
+        <div class="nav-item" onclick="showScreen('profile')">
+          <span class="nav-icon-text">ME</span>
+          <span class="nav-label">Profile</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ==================== SCREEN 6: PROFILE / DYNASTY ==================== -->
+    <div class="screen profile-screen" id="screen-profile">
+
+      <div class="profile-header">
+        <div class="profile-avatar-lg">JD</div>
+        <div class="profile-name">John Davis</div>
+        <div class="profile-handle">@GridironKing</div>
+        <div class="profile-school">
+          <span class="school-dot"></span>
+          Ohio State
+        </div>
+      </div>
+
+      <div class="content-area">
+
+        <!-- Dynasty Stats -->
+        <div class="dynasty-stats-card">
+          <div class="card-title">Dynasty Stats</div>
+          <div class="xp-section">
+            <div class="xp-label">
+              Level 12 <span>2,450 / 3,000 XP</span>
+            </div>
+            <div class="xp-bar-track">
+              <div class="xp-bar-fill"></div>
+            </div>
+          </div>
+          <div class="stats-grid">
+            <div class="stat-box">
+              <div class="stat-value">148</div>
+              <div class="stat-label-text">Total Posts</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-value green">67%</div>
+              <div class="stat-label-text">Receipts (12/18)</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-value yellow">23</div>
+              <div class="stat-label-text">Rivalry Wins</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-value">#847</div>
+              <div class="stat-label-text">Dynasty Rank</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Badges -->
+        <div class="badges-section">
+          <div class="card-title">Achievements</div>
+          <div class="badges-row">
+            <div class="badge-item">
+              <div class="badge-icon-shape first-take">1st</div>
+              <div class="badge-name">First Take</div>
+            </div>
+            <div class="badge-item">
+              <div class="badge-icon-shape receipt-master">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+              <div class="badge-name">Receipt Master</div>
+            </div>
+            <div class="badge-item">
+              <div class="badge-icon-shape rivalry-victor">VS</div>
+              <div class="badge-name">Rivalry Victor</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="recent-activity">
+          <div class="card-title">Recent Activity</div>
+          <div class="activity-item">
+            <div class="activity-dot yellow"></div>
+            <div class="activity-text">Posted a take on Travis Hunter</div>
+            <div class="activity-time">2h</div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-dot green"></div>
+            <div class="activity-text">Receipt verified: Alabama 11-1 prediction</div>
+            <div class="activity-time">1d</div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-dot red"></div>
+            <div class="activity-text">Won rivalry debate: OSU vs Michigan</div>
+            <div class="activity-time">2d</div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-dot blue"></div>
+            <div class="activity-text">Claimed Marcus Williams in Portal</div>
+            <div class="activity-time">3d</div>
+          </div>
+        </div>
+
+        <!-- Edit Profile Button -->
+        <button class="edit-profile-btn">Edit Profile</button>
+
+        <div style="height: 12px;"></div>
+      </div>
+
+      <!-- Bottom Navigation -->
+      <div class="bottom-nav">
+        <div class="nav-item" onclick="showScreen('feed')">
+          <span class="nav-icon-text">FD</span>
+          <span class="nav-label">Feed</span>
+        </div>
+        <div class="nav-item" onclick="showScreen('rivalry')">
+          <span class="nav-icon-text">VS</span>
+          <span class="nav-label">Rivals</span>
+        </div>
+        <div class="nav-item">
+          <span class="nav-icon-text">PC</span>
+          <span class="nav-label">Play Call</span>
+        </div>
+        <div class="nav-item" onclick="showScreen('portal')">
+          <span class="nav-icon-text">TP</span>
+          <span class="nav-label">Portal</span>
+        </div>
+        <div class="nav-item active" onclick="showScreen('profile')">
+          <span class="nav-icon-text">ME</span>
+          <span class="nav-label">Profile</span>
+        </div>
+      </div>
+
+    </div>
+
+  </div><!-- /phone-inner -->
+</div><!-- /phone-frame -->
+
+<script>
+// Screen management
+const screens = ['splash', 'login', 'feed', 'rivalry', 'portal', 'profile'];
+let currentScreen = 'splash';
+
+function showScreen(name) {
+  // Hide all screens
+  screens.forEach(s => {
+    const el = document.getElementById('screen-' + s);
+    if (el) el.classList.remove('active');
+  });
+
+  // Show target screen
+  const target = document.getElementById('screen-' + name);
+  if (target) target.classList.add('active');
+
+  // Update nav buttons
+  document.querySelectorAll('.screen-nav button').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  // Match button by mapping
+  const btnMap = { splash: 0, login: 1, feed: 2, rivalry: 3, portal: 4, profile: 5 };
+  const navBtns = document.querySelectorAll('.screen-nav button');
+  if (navBtns[btnMap[name]]) {
+    navBtns[btnMap[name]].classList.add('active');
+  }
+
+  // Update bottom nav active states per screen
+  const allBottomNavs = document.querySelectorAll('.bottom-nav');
+  allBottomNavs.forEach(nav => {
+    nav.querySelectorAll('.nav-item').forEach(item => {
+      item.classList.remove('active');
+    });
+    // Set active based on current screen
+    const tabMap = { feed: 0, rivalry: 1, portal: 3, profile: 4 };
+    if (tabMap[name] !== undefined) {
+      const items = nav.querySelectorAll('.nav-item');
+      if (items[tabMap[name]]) items[tabMap[name]].classList.add('active');
+    }
+  });
+
+  // Status bar stays white on all screens (dark theme)
+  const homeIndicator = document.getElementById('homeIndicator');
+  if (name === 'splash') {
+    homeIndicator.style.background = 'rgba(245,197,24,0.3)';
+  } else {
+    homeIndicator.style.background = 'rgba(255,255,255,0.2)';
+  }
+
+  // Animate vote bar on rivalry screen
+  if (name === 'rivalry') {
+    setTimeout(() => {
+      const voteBar = document.getElementById('voteBarFill');
+      if (voteBar) voteBar.style.width = '56%';
+    }, 100);
+  }
+
+  currentScreen = name;
+}
+
+// Login button navigates to feed
+document.getElementById('loginBtn').addEventListener('click', (e) => {
+  e.preventDefault();
+  showScreen('feed');
+});
+
+// Click splash to advance
+document.getElementById('screen-splash').addEventListener('click', () => {
+  showScreen('login');
+});
+
+// Auto-advance splash after 3 seconds
+let splashTimer;
+function startSplashTimer() {
+  clearTimeout(splashTimer);
+  splashTimer = setTimeout(() => {
+    if (currentScreen === 'splash') {
+      showScreen('login');
+    }
+  }, 3000);
+}
+
+// Initialize vote bar at 0 for animation
+const voteBarInit = document.getElementById('voteBarFill');
+if (voteBarInit) voteBarInit.style.width = '0%';
+
+// Start splash timer on load
+startSplashTimer();
+</script>
+
+</body>
+</html>

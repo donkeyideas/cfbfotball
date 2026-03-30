@@ -1,0 +1,2034 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CFB Social — The Stadium</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ========== RESET & BASE ========== */
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-primary: #1a1a2e;
+      --bg-secondary: #16213e;
+      --bg-card: #1f2a48;
+      --bg-card-hover: #253254;
+      --bg-input: #0f1629;
+      --accent: #f5c518;
+      --accent-dim: rgba(245, 197, 24, 0.15);
+      --accent-glow: rgba(245, 197, 24, 0.35);
+      --text-primary: #ffffff;
+      --text-secondary: #a0aec0;
+      --text-muted: #6b7a99;
+      --border: #2d3a5c;
+      --border-glow: rgba(245, 197, 24, 0.4);
+      --success: #48bb78;
+      --danger: #fc5c65;
+      --ohio-state: #bb0000;
+      --alabama: #9e1b32;
+      --auburn: #0c2340;
+      --texas: #bf5700;
+      --oklahoma: #841617;
+      --georgia: #ba0c2f;
+      --usc: #990000;
+      --sidebar-width: 260px;
+      --right-sidebar-width: 310px;
+      --topbar-height: 56px;
+      --ticker-height: 36px;
+    }
+
+    html {
+      font-size: 15px;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-width: 1200px;
+      overflow-x: hidden;
+      line-height: 1.5;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+      font-family: 'Oswald', sans-serif;
+      letter-spacing: 0.02em;
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    /* ========== SCROLLBAR ========== */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--bg-primary);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--text-muted);
+    }
+
+    /* ========== TOP BAR ========== */
+    .topbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: var(--topbar-height);
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+      z-index: 1000;
+      gap: 20px;
+    }
+
+    .topbar-logo {
+      font-family: 'Oswald', sans-serif;
+      font-weight: 700;
+      font-size: 1.55rem;
+      color: var(--accent);
+      letter-spacing: 0.06em;
+      white-space: nowrap;
+      text-transform: uppercase;
+      flex-shrink: 0;
+    }
+
+    .topbar-logo span {
+      color: var(--text-primary);
+      font-weight: 500;
+    }
+
+    .topbar-search {
+      flex: 0 1 280px;
+      position: relative;
+    }
+
+    .topbar-search input {
+      width: 100%;
+      padding: 7px 14px 7px 36px;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-primary);
+      font-size: 0.87rem;
+      font-family: 'Inter', sans-serif;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .topbar-search input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .topbar-search input:focus {
+      border-color: var(--accent);
+    }
+
+    .topbar-search .search-icon {
+      position: absolute;
+      left: 11px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-left: auto;
+      flex-shrink: 0;
+    }
+
+    .topbar-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      transition: border-color 0.2s, background 0.2s;
+      color: var(--text-secondary);
+      font-size: 1.05rem;
+    }
+
+    .topbar-btn:hover {
+      border-color: var(--accent);
+      background: var(--accent-dim);
+      color: var(--accent);
+    }
+
+    .topbar-btn .badge-dot {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 8px;
+      height: 8px;
+      background: var(--danger);
+      border-radius: 50%;
+      border: 2px solid var(--bg-secondary);
+    }
+
+    .topbar-avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), #e6a800);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Oswald', sans-serif;
+      font-weight: 600;
+      font-size: 0.85rem;
+      color: var(--bg-primary);
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: border-color 0.2s;
+    }
+
+    .topbar-avatar:hover {
+      border-color: var(--accent);
+    }
+
+    /* ========== LIVE SCORES TICKER ========== */
+    .ticker-bar {
+      position: fixed;
+      top: var(--topbar-height);
+      left: 0;
+      right: 0;
+      height: var(--ticker-height);
+      background: var(--bg-input);
+      border-bottom: 1px solid var(--border);
+      overflow: hidden;
+      z-index: 999;
+      display: flex;
+      align-items: center;
+    }
+
+    .ticker-label {
+      flex-shrink: 0;
+      background: var(--accent);
+      color: var(--bg-primary);
+      font-family: 'Oswald', sans-serif;
+      font-weight: 600;
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 4px 14px;
+      margin-right: 0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      height: 100%;
+    }
+
+    .ticker-label .live-dot {
+      width: 7px;
+      height: 7px;
+      background: var(--danger);
+      border-radius: 50%;
+      animation: pulse-dot 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    .ticker-track {
+      flex: 1;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .ticker-content {
+      display: flex;
+      align-items: center;
+      white-space: nowrap;
+      animation: ticker-scroll 40s linear infinite;
+      will-change: transform;
+    }
+
+    .ticker-content:hover {
+      animation-play-state: paused;
+    }
+
+    @keyframes ticker-scroll {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    .ticker-game {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 24px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .ticker-game .team-name {
+      color: var(--text-primary);
+      font-family: 'Oswald', sans-serif;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .ticker-game .score {
+      color: var(--accent);
+      font-family: 'Oswald', sans-serif;
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+
+    .ticker-game .game-status {
+      font-size: 0.68rem;
+      color: var(--success);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .ticker-divider {
+      color: var(--border);
+      padding: 0 4px;
+      font-size: 0.6rem;
+    }
+
+    /* ========== LAYOUT SHELL ========== */
+    .app-shell {
+      display: flex;
+      padding-top: calc(var(--topbar-height) + var(--ticker-height));
+      min-height: 100vh;
+    }
+
+    /* ========== LEFT SIDEBAR ========== */
+    .sidebar-left {
+      position: fixed;
+      top: calc(var(--topbar-height) + var(--ticker-height));
+      left: 0;
+      bottom: 0;
+      width: var(--sidebar-width);
+      background: var(--bg-secondary);
+      border-right: 1px solid var(--border);
+      padding: 16px 0;
+      overflow-y: auto;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .nav-section {
+      padding: 0 12px;
+      margin-bottom: 8px;
+    }
+
+    .nav-section-label {
+      font-family: 'Oswald', sans-serif;
+      font-size: 0.68rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      padding: 8px 12px 6px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      font-weight: 500;
+      position: relative;
+    }
+
+    .nav-item:hover {
+      background: rgba(245, 197, 24, 0.06);
+      color: var(--text-primary);
+    }
+
+    .nav-item.active {
+      background: var(--accent-dim);
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .nav-item.active::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 8px;
+      bottom: 8px;
+      width: 3px;
+      background: var(--accent);
+      border-radius: 0 2px 2px 0;
+    }
+
+    .nav-item .nav-icon {
+      font-size: 1.15rem;
+      width: 24px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .nav-item .nav-label {
+      flex: 1;
+    }
+
+    .nav-item .nav-badge {
+      background: var(--danger);
+      color: #fff;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 10px;
+    }
+
+    /* XP Bar */
+    .xp-container {
+      margin: 4px 12px 0;
+      padding: 10px 14px;
+      background: rgba(245, 197, 24, 0.05);
+      border: 1px solid rgba(245, 197, 24, 0.12);
+      border-radius: 10px;
+    }
+
+    .xp-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .xp-level {
+      font-family: 'Oswald', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .xp-amount {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .xp-bar-track {
+      height: 5px;
+      background: var(--bg-input);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .xp-bar-fill {
+      height: 100%;
+      width: 65%;
+      background: linear-gradient(90deg, var(--accent), #e6a800);
+      border-radius: 3px;
+      transition: width 0.6s ease;
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding: 16px 12px 8px;
+      border-top: 1px solid var(--border);
+    }
+
+    .sidebar-user {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .sidebar-user:hover {
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .sidebar-user-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Oswald', sans-serif;
+      font-weight: 600;
+      font-size: 0.85rem;
+    }
+
+    .sidebar-user-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .sidebar-user-name {
+      font-weight: 600;
+      font-size: 0.85rem;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .sidebar-user-handle {
+      font-size: 0.73rem;
+      color: var(--text-muted);
+    }
+
+    /* ========== MAIN CONTENT ========== */
+    .main-content {
+      margin-left: var(--sidebar-width);
+      margin-right: var(--right-sidebar-width);
+      flex: 1;
+      padding: 24px 32px;
+      max-width: 680px;
+      min-width: 500px;
+      margin-left: calc(var(--sidebar-width) + 24px);
+    }
+
+    .feed-header {
+      font-family: 'Oswald', sans-serif;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 20px;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+
+    .feed-header span {
+      color: var(--accent);
+    }
+
+    /* ========== COMPOSER ========== */
+    .composer {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px;
+      margin-bottom: 24px;
+      transition: border-color 0.2s;
+    }
+
+    .composer:hover {
+      border-color: rgba(245, 197, 24, 0.2);
+    }
+
+    .composer-top {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .composer-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Oswald', sans-serif;
+      font-weight: 600;
+      font-size: 0.95rem;
+      flex-shrink: 0;
+    }
+
+    .composer-input {
+      flex: 1;
+    }
+
+    .composer-textarea {
+      width: 100%;
+      background: transparent;
+      border: none;
+      color: var(--text-primary);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.95rem;
+      resize: none;
+      outline: none;
+      min-height: 48px;
+      line-height: 1.5;
+    }
+
+    .composer-textarea::placeholder {
+      color: var(--text-muted);
+    }
+
+    .composer-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+    }
+
+    .composer-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    .composer-action-btn {
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg-input);
+      color: var(--text-secondary);
+      font-size: 0.78rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .composer-action-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-dim);
+    }
+
+    .composer-post-btn {
+      padding: 8px 24px;
+      border-radius: 8px;
+      border: none;
+      background: var(--accent);
+      color: var(--bg-primary);
+      font-family: 'Oswald', sans-serif;
+      font-weight: 600;
+      font-size: 0.9rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .composer-post-btn:hover {
+      background: #e6b800;
+      box-shadow: 0 0 20px rgba(245, 197, 24, 0.3);
+    }
+
+    /* ========== POST CARDS ========== */
+    .post-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px;
+      margin-bottom: 16px;
+      transition: border-color 0.25s, box-shadow 0.25s, transform 0.15s;
+    }
+
+    .post-card:hover {
+      border-color: rgba(245, 197, 24, 0.15);
+      transform: translateY(-1px);
+    }
+
+    .post-card.trending {
+      border-color: rgba(245, 197, 24, 0.25);
+      box-shadow: 0 0 24px rgba(245, 197, 24, 0.06), inset 0 0 24px rgba(245, 197, 24, 0.02);
+    }
+
+    .post-card.trending:hover {
+      border-color: var(--border-glow);
+      box-shadow: 0 0 30px rgba(245, 197, 24, 0.1), inset 0 0 30px rgba(245, 197, 24, 0.03);
+    }
+
+    .post-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .post-avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Oswald', sans-serif;
+      font-weight: 700;
+      font-size: 0.8rem;
+      color: #fff;
+      flex-shrink: 0;
+      letter-spacing: 0.02em;
+    }
+
+    .post-user-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .post-user-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .post-username {
+      font-weight: 700;
+      font-size: 0.92rem;
+      color: var(--text-primary);
+    }
+
+    .post-flair {
+      font-size: 0.65rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-family: 'Oswald', sans-serif;
+    }
+
+    .post-badge {
+      font-size: 0.68rem;
+      font-weight: 600;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .post-timestamp {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .post-body {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: var(--text-primary);
+      margin-bottom: 14px;
+    }
+
+    .post-body strong {
+      color: var(--accent);
+    }
+
+    /* Receipt Tag */
+    .receipt-tag {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      background: rgba(245, 197, 24, 0.06);
+      border: 1px solid rgba(245, 197, 24, 0.15);
+      border-radius: 8px;
+      margin-bottom: 14px;
+      font-size: 0.8rem;
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    .receipt-tag .receipt-icon {
+      font-size: 1rem;
+    }
+
+    /* Stat Check */
+    .stat-check {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      background: rgba(72, 187, 120, 0.08);
+      border: 1px solid rgba(72, 187, 120, 0.2);
+      border-radius: 8px;
+      margin-bottom: 14px;
+      font-size: 0.8rem;
+      color: var(--success);
+      font-weight: 500;
+    }
+
+    /* Sideline Tag */
+    .sideline-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      background: rgba(99, 102, 241, 0.1);
+      border: 1px solid rgba(99, 102, 241, 0.2);
+      border-radius: 6px;
+      margin-bottom: 14px;
+      font-size: 0.78rem;
+      color: #818cf8;
+      font-weight: 500;
+    }
+
+    /* Reactions */
+    .post-reactions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 14px;
+    }
+
+    .reaction-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 14px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: var(--bg-input);
+      cursor: pointer;
+      transition: all 0.15s;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      font-family: 'Inter', sans-serif;
+    }
+
+    .reaction-btn:hover {
+      border-color: var(--accent);
+      background: var(--accent-dim);
+    }
+
+    .reaction-btn .reaction-emoji {
+      font-size: 1rem;
+    }
+
+    .reaction-btn.touchdown {
+      border-color: rgba(72, 187, 120, 0.3);
+    }
+
+    .reaction-btn.touchdown:hover {
+      border-color: var(--success);
+      background: rgba(72, 187, 120, 0.1);
+      color: var(--success);
+    }
+
+    .reaction-btn.fumble {
+      border-color: rgba(252, 92, 101, 0.2);
+    }
+
+    .reaction-btn.fumble:hover {
+      border-color: var(--danger);
+      background: rgba(252, 92, 101, 0.1);
+      color: var(--danger);
+    }
+
+    /* Post Actions */
+    .post-actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(45, 58, 92, 0.6);
+    }
+
+    .post-action {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      padding: 7px 6px;
+      border-radius: 8px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 0.76rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: 'Inter', sans-serif;
+      white-space: nowrap;
+    }
+
+    .post-action:hover {
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-secondary);
+    }
+
+    .post-action .action-icon {
+      font-size: 0.9rem;
+    }
+
+    /* ========== FLAGGED POST ========== */
+    .post-card.flagged {
+      border: 2px solid var(--accent);
+      background: repeating-linear-gradient(
+        -45deg,
+        var(--bg-card),
+        var(--bg-card) 10px,
+        rgba(245, 197, 24, 0.03) 10px,
+        rgba(245, 197, 24, 0.03) 20px
+      );
+      position: relative;
+      overflow: hidden;
+    }
+
+    .flag-overlay {
+      padding: 18px;
+      text-align: center;
+    }
+
+    .flag-icon {
+      font-size: 2.2rem;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .flag-title {
+      font-family: 'Oswald', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 8px;
+    }
+
+    .flag-message {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-bottom: 14px;
+      line-height: 1.5;
+    }
+
+    .flag-meta {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .flag-penalty {
+      background: rgba(245, 197, 24, 0.1);
+      border: 1px solid rgba(245, 197, 24, 0.2);
+      padding: 4px 12px;
+      border-radius: 6px;
+      font-weight: 500;
+      color: var(--accent);
+    }
+
+    .flag-appeal {
+      color: var(--text-secondary);
+      cursor: pointer;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    .flag-appeal:hover {
+      color: var(--accent);
+    }
+
+    /* ========== CHALLENGE POST ========== */
+    .challenge-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .challenge-user {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .challenge-vs {
+      font-family: 'Oswald', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--accent);
+      letter-spacing: 0.06em;
+    }
+
+    .challenge-avatar-sm {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Oswald', sans-serif;
+      font-weight: 700;
+      font-size: 0.65rem;
+      color: #fff;
+    }
+
+    .challenge-question {
+      font-family: 'Oswald', sans-serif;
+      font-size: 1.15rem;
+      font-weight: 600;
+      text-align: center;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+
+    .challenge-votes {
+      margin-bottom: 12px;
+    }
+
+    .challenge-bar {
+      display: flex;
+      height: 40px;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+
+    .challenge-side {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Oswald', sans-serif;
+      font-weight: 600;
+      font-size: 0.9rem;
+      letter-spacing: 0.04em;
+      transition: flex 0.6s ease;
+    }
+
+    .challenge-side.texas {
+      flex: 56;
+      background: linear-gradient(90deg, var(--texas), #cc6600);
+    }
+
+    .challenge-side.oklahoma {
+      flex: 44;
+      background: linear-gradient(90deg, #a01c1c, var(--oklahoma));
+    }
+
+    .challenge-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .challenge-timer {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .challenge-timer span {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    /* ========== RIGHT SIDEBAR ========== */
+    .sidebar-right {
+      position: fixed;
+      top: calc(var(--topbar-height) + var(--ticker-height));
+      right: 0;
+      bottom: 0;
+      width: var(--right-sidebar-width);
+      background: var(--bg-secondary);
+      border-left: 1px solid var(--border);
+      padding: 20px 16px;
+      overflow-y: auto;
+      z-index: 100;
+    }
+
+    .sidebar-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .sidebar-card-title {
+      font-family: 'Oswald', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .sidebar-card-title .title-accent {
+      color: var(--accent);
+    }
+
+    /* Trending Topics */
+    .trending-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s;
+      margin-bottom: 2px;
+    }
+
+    .trending-item:hover {
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .trending-rank {
+      font-family: 'Oswald', sans-serif;
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      width: 20px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .trending-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .trending-tag {
+      font-weight: 600;
+      font-size: 0.87rem;
+      color: var(--text-primary);
+    }
+
+    .trending-count {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+
+    /* Dynasty Leaderboard */
+    .leaderboard-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 0;
+    }
+
+    .leaderboard-item:not(:last-child) {
+      border-bottom: 1px solid rgba(45, 58, 92, 0.5);
+    }
+
+    .leaderboard-pos {
+      font-family: 'Oswald', sans-serif;
+      font-weight: 700;
+      font-size: 0.9rem;
+      width: 22px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .leaderboard-pos.gold { color: #ffd700; }
+    .leaderboard-pos.silver { color: #c0c0c0; }
+    .leaderboard-pos.bronze { color: #cd7f32; }
+
+    .leaderboard-avatar-sm {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--bg-input);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.65rem;
+      font-weight: 700;
+      font-family: 'Oswald', sans-serif;
+      flex-shrink: 0;
+    }
+
+    .leaderboard-name {
+      flex: 1;
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .leaderboard-xp {
+      font-family: 'Oswald', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    /* Rivalry Countdown */
+    .countdown-matchup {
+      text-align: center;
+      margin-bottom: 12px;
+    }
+
+    .countdown-teams {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      margin-bottom: 10px;
+    }
+
+    .countdown-team-circle {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Oswald', sans-serif;
+      font-weight: 700;
+      font-size: 0.7rem;
+      color: #fff;
+      border: 2px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .countdown-vs-text {
+      font-family: 'Oswald', sans-serif;
+      font-weight: 700;
+      color: var(--accent);
+      font-size: 0.85rem;
+    }
+
+    .countdown-timer-row {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .countdown-unit {
+      text-align: center;
+    }
+
+    .countdown-value {
+      font-family: 'Oswald', sans-serif;
+      font-weight: 700;
+      font-size: 1.4rem;
+      color: var(--text-primary);
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .countdown-label {
+      font-size: 0.6rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-top: 4px;
+      font-weight: 600;
+    }
+
+    /* Recruiting Alert */
+    .recruiting-alert {
+      background: linear-gradient(135deg, rgba(245, 197, 24, 0.08), rgba(245, 197, 24, 0.02));
+      border: 1px solid rgba(245, 197, 24, 0.2);
+      border-radius: 10px;
+      padding: 14px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .recruiting-alert::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: var(--accent);
+    }
+
+    .recruiting-stars {
+      color: var(--accent);
+      font-size: 0.85rem;
+      margin-bottom: 4px;
+      letter-spacing: 1px;
+    }
+
+    .recruiting-headline {
+      font-family: 'Oswald', sans-serif;
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .recruiting-sub {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    /* ========== UTILITY ========== */
+    .text-accent { color: var(--accent); }
+    .text-muted { color: var(--text-muted); }
+    .text-secondary { color: var(--text-secondary); }
+    .fw-600 { font-weight: 600; }
+    .mt-2 { margin-top: 8px; }
+    .mb-2 { margin-bottom: 8px; }
+
+    /* ========== TEXT-BASED ICON REPLACEMENTS ========== */
+    .nav-icon-text {
+      font-family: 'Oswald', sans-serif;
+      font-weight: 700;
+      font-size: 0.7rem;
+      letter-spacing: 0.02em;
+      color: inherit;
+    }
+
+    .reaction-label-td, .reaction-label-fum {
+      font-family: 'Oswald', sans-serif;
+      font-weight: 700;
+      font-size: 0.75rem;
+      letter-spacing: 0.04em;
+    }
+
+    .reaction-label-td {
+      color: var(--success);
+    }
+
+    .reaction-label-fum {
+      color: var(--danger);
+    }
+
+    .flag-icon-text {
+      font-family: 'Oswald', sans-serif;
+      font-weight: 700;
+      font-size: 1.6rem;
+      color: var(--accent);
+      letter-spacing: 0.1em;
+      border: 2px solid var(--accent);
+      padding: 6px 16px;
+      border-radius: 6px;
+      display: inline-block;
+    }
+
+    .checkmark-icon {
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--success);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== TOP BAR ===== -->
+  <header class="topbar">
+    <div class="topbar-logo">CFB <span>SOCIAL</span></div>
+
+    <div class="topbar-search">
+      <span class="search-icon">Q</span>
+      <input type="text" placeholder="Search teams, players, topics...">
+    </div>
+
+    <div class="topbar-right">
+      <div class="topbar-btn" title="Messages">
+        MSG
+        <span class="badge-dot"></span>
+      </div>
+      <div class="topbar-btn" title="Notifications">
+        Alerts
+        <span class="badge-dot"></span>
+      </div>
+      <div class="topbar-avatar" title="My Profile">JD</div>
+    </div>
+  </header>
+
+  <!-- ===== LIVE SCORES TICKER ===== -->
+  <div class="ticker-bar">
+    <div class="ticker-label">
+      <span class="live-dot"></span>
+      LIVE
+    </div>
+    <div class="ticker-track">
+      <div class="ticker-content">
+        <!-- First set -->
+        <div class="ticker-game">
+          <span class="team-name">Ohio St</span>
+          <span class="score">24</span>
+          <span>-</span>
+          <span class="team-name">Michigan</span>
+          <span class="score">21</span>
+          <span class="game-status">4Q 2:14</span>
+        </div>
+        <span class="ticker-divider">&#9670;</span>
+        <div class="ticker-game">
+          <span class="team-name">Alabama</span>
+          <span class="score">35</span>
+          <span>-</span>
+          <span class="team-name">Auburn</span>
+          <span class="score">28</span>
+          <span class="game-status">Final</span>
+        </div>
+        <span class="ticker-divider">&#9670;</span>
+        <div class="ticker-game">
+          <span class="team-name">Georgia</span>
+          <span class="score">17</span>
+          <span>-</span>
+          <span class="team-name">Florida</span>
+          <span class="score">14</span>
+          <span class="game-status">3Q 8:45</span>
+        </div>
+        <span class="ticker-divider">&#9670;</span>
+        <div class="ticker-game">
+          <span class="team-name">Texas</span>
+          <span class="score">28</span>
+          <span>-</span>
+          <span class="team-name">Oklahoma</span>
+          <span class="score">24</span>
+          <span class="game-status">Halftime</span>
+        </div>
+        <span class="ticker-divider">&#9670;</span>
+        <div class="ticker-game">
+          <span class="team-name">USC</span>
+          <span class="score">31</span>
+          <span>-</span>
+          <span class="team-name">UCLA</span>
+          <span class="score">17</span>
+          <span class="game-status">4Q 0:42</span>
+        </div>
+        <span class="ticker-divider">&#9670;</span>
+        <div class="ticker-game">
+          <span class="team-name">Clemson</span>
+          <span class="score">21</span>
+          <span>-</span>
+          <span class="team-name">FSU</span>
+          <span class="score">14</span>
+          <span class="game-status">3Q 1:30</span>
+        </div>
+        <span class="ticker-divider">&#9670;</span>
+        <!-- Duplicate for seamless loop -->
+        <div class="ticker-game">
+          <span class="team-name">Ohio St</span>
+          <span class="score">24</span>
+          <span>-</span>
+          <span class="team-name">Michigan</span>
+          <span class="score">21</span>
+          <span class="game-status">4Q 2:14</span>
+        </div>
+        <span class="ticker-divider">&#9670;</span>
+        <div class="ticker-game">
+          <span class="team-name">Alabama</span>
+          <span class="score">35</span>
+          <span>-</span>
+          <span class="team-name">Auburn</span>
+          <span class="score">28</span>
+          <span class="game-status">Final</span>
+        </div>
+        <span class="ticker-divider">&#9670;</span>
+        <div class="ticker-game">
+          <span class="team-name">Georgia</span>
+          <span class="score">17</span>
+          <span>-</span>
+          <span class="team-name">Florida</span>
+          <span class="score">14</span>
+          <span class="game-status">3Q 8:45</span>
+        </div>
+        <span class="ticker-divider">&#9670;</span>
+        <div class="ticker-game">
+          <span class="team-name">Texas</span>
+          <span class="score">28</span>
+          <span>-</span>
+          <span class="team-name">Oklahoma</span>
+          <span class="score">24</span>
+          <span class="game-status">Halftime</span>
+        </div>
+        <span class="ticker-divider">&#9670;</span>
+        <div class="ticker-game">
+          <span class="team-name">USC</span>
+          <span class="score">31</span>
+          <span>-</span>
+          <span class="team-name">UCLA</span>
+          <span class="score">17</span>
+          <span class="game-status">4Q 0:42</span>
+        </div>
+        <span class="ticker-divider">&#9670;</span>
+        <div class="ticker-game">
+          <span class="team-name">Clemson</span>
+          <span class="score">21</span>
+          <span>-</span>
+          <span class="team-name">FSU</span>
+          <span class="score">14</span>
+          <span class="game-status">3Q 1:30</span>
+        </div>
+        <span class="ticker-divider">&#9670;</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== APP SHELL ===== -->
+  <div class="app-shell">
+
+    <!-- ===== LEFT SIDEBAR ===== -->
+    <nav class="sidebar-left">
+      <div class="nav-section">
+        <div class="nav-section-label">Main</div>
+        <div class="nav-item active">
+          <span class="nav-icon nav-icon-text">FD</span>
+          <span class="nav-label">Feed</span>
+        </div>
+        <div class="nav-item">
+          <span class="nav-icon nav-icon-text">TR</span>
+          <span class="nav-label">Trending</span>
+          <span class="nav-badge">12</span>
+        </div>
+        <div class="nav-item">
+          <span class="nav-icon nav-icon-text">VS</span>
+          <span class="nav-label">Rivalry Arena</span>
+        </div>
+        <div class="nav-item">
+          <span class="nav-icon nav-icon-text">PC</span>
+          <span class="nav-label">Play Caller</span>
+        </div>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-label">Experience</div>
+        <div class="nav-item">
+          <span class="nav-icon nav-icon-text">DY</span>
+          <span class="nav-label">Dynasty Mode</span>
+        </div>
+        <div class="xp-container">
+          <div class="xp-header">
+            <span class="xp-level">Level 12</span>
+            <span class="xp-amount">2,450 / 3,800 XP</span>
+          </div>
+          <div class="xp-bar-track">
+            <div class="xp-bar-fill"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-label">Intel</div>
+        <div class="nav-item">
+          <span class="nav-icon nav-icon-text">TP</span>
+          <span class="nav-label">Transfer Portal War Room</span>
+        </div>
+        <div class="nav-item">
+          <span class="nav-icon nav-icon-text">RC</span>
+          <span class="nav-label">Recruiting</span>
+          <span class="nav-badge">3</span>
+        </div>
+        <div class="nav-item">
+          <span class="nav-icon nav-icon-text">NW</span>
+          <span class="nav-label">News</span>
+        </div>
+        <div class="nav-item">
+          <span class="nav-icon nav-icon-text">VT</span>
+          <span class="nav-label">The Vault</span>
+        </div>
+      </div>
+
+      <div class="nav-section" style="margin-top: auto;">
+        <div class="nav-item">
+          <span class="nav-icon nav-icon-text">ST</span>
+          <span class="nav-label">Settings</span>
+        </div>
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="sidebar-user-avatar">JD</div>
+          <div class="sidebar-user-info">
+            <div class="sidebar-user-name">JohnDoe_CFB</div>
+            <div class="sidebar-user-handle">@JohnDoe_CFB</div>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- ===== MAIN FEED ===== -->
+    <main class="main-content">
+      <h1 class="feed-header"><span>The Feed</span></h1>
+
+      <!-- Composer -->
+      <div class="composer">
+        <div class="composer-top">
+          <div class="composer-avatar">JD</div>
+          <div class="composer-input">
+            <textarea class="composer-textarea" placeholder="What's your take?" rows="2"></textarea>
+          </div>
+        </div>
+        <div class="composer-bottom">
+          <div class="composer-actions">
+            <button class="composer-action-btn">TD Touchdown</button>
+            <button class="composer-action-btn">Add Poll</button>
+            <button class="composer-action-btn">Media</button>
+            <button class="composer-action-btn">Challenge</button>
+          </div>
+          <button class="composer-post-btn">Post</button>
+        </div>
+      </div>
+
+      <!-- ===== POST 1: Normal post with badges ===== -->
+      <article class="post-card trending">
+        <div class="post-header">
+          <div class="post-avatar" style="background: var(--ohio-state);">OSU</div>
+          <div class="post-user-info">
+            <div class="post-user-row">
+              <span class="post-username">@BuckeyeNation</span>
+              <span class="post-flair" style="background: var(--ohio-state); color: #fff;">Ohio State</span>
+              <span class="post-badge">Heisman Streak</span>
+            </div>
+            <div class="post-timestamp">14 min ago</div>
+          </div>
+        </div>
+        <div class="post-body">
+          Travis Hunter is the best two-way player since Deion Sanders. Not even close. The man plays every snap on both sides of the ball and dominates. We're witnessing something that won't happen again for decades.
+        </div>
+        <div class="post-reactions">
+          <button class="reaction-btn touchdown">
+            <span class="reaction-emoji reaction-label-td">TD</span>
+            <span>Touchdown</span>
+            <span class="fw-600">342</span>
+          </button>
+          <button class="reaction-btn fumble">
+            <span class="reaction-emoji reaction-label-fum">FUM</span>
+            <span>Fumble</span>
+            <span class="fw-600">89</span>
+          </button>
+        </div>
+        <div class="post-actions">
+          <button class="post-action">
+            <span class="action-icon">[SC]</span> Stat Check
+          </button>
+          <button class="post-action">
+            <span class="action-icon">[VS]</span> Challenge
+          </button>
+          <button class="post-action">
+            <span class="action-icon">[AT]</span> Aging Take
+          </button>
+          <button class="post-action">
+            <span class="action-icon">[R]</span> Reply
+          </button>
+          <button class="post-action">
+            <span class="action-icon">[SH]</span> Share
+          </button>
+        </div>
+      </article>
+
+      <!-- ===== POST 2: Receipt / Aging Take ===== -->
+      <article class="post-card">
+        <div class="post-header">
+          <div class="post-avatar" style="background: var(--alabama);">ALA</div>
+          <div class="post-user-info">
+            <div class="post-user-row">
+              <span class="post-username">@TideRollin</span>
+              <span class="post-flair" style="background: var(--alabama); color: #fff;">Alabama</span>
+            </div>
+            <div class="post-timestamp">2 hours ago</div>
+          </div>
+        </div>
+        <div class="post-body">
+          Alabama going 11-1 this season. Book it. Only loss at Georgia. This roster is the most talented Bama squad since 2020. The defense alone is going to carry us to the playoff.
+        </div>
+        <div class="receipt-tag">
+          <span class="receipt-icon">[REC]</span>
+          <span><strong>RECEIPT TRACKED</strong> &mdash; This prediction revisits after Week 12</span>
+        </div>
+        <div style="display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; background: rgba(245, 197, 24, 0.06); border: 1px solid rgba(245, 197, 24, 0.12); border-radius: 6px; margin-bottom: 14px; font-size: 0.78rem; color: var(--accent); font-weight: 500;">
+          AGING TAKE &mdash; Revisits Nov 15
+        </div>
+        <div class="post-reactions">
+          <button class="reaction-btn touchdown">
+            <span class="reaction-emoji reaction-label-td">TD</span>
+            <span>Touchdown</span>
+            <span class="fw-600">234</span>
+          </button>
+          <button class="reaction-btn fumble">
+            <span class="reaction-emoji reaction-label-fum">FUM</span>
+            <span>Fumble</span>
+            <span class="fw-600">156</span>
+          </button>
+        </div>
+        <div class="post-actions">
+          <button class="post-action">
+            <span class="action-icon">[SC]</span> Stat Check
+          </button>
+          <button class="post-action">
+            <span class="action-icon">[VS]</span> Challenge
+          </button>
+          <button class="post-action">
+            <span class="action-icon">[AT]</span> Aging Take
+          </button>
+          <button class="post-action">
+            <span class="action-icon">[R]</span> Reply
+          </button>
+          <button class="post-action">
+            <span class="action-icon">[SH]</span> Share
+          </button>
+        </div>
+      </article>
+
+      <!-- ===== POST 3: Flagged "Flag on the Play" ===== -->
+      <article class="post-card flagged">
+        <div class="flag-overlay">
+          <span class="flag-icon flag-icon-text">FLAG</span>
+          <div class="flag-title">Flag on the Play</div>
+          <div class="flag-message">
+            This post was flagged by our AI referee for containing off-topic political content.<br>
+            The content has been hidden to keep The Stadium focused on football.
+          </div>
+          <div class="flag-meta">
+            <span class="flag-penalty">Penalty: Off-topic (Politics)</span>
+            <span class="flag-appeal">Appeal this call?</span>
+          </div>
+        </div>
+      </article>
+
+      <!-- ===== POST 4: Sideline tagged (live game) ===== -->
+      <article class="post-card">
+        <div class="post-header">
+          <div class="post-avatar" style="background: var(--auburn);">AUB</div>
+          <div class="post-user-info">
+            <div class="post-user-row">
+              <span class="post-username">@WarEagle</span>
+              <span class="post-flair" style="background: var(--auburn); color: #fff;">Auburn</span>
+            </div>
+            <div class="post-timestamp">6 min ago</div>
+          </div>
+        </div>
+        <div class="post-body">
+          Auburn's defense is COOKING right now! 3 sacks in the first quarter alone! The D-line is absolutely dominating. This is the best Auburn defense I've seen in years.
+        </div>
+        <div class="sideline-tag">
+          SIDELINE: Q1 &mdash; 4:32 remaining &ensp;|&ensp; Auburn vs LSU
+        </div>
+        <div class="stat-check">
+          <span class="checkmark-icon">&#10003;</span> <strong>Verified</strong> &mdash; Auburn has 3 sacks in Q1 (ESPN live stats)
+        </div>
+        <div class="post-reactions">
+          <button class="reaction-btn touchdown">
+            <span class="reaction-emoji reaction-label-td">TD</span>
+            <span>Touchdown</span>
+            <span class="fw-600">189</span>
+          </button>
+          <button class="reaction-btn fumble">
+            <span class="reaction-emoji reaction-label-fum">FUM</span>
+            <span>Fumble</span>
+            <span class="fw-600">12</span>
+          </button>
+        </div>
+        <div class="post-actions">
+          <button class="post-action">
+            <span class="action-icon">[SC]</span> Stat Check
+          </button>
+          <button class="post-action">
+            <span class="action-icon">[VS]</span> Challenge
+          </button>
+          <button class="post-action">
+            <span class="action-icon">[AT]</span> Aging Take
+          </button>
+          <button class="post-action">
+            <span class="action-icon">[R]</span> Reply
+          </button>
+          <button class="post-action">
+            <span class="action-icon">[SH]</span> Share
+          </button>
+        </div>
+      </article>
+
+      <!-- ===== POST 5: Challenge / Debate ===== -->
+      <article class="post-card trending">
+        <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 14px; font-size: 0.78rem; color: var(--accent); font-weight: 600; font-family: 'Oswald', sans-serif; text-transform: uppercase; letter-spacing: 0.08em;">
+          ACTIVE CHALLENGE
+        </div>
+        <div class="challenge-header">
+          <div class="challenge-user">
+            <div class="challenge-avatar-sm" style="background: var(--texas);">TEX</div>
+            <span class="post-username">@HookEm</span>
+          </div>
+          <span class="challenge-vs">VS</span>
+          <div class="challenge-user">
+            <span class="post-username">@BoomerSooner</span>
+            <div class="challenge-avatar-sm" style="background: var(--oklahoma);">OU</div>
+          </div>
+        </div>
+        <div class="challenge-question">Is Texas actually back?</div>
+        <div class="challenge-votes">
+          <div class="challenge-bar">
+            <div class="challenge-side texas">56%</div>
+            <div class="challenge-side oklahoma">44%</div>
+          </div>
+          <div class="challenge-labels">
+            <span>Texas &mdash; "They're back"</span>
+            <span>"Overrated" &mdash; Oklahoma</span>
+          </div>
+        </div>
+        <div class="challenge-timer">
+          Community voting closes in <span>2h 14m</span>
+        </div>
+        <div class="post-reactions" style="margin-top: 14px;">
+          <button class="reaction-btn touchdown">
+            <span class="reaction-emoji reaction-label-td">TD</span>
+            <span>Touchdown</span>
+            <span class="fw-600">567</span>
+          </button>
+          <button class="reaction-btn fumble">
+            <span class="reaction-emoji reaction-label-fum">FUM</span>
+            <span>Fumble</span>
+            <span class="fw-600">203</span>
+          </button>
+        </div>
+        <div class="post-actions">
+          <button class="post-action">
+            <span class="action-icon">[R]</span> Join Debate
+          </button>
+          <button class="post-action">
+            <span class="action-icon">[SH]</span> Share
+          </button>
+        </div>
+      </article>
+
+    </main>
+
+    <!-- ===== RIGHT SIDEBAR ===== -->
+    <aside class="sidebar-right">
+
+      <!-- Trending Topics -->
+      <div class="sidebar-card">
+        <div class="sidebar-card-title">
+          <span class="title-accent">HOT</span> Trending Topics
+        </div>
+        <div class="trending-item">
+          <span class="trending-rank">1</span>
+          <div class="trending-info">
+            <div class="trending-tag">#RivalryWeek</div>
+            <div class="trending-count">14.2k posts</div>
+          </div>
+        </div>
+        <div class="trending-item">
+          <span class="trending-rank">2</span>
+          <div class="trending-info">
+            <div class="trending-tag">#TransferPortal</div>
+            <div class="trending-count">9.8k posts</div>
+          </div>
+        </div>
+        <div class="trending-item">
+          <span class="trending-rank">3</span>
+          <div class="trending-info">
+            <div class="trending-tag">#CFBPlayoff</div>
+            <div class="trending-count">8.3k posts</div>
+          </div>
+        </div>
+        <div class="trending-item">
+          <span class="trending-rank">4</span>
+          <div class="trending-info">
+            <div class="trending-tag">#HeismanWatch</div>
+            <div class="trending-count">6.1k posts</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dynasty Leaderboard -->
+      <div class="sidebar-card">
+        <div class="sidebar-card-title">
+          <span class="title-accent">#1</span> Dynasty Leaderboard
+        </div>
+        <div class="leaderboard-item">
+          <span class="leaderboard-pos gold">1</span>
+          <div class="leaderboard-avatar-sm" style="background: var(--ohio-state); color: #fff;">GH</div>
+          <span class="leaderboard-name">GridironHero</span>
+          <span class="leaderboard-xp">12,480 XP</span>
+        </div>
+        <div class="leaderboard-item">
+          <span class="leaderboard-pos silver">2</span>
+          <div class="leaderboard-avatar-sm" style="background: var(--alabama); color: #fff;">TP</div>
+          <span class="leaderboard-name">TidePride_21</span>
+          <span class="leaderboard-xp">11,225 XP</span>
+        </div>
+        <div class="leaderboard-item">
+          <span class="leaderboard-pos bronze">3</span>
+          <div class="leaderboard-avatar-sm" style="background: var(--georgia); color: #fff;">DG</div>
+          <span class="leaderboard-name">DawgNation_King</span>
+          <span class="leaderboard-xp">10,890 XP</span>
+        </div>
+        <div class="leaderboard-item">
+          <span class="leaderboard-pos" style="color: var(--text-muted);">4</span>
+          <div class="leaderboard-avatar-sm" style="background: var(--texas); color: #fff;">LH</div>
+          <span class="leaderboard-name">LonghornLegend</span>
+          <span class="leaderboard-xp">9,740 XP</span>
+        </div>
+        <div class="leaderboard-item">
+          <span class="leaderboard-pos" style="color: var(--text-muted);">5</span>
+          <div class="leaderboard-avatar-sm" style="background: #FF6600; color: #fff;">CK</div>
+          <span class="leaderboard-name">ClemsonKing</span>
+          <span class="leaderboard-xp">9,320 XP</span>
+        </div>
+      </div>
+
+      <!-- Rivalry Countdown -->
+      <div class="sidebar-card">
+        <div class="sidebar-card-title">
+          <span class="title-accent">VS</span> Upcoming Rivalry
+        </div>
+        <div class="countdown-matchup">
+          <div class="countdown-teams">
+            <div class="countdown-team-circle" style="background: var(--ohio-state);">OSU</div>
+            <span class="countdown-vs-text">VS</span>
+            <div class="countdown-team-circle" style="background: #00274C;">MICH</div>
+          </div>
+          <div style="font-family: 'Oswald', sans-serif; font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px;">
+            "The Game" &mdash; Nov 29
+          </div>
+          <div class="countdown-timer-row">
+            <div class="countdown-unit">
+              <div class="countdown-value" id="cd-days">04</div>
+              <div class="countdown-label">Days</div>
+            </div>
+            <div class="countdown-unit">
+              <div class="countdown-value" id="cd-hours">11</div>
+              <div class="countdown-label">Hours</div>
+            </div>
+            <div class="countdown-unit">
+              <div class="countdown-value" id="cd-mins">32</div>
+              <div class="countdown-label">Mins</div>
+            </div>
+            <div class="countdown-unit">
+              <div class="countdown-value" id="cd-secs">48</div>
+              <div class="countdown-label">Secs</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recruiting Alert -->
+      <div class="sidebar-card" style="padding: 0; border: none; background: transparent;">
+        <div class="sidebar-card-title" style="padding: 0 0 10px; margin-bottom: 0;">
+          <span class="title-accent">REC</span> Recruiting Alert
+        </div>
+        <div class="recruiting-alert">
+          <div class="recruiting-stars">5-STAR</div>
+          <div class="recruiting-headline">5-Star QB commits to USC!</div>
+          <div class="recruiting-sub">
+            The No. 1 ranked QB in the class of 2027 has announced his commitment to the Trojans.
+            <br><a href="#" style="font-size: 0.75rem; margin-top: 4px; display: inline-block;">Read full story &rarr;</a>
+          </div>
+        </div>
+      </div>
+
+    </aside>
+
+  </div>
+
+  <!-- ===== JAVASCRIPT ===== -->
+  <script>
+    // Countdown Timer
+    (function() {
+      function updateCountdown() {
+        const daysEl = document.getElementById('cd-days');
+        const hoursEl = document.getElementById('cd-hours');
+        const minsEl = document.getElementById('cd-mins');
+        const secsEl = document.getElementById('cd-secs');
+
+        if (!daysEl) return;
+
+        // Simulate a target ~4 days from now
+        if (!window._countdownTarget) {
+          window._countdownTarget = Date.now() + (4 * 24 * 60 * 60 * 1000) + (11 * 60 * 60 * 1000) + (32 * 60 * 1000) + (48 * 1000);
+        }
+
+        const diff = Math.max(0, window._countdownTarget - Date.now());
+        const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const s = Math.floor((diff % (1000 * 60)) / 1000);
+
+        daysEl.textContent = String(d).padStart(2, '0');
+        hoursEl.textContent = String(h).padStart(2, '0');
+        minsEl.textContent = String(m).padStart(2, '0');
+        secsEl.textContent = String(s).padStart(2, '0');
+      }
+
+      updateCountdown();
+      setInterval(updateCountdown, 1000);
+    })();
+
+    // Hover glow effect on trending posts
+    document.querySelectorAll('.post-card.trending').forEach(function(card) {
+      card.addEventListener('mousemove', function(e) {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        card.style.background = 'radial-gradient(600px circle at ' + x + 'px ' + y + 'px, rgba(245, 197, 24, 0.04), var(--bg-card) 60%)';
+      });
+      card.addEventListener('mouseleave', function() {
+        card.style.background = 'var(--bg-card)';
+      });
+    });
+
+    // Active nav item click handler
+    document.querySelectorAll('.nav-item').forEach(function(item) {
+      item.addEventListener('click', function() {
+        document.querySelectorAll('.nav-item').forEach(function(i) { i.classList.remove('active'); });
+        this.classList.add('active');
+      });
+    });
+
+    // Post button hover sound simulation (visual feedback)
+    document.querySelectorAll('.reaction-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        this.style.transform = 'scale(1.08)';
+        setTimeout(function() { btn.style.transform = 'scale(1)'; }, 150);
+      });
+    });
+
+    // Composer auto-resize
+    var textarea = document.querySelector('.composer-textarea');
+    if (textarea) {
+      textarea.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = this.scrollHeight + 'px';
+      });
+    }
+  </script>
+
+</body>
+</html>

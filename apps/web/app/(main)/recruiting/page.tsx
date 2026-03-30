@@ -1,5 +1,7 @@
 import { RecruitingClient } from './RecruitingClient';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata = {
   title: 'Recruiting Desk | College Football Recruiting & Portal Activity',
   description: 'Track transfer portal activity and recruiting intelligence across all FBS programs. See which schools are winning and losing the portal.',

@@ -2,6 +2,8 @@ import { notFound } from 'next/navigation';
 import { SchoolHub } from './SchoolHub';
 import { SportsTeamJsonLd, BreadcrumbJsonLd } from '@/components/seo/JsonLd';
 
+export const dynamic = 'force-dynamic';
+
 interface SchoolPageProps {
   params: Promise<{ slug: string }>;
 }

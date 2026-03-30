@@ -64,19 +64,19 @@ async function ReportsQueue() {
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
                   <span
-                    className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold ${
+                    className={`shrink-0 text-xs font-semibold ${
                       report.reason === 'HATE_SPEECH' || report.reason === 'HARASSMENT'
-                        ? 'bg-[var(--admin-error)]/20 text-[var(--admin-error)]'
-                        : 'bg-[var(--admin-warning)]/20 text-[var(--admin-warning)]'
+                        ? 'text-[var(--admin-error)]'
+                        : 'text-[var(--admin-warning)]'
                     }`}
                   >
-                    {report.reason}
+                    {report.reason.replace(/_/g, ' ')}
                   </span>
                   <span
-                    className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold ${
+                    className={`shrink-0 text-xs font-semibold ${
                       report.status === 'REVIEWING'
-                        ? 'bg-[var(--admin-info)]/20 text-[var(--admin-info)]'
-                        : 'bg-[var(--admin-surface-raised)] text-[var(--admin-text-muted)]'
+                        ? 'text-[var(--admin-info)]'
+                        : 'text-[var(--admin-text-muted)]'
                     }`}
                   >
                     {report.status}

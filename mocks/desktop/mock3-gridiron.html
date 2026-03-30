@@ -1,0 +1,2353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>THE GRIDIRON — College Football's Social Home</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;0,900;1,400;1,700&family=Source+Sans+Pro:wght@300;400;600;700&family=Special+Elite&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ========================================
+   GRIDIRON CLASSIC — Retro Heritage Theme
+   ======================================== */
+
+/* --- CSS Reset & Base --- */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --aged-paper: #f4efe4;
+  --dark-brown: #3b2f1e;
+  --crimson: #8b1a1a;
+  --cream: #f9f6ee;
+  --tan: #d4c5a0;
+  --gold: #c49a2f;
+  --ink: #2a2218;
+  --faded-ink: #6b5d4d;
+  --light-brown: #a0896c;
+  --warm-white: #faf7f0;
+  --yellowed: #f0e6c8;
+  --corkboard: #c4a265;
+  --cork-dark: #a68945;
+  --penalty-yellow: #f5d442;
+  --penalty-bg: #fdf4d0;
+  --green-field: #2d5a27;
+  --press-bg: #ece5d3;
+  --serif: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  --sans: 'Source Sans Pro', 'Segoe UI', Tahoma, sans-serif;
+  --typewriter: 'Special Elite', 'Courier Prime', 'Courier New', monospace;
+  --mono: 'Courier Prime', 'Courier New', monospace;
+}
+
+html {
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  font-family: var(--sans);
+  color: var(--ink);
+  line-height: 1.6;
+  /* Aged paper texture via CSS gradients */
+  background-color: var(--aged-paper);
+  background-image:
+    /* subtle grain / noise effect */
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(139,119,90,0.015) 2px,
+      rgba(139,119,90,0.015) 4px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 3px,
+      rgba(139,119,90,0.01) 3px,
+      rgba(139,119,90,0.01) 6px
+    ),
+    /* paper fiber effect */
+    radial-gradient(ellipse at 20% 50%, rgba(212,197,160,0.15) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(212,197,160,0.12) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 80%, rgba(196,162,47,0.05) 0%, transparent 40%);
+  min-height: 100vh;
+}
+
+a {
+  color: var(--crimson);
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+/* --- Scrollbar Styling --- */
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--tan);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--light-brown);
+  border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--dark-brown);
+}
+
+/* ========================================
+   TOP HEADER — Aged Paper Masthead
+   ======================================== */
+.header-top-border {
+  height: 6px;
+  background: var(--dark-brown);
+  background-image: repeating-linear-gradient(
+    90deg,
+    var(--dark-brown) 0px,
+    var(--dark-brown) 20px,
+    #4a3d2a 20px,
+    #4a3d2a 21px
+  );
+}
+
+.header {
+  background: var(--cream);
+  background-image:
+    linear-gradient(180deg, rgba(212,197,160,0.12) 0%, transparent 100%),
+    repeating-linear-gradient(0deg, transparent, transparent 1px, rgba(59,47,30,0.02) 1px, rgba(59,47,30,0.02) 2px);
+  border-bottom: 3px double var(--dark-brown);
+  padding: 18px 40px 14px;
+  position: relative;
+}
+
+.header-inner {
+  max-width: 1240px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.header-brand {
+  text-align: center;
+  flex: 1;
+}
+
+.header-title {
+  font-family: var(--serif);
+  font-size: 3.2rem;
+  font-weight: 900;
+  color: var(--dark-brown);
+  letter-spacing: 8px;
+  text-transform: uppercase;
+  line-height: 1;
+  position: relative;
+  display: inline-block;
+}
+
+/* Vintage ornamental underline */
+.header-title::after {
+  content: '';
+  display: block;
+  width: 100%;
+  height: 3px;
+  background: var(--dark-brown);
+  margin-top: 6px;
+  position: relative;
+}
+.header-title::before {
+  content: '\2766';
+  display: block;
+  position: absolute;
+  bottom: -16px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1rem;
+  color: var(--dark-brown);
+  background: var(--cream);
+  padding: 0 10px;
+  z-index: 1;
+}
+
+.header-subtitle {
+  font-family: var(--sans);
+  font-size: 0.78rem;
+  color: var(--faded-ink);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-top: 18px;
+  font-weight: 400;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 180px;
+}
+
+.header-date {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--faded-ink);
+  letter-spacing: 1px;
+}
+
+.header-edition {
+  font-family: var(--serif);
+  font-size: 0.7rem;
+  font-style: italic;
+  color: var(--light-brown);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 180px;
+  justify-content: flex-end;
+}
+
+.header-btn {
+  background: none;
+  border: 1.5px solid var(--dark-brown);
+  color: var(--dark-brown);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  transition: all 0.2s;
+  position: relative;
+}
+.header-btn:hover {
+  background: var(--dark-brown);
+  color: var(--cream);
+}
+
+.header-btn .notif-badge {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  background: var(--crimson);
+  color: #fff;
+  font-size: 0.6rem;
+  font-weight: 700;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--sans);
+}
+
+.header-profile {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid var(--dark-brown);
+  background: var(--tan);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--serif);
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--dark-brown);
+  cursor: pointer;
+}
+
+/* ========================================
+   SCORES RIBBON — Old Scoreboard
+   ======================================== */
+.scores-ribbon {
+  background: var(--dark-brown);
+  background-image:
+    linear-gradient(180deg, #4a3d2a 0%, var(--dark-brown) 40%, #2e2416 100%),
+    repeating-linear-gradient(90deg, transparent, transparent 4px, rgba(0,0,0,0.05) 4px, rgba(0,0,0,0.05) 5px);
+  border-bottom: 2px solid var(--gold);
+  padding: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+.scores-ribbon::before,
+.scores-ribbon::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 60px;
+  z-index: 2;
+  pointer-events: none;
+}
+.scores-ribbon::before {
+  left: 0;
+  background: linear-gradient(90deg, var(--dark-brown) 20%, transparent);
+}
+.scores-ribbon::after {
+  right: 0;
+  background: linear-gradient(-90deg, var(--dark-brown) 20%, transparent);
+}
+
+.scores-track {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  animation: ticker-scroll 30s linear infinite;
+  white-space: nowrap;
+  padding: 10px 0;
+}
+
+@keyframes ticker-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.score-item {
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  color: #e8dcc8;
+  padding: 0 28px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  letter-spacing: 0.5px;
+}
+
+.score-label {
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.68rem;
+  padding: 2px 7px;
+  border-radius: 2px;
+  letter-spacing: 1px;
+}
+.score-label.final {
+  background: var(--tan);
+  color: var(--dark-brown);
+}
+.score-label.live {
+  background: var(--crimson);
+  color: #fff;
+  animation: live-pulse 1.5s ease-in-out infinite;
+}
+@keyframes live-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.65; }
+}
+
+.score-divider {
+  color: var(--gold);
+  font-size: 1.2rem;
+  padding: 0 8px;
+  opacity: 0.5;
+}
+
+.score-teams {
+  color: #f0e6c8;
+}
+.score-teams strong {
+  color: #fff;
+}
+
+/* ========================================
+   MAIN LAYOUT — 3-Column Newspaper
+   ======================================== */
+.main-layout {
+  max-width: 1240px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 250px 1fr 300px;
+  gap: 0;
+  padding: 0;
+  min-height: calc(100vh - 200px);
+}
+
+/* Column Dividers */
+.col-left {
+  border-right: 1px solid rgba(59,47,30,0.15);
+  padding: 20px 18px 20px 0;
+}
+.col-center {
+  padding: 20px 24px;
+  border-right: 1px solid rgba(59,47,30,0.15);
+}
+.col-right {
+  padding: 20px 0 20px 18px;
+}
+
+/* ========================================
+   LEFT COLUMN — The Bulletin Board
+   ======================================== */
+.bulletin-title {
+  font-family: var(--serif);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--dark-brown);
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  text-align: center;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--dark-brown);
+  position: relative;
+}
+.bulletin-title::after {
+  content: '\25C6';
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.55rem;
+  background: var(--aged-paper);
+  padding: 0 6px;
+  color: var(--dark-brown);
+}
+
+/* Corkboard background */
+.corkboard {
+  background:
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 10px,
+      rgba(164,137,69,0.06) 10px,
+      rgba(164,137,69,0.06) 11px
+    ),
+    linear-gradient(135deg, #c9a96e 0%, #b89855 30%, #c4a265 50%, #b89855 70%, #c9a96e 100%);
+  border-radius: 4px;
+  padding: 14px 10px;
+  border: 3px solid #8b7340;
+  box-shadow:
+    inset 0 1px 3px rgba(0,0,0,0.2),
+    0 2px 6px rgba(0,0,0,0.15);
+  margin-bottom: 18px;
+}
+
+/* Pinned note nav items */
+.nav-pin {
+  background: var(--cream);
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  margin-bottom: 6px;
+  cursor: pointer;
+  font-family: var(--sans);
+  font-size: 0.85rem;
+  color: var(--ink);
+  width: 100%;
+  text-align: left;
+  transition: all 0.15s;
+  position: relative;
+  box-shadow: 1px 2px 4px rgba(0,0,0,0.15);
+  transform: rotate(-0.5deg);
+}
+.nav-pin:nth-child(even) {
+  transform: rotate(0.3deg);
+}
+.nav-pin:nth-child(3) {
+  transform: rotate(-0.8deg);
+}
+.nav-pin:hover {
+  background: #fff;
+  box-shadow: 2px 3px 6px rgba(0,0,0,0.2);
+  transform: rotate(0deg) translateY(-1px);
+}
+.nav-pin.active {
+  background: #fff;
+  border-left: 3px solid var(--crimson);
+  font-weight: 600;
+}
+
+/* Pushpin CSS */
+.nav-pin::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: 14px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #e05050, var(--crimson));
+  box-shadow: 0 1px 2px rgba(0,0,0,0.4);
+}
+.nav-pin:nth-child(even)::before {
+  left: auto;
+  right: 18px;
+  background: radial-gradient(circle at 35% 35%, #5090e0, #2a5a9e);
+}
+.nav-pin:nth-child(3)::before {
+  background: radial-gradient(circle at 35% 35%, #50c050, #2a7a2a);
+}
+.nav-pin:nth-child(5)::before {
+  left: auto;
+  right: 12px;
+  background: radial-gradient(circle at 35% 35%, #e0c050, #b8952a);
+}
+
+.nav-icon {
+  font-size: 1rem;
+  width: 22px;
+  text-align: center;
+}
+
+.nav-label {
+  flex: 1;
+}
+
+/* Ticket Stub Card */
+.ticket-stub {
+  background: var(--cream);
+  border: 2px dashed var(--dark-brown);
+  border-radius: 3px;
+  padding: 14px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Perforated left edge */
+.ticket-stub::before {
+  content: '';
+  position: absolute;
+  left: -1px;
+  top: 0;
+  bottom: 0;
+  width: 14px;
+  background: repeating-radial-gradient(
+    circle at 0px center,
+    transparent 0px,
+    transparent 4px,
+    var(--cream) 4px,
+    var(--cream) 5px
+  );
+  background: repeating-linear-gradient(
+    180deg,
+    transparent 0px,
+    transparent 4px,
+    var(--dark-brown) 4px,
+    var(--dark-brown) 5px,
+    transparent 5px,
+    transparent 12px
+  );
+  opacity: 0.3;
+}
+
+.ticket-title {
+  font-family: var(--serif);
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--dark-brown);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.ticket-stat {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 5px 0;
+  border-bottom: 1px dotted var(--tan);
+  font-size: 0.82rem;
+}
+.ticket-stat:last-child {
+  border-bottom: none;
+}
+
+.ticket-stat-label {
+  color: var(--faded-ink);
+  font-weight: 400;
+}
+
+.ticket-stat-value {
+  font-family: var(--mono);
+  font-weight: 700;
+  color: var(--dark-brown);
+}
+
+.xp-bar-track {
+  width: 100%;
+  height: 8px;
+  background: var(--tan);
+  border-radius: 4px;
+  margin-top: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(59,47,30,0.2);
+}
+.xp-bar-fill {
+  height: 100%;
+  width: 65%;
+  background: linear-gradient(90deg, var(--crimson), #a52828);
+  border-radius: 4px;
+}
+
+.xp-text {
+  font-size: 0.7rem;
+  color: var(--faded-ink);
+  text-align: center;
+  margin-top: 4px;
+  font-family: var(--mono);
+}
+
+/* ========================================
+   CENTER COLUMN — The Feed
+   ======================================== */
+.feed-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 3px double var(--dark-brown);
+}
+
+.feed-title {
+  font-family: var(--serif);
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--dark-brown);
+  letter-spacing: 2px;
+}
+
+.feed-tabs {
+  display: flex;
+  gap: 16px;
+}
+.feed-tab {
+  font-family: var(--sans);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--faded-ink);
+  cursor: pointer;
+  padding-bottom: 2px;
+  border: none;
+  background: none;
+  transition: all 0.2s;
+}
+.feed-tab:hover {
+  color: var(--dark-brown);
+}
+.feed-tab.active {
+  color: var(--crimson);
+  border-bottom: 2px solid var(--crimson);
+  font-weight: 600;
+}
+
+/* Composer — Telegram/Typewriter */
+.composer {
+  background: var(--warm-white);
+  border: 2px solid var(--dark-brown);
+  border-radius: 2px;
+  padding: 16px;
+  margin-bottom: 22px;
+  position: relative;
+}
+.composer::before {
+  content: 'FILE YOUR REPORT';
+  position: absolute;
+  top: -10px;
+  left: 16px;
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  letter-spacing: 2px;
+  color: var(--faded-ink);
+  background: var(--aged-paper);
+  padding: 0 8px;
+}
+
+.composer-input {
+  width: 100%;
+  border: none;
+  background: transparent;
+  font-family: var(--typewriter);
+  font-size: 0.95rem;
+  color: var(--ink);
+  resize: none;
+  outline: none;
+  min-height: 50px;
+  line-height: 1.7;
+  /* Typewriter paper lines */
+  background-image: repeating-linear-gradient(
+    transparent,
+    transparent 26px,
+    rgba(59,47,30,0.08) 26px,
+    rgba(59,47,30,0.08) 27px
+  );
+  background-size: 100% 27px;
+  background-position: 0 2px;
+}
+.composer-input::placeholder {
+  color: var(--light-brown);
+  font-style: italic;
+}
+
+.composer-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(59,47,30,0.1);
+}
+
+.composer-tools {
+  display: flex;
+  gap: 10px;
+}
+.composer-tool {
+  background: none;
+  border: 1px solid var(--tan);
+  padding: 4px 10px;
+  font-size: 0.75rem;
+  color: var(--faded-ink);
+  cursor: pointer;
+  font-family: var(--sans);
+  border-radius: 2px;
+  transition: all 0.15s;
+}
+.composer-tool:hover {
+  border-color: var(--dark-brown);
+  color: var(--dark-brown);
+}
+
+.composer-submit {
+  font-family: var(--serif);
+  font-size: 0.8rem;
+  font-weight: 700;
+  background: var(--dark-brown);
+  color: var(--cream);
+  border: none;
+  padding: 7px 20px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  transition: background 0.2s;
+}
+.composer-submit:hover {
+  background: var(--crimson);
+}
+
+/* --- Post Card Base --- */
+.post-card {
+  margin-bottom: 22px;
+  position: relative;
+}
+
+/* ========================================
+   POST 1 — Classic Take / Ticket Stub
+   ======================================== */
+.post-classic {
+  background: var(--warm-white);
+  border: 1.5px solid rgba(59,47,30,0.2);
+  border-radius: 2px;
+  padding: 18px 18px 14px 30px;
+  position: relative;
+  box-shadow: 0 1px 4px rgba(59,47,30,0.08);
+}
+
+/* Ticket stub perforated left edge */
+.post-classic::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 18px;
+  background:
+    repeating-radial-gradient(
+      circle at 0px 0px,
+      var(--aged-paper) 0px,
+      var(--aged-paper) 4px,
+      var(--crimson) 4px,
+      var(--crimson) 5px,
+      transparent 5px
+    );
+  background-size: 10px 14px;
+  background-position: -5px 0px;
+  border-right: 1.5px dashed var(--crimson);
+}
+
+/* Crimson accent stripe */
+.post-classic::after {
+  content: '';
+  position: absolute;
+  left: 18px;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--crimson);
+}
+
+.post-user-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.post-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 2px solid var(--dark-brown);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--serif);
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: #fff;
+  flex-shrink: 0;
+}
+.post-avatar.scarlet { background: #bb0000; }
+.post-avatar.crimson-bg { background: var(--crimson); }
+.post-avatar.orange-bg { background: #dd5500; }
+.post-avatar.blue-bg { background: #0c2340; }
+.post-avatar.burnt-orange { background: #bf5700; }
+
+.post-username {
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--dark-brown);
+}
+
+.post-pennant {
+  display: inline-block;
+  font-family: var(--sans);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #fff;
+  padding: 2px 12px 2px 8px;
+  position: relative;
+  margin-left: 4px;
+  /* Pennant shape via clip-path */
+  clip-path: polygon(0 0, 100% 0, 90% 50%, 100% 100%, 0 100%);
+}
+.post-pennant.ohio-state { background: #bb0000; }
+.post-pennant.alabama { background: var(--crimson); }
+.post-pennant.auburn { background: #0c2340; }
+.post-pennant.texas { background: #bf5700; }
+.post-pennant.oklahoma { background: #841617; }
+.post-pennant.usc { background: #990000; }
+
+.post-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--serif);
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--gold);
+  background: linear-gradient(135deg, rgba(196,154,47,0.12), rgba(196,154,47,0.06));
+  border: 1px solid var(--gold);
+  padding: 2px 9px;
+  border-radius: 2px;
+  margin-left: auto;
+  letter-spacing: 0.5px;
+}
+
+.post-time {
+  font-size: 0.7rem;
+  color: var(--light-brown);
+  margin-left: auto;
+  font-family: var(--mono);
+}
+
+.post-body {
+  font-family: var(--serif);
+  font-size: 1.02rem;
+  line-height: 1.65;
+  color: var(--ink);
+  margin-bottom: 14px;
+}
+
+/* Ballot-style reactions */
+.post-reactions {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.ballot-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  padding: 5px 14px;
+  border: 1.5px solid var(--dark-brown);
+  border-radius: 2px;
+  background: var(--cream);
+  cursor: pointer;
+  transition: all 0.15s;
+  color: var(--dark-brown);
+  letter-spacing: 0.5px;
+}
+.ballot-btn:hover {
+  background: var(--dark-brown);
+  color: var(--cream);
+}
+.ballot-btn .vote-symbol {
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+.ballot-btn .vote-label {
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.68rem;
+  letter-spacing: 1px;
+}
+.ballot-btn .vote-count {
+  color: var(--faded-ink);
+  font-weight: 400;
+}
+
+.post-actions {
+  display: flex;
+  gap: 14px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(59,47,30,0.08);
+}
+
+.post-action {
+  font-family: var(--sans);
+  font-size: 0.72rem;
+  color: var(--faded-ink);
+  cursor: pointer;
+  border: none;
+  background: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: color 0.15s;
+  letter-spacing: 0.3px;
+}
+.post-action:hover {
+  color: var(--crimson);
+}
+
+/* ========================================
+   POST 2 — Receipt / Newspaper Clipping
+   ======================================== */
+.post-receipt {
+  background: var(--yellowed);
+  background-image:
+    linear-gradient(180deg, rgba(212,197,160,0.25) 0%, transparent 30%, transparent 70%, rgba(212,197,160,0.15) 100%);
+  border: 1px solid var(--tan);
+  padding: 18px 20px;
+  position: relative;
+  transform: rotate(-0.7deg);
+  box-shadow: 2px 3px 8px rgba(59,47,30,0.12);
+}
+/* Torn top edge */
+.post-receipt::before {
+  content: '';
+  position: absolute;
+  top: -3px;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      var(--aged-paper) 0px,
+      var(--aged-paper) 3px,
+      transparent 3px,
+      transparent 5px,
+      var(--aged-paper) 5px,
+      var(--aged-paper) 9px,
+      transparent 9px,
+      transparent 10px
+    );
+}
+
+/* Wax seal stamp */
+.receipt-seal {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #c0392b, #8b1a1a 60%, #5a1010);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  box-shadow:
+    inset 0 -2px 4px rgba(0,0,0,0.3),
+    inset 0 2px 4px rgba(255,255,255,0.15),
+    0 2px 6px rgba(0,0,0,0.25);
+  transform: rotate(12deg);
+}
+.receipt-seal-text {
+  font-family: var(--serif);
+  font-size: 0.5rem;
+  font-weight: 800;
+  color: rgba(255,255,255,0.9);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-align: center;
+  line-height: 1.1;
+}
+.receipt-seal-icon {
+  font-size: 1rem;
+  margin-bottom: 1px;
+}
+
+.receipt-stamp {
+  font-family: var(--typewriter);
+  font-size: 0.78rem;
+  color: var(--crimson);
+  margin-top: 12px;
+  padding: 6px 10px;
+  border: 2px solid var(--crimson);
+  display: inline-block;
+  transform: rotate(-2deg);
+  opacity: 0.85;
+  letter-spacing: 0.5px;
+}
+
+/* ========================================
+   POST 3 — Penalty Flag
+   ======================================== */
+.post-penalty {
+  background: var(--penalty-bg);
+  background-image:
+    linear-gradient(135deg, rgba(245,212,66,0.15) 0%, transparent 50%);
+  border: 3px solid var(--dark-brown);
+  border-left: 6px solid var(--penalty-yellow);
+  padding: 18px 20px;
+  position: relative;
+}
+
+.penalty-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.penalty-flag-icon {
+  font-size: 1.5rem;
+  filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.3));
+}
+
+.penalty-title {
+  font-family: var(--serif);
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--dark-brown);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.penalty-subtitle {
+  font-family: var(--sans);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--crimson);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 10px;
+}
+
+.penalty-body {
+  font-family: var(--serif);
+  font-size: 0.95rem;
+  font-style: italic;
+  color: var(--ink);
+  line-height: 1.6;
+  margin-bottom: 8px;
+  padding: 8px 12px;
+  border-left: 2px solid var(--dark-brown);
+}
+
+.penalty-ruling {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: var(--faded-ink);
+  margin-bottom: 12px;
+  letter-spacing: 0.3px;
+}
+
+.penalty-appeal {
+  font-family: var(--sans);
+  font-size: 0.78rem;
+  color: var(--crimson);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--crimson);
+  padding: 4px 12px;
+  border-radius: 2px;
+  transition: all 0.15s;
+  background: transparent;
+}
+.penalty-appeal:hover {
+  background: var(--crimson);
+  color: #fff;
+}
+
+/* Whistle icon (CSS) */
+.whistle {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  position: relative;
+}
+.whistle::before {
+  content: '~';
+  font-size: 0.75rem;
+}
+
+/* ========================================
+   POST 4 — Sideline Report / Press Box
+   ======================================== */
+.post-pressbox {
+  background: var(--warm-white);
+  border: 2px solid var(--dark-brown);
+  padding: 0;
+  font-family: var(--mono);
+  box-shadow: 0 2px 6px rgba(59,47,30,0.1);
+}
+
+.pressbox-header {
+  background: var(--dark-brown);
+  color: var(--cream);
+  padding: 10px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pressbox-title {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.pressbox-time {
+  font-size: 0.72rem;
+  color: var(--tan);
+}
+
+.pressbox-meta {
+  background: rgba(59,47,30,0.06);
+  padding: 8px 16px;
+  border-bottom: 1px solid rgba(59,47,30,0.1);
+  font-size: 0.78rem;
+  color: var(--faded-ink);
+  letter-spacing: 1px;
+}
+
+.pressbox-body {
+  padding: 16px;
+}
+
+.pressbox-content {
+  font-family: var(--typewriter);
+  font-size: 0.9rem;
+  line-height: 1.75;
+  color: var(--ink);
+  margin-bottom: 12px;
+}
+
+.pressbox-verified {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--sans);
+  font-size: 0.72rem;
+  color: var(--green-field);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 3px 10px;
+  background: rgba(45,90,39,0.08);
+  border: 1px solid rgba(45,90,39,0.2);
+  border-radius: 2px;
+}
+
+.pressbox-footer {
+  padding: 10px 16px;
+  border-top: 1px solid rgba(59,47,30,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* ========================================
+   POST 5 — Rivalry Ring / Fight Card
+   ======================================== */
+.post-rivalry {
+  background: var(--warm-white);
+  border: 3px solid var(--crimson);
+  position: relative;
+  overflow: hidden;
+}
+
+.rivalry-header {
+  background: var(--crimson);
+  background-image: linear-gradient(135deg, var(--crimson), #6b1111);
+  color: #fff;
+  padding: 12px 20px;
+  text-align: center;
+  position: relative;
+}
+/* Decorative corner elements */
+.rivalry-header::before,
+.rivalry-header::after {
+  content: '\2726';
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1rem;
+  color: var(--gold);
+}
+.rivalry-header::before { left: 14px; }
+.rivalry-header::after { right: 14px; }
+
+.rivalry-label {
+  font-family: var(--sans);
+  font-size: 0.6rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  opacity: 0.8;
+  margin-bottom: 2px;
+}
+
+.rivalry-title {
+  font-family: var(--serif);
+  font-size: 1.2rem;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.rivalry-subtitle {
+  font-family: var(--serif);
+  font-size: 0.8rem;
+  font-style: italic;
+  color: var(--gold);
+  margin-top: 2px;
+}
+
+.rivalry-body {
+  padding: 18px 20px;
+}
+
+.rivalry-question {
+  font-family: var(--serif);
+  font-size: 1rem;
+  text-align: center;
+  margin-bottom: 16px;
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.rivalry-matchup {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 12px;
+  align-items: center;
+}
+
+.rivalry-corner {
+  text-align: center;
+  padding: 14px;
+  border-radius: 3px;
+  border: 2px solid;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.rivalry-corner:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.corner-left {
+  border-color: #bf5700;
+  background: rgba(191,87,0,0.04);
+}
+.corner-left:hover {
+  background: rgba(191,87,0,0.1);
+}
+
+.corner-right {
+  border-color: #841617;
+  background: rgba(132,22,23,0.04);
+}
+.corner-right:hover {
+  background: rgba(132,22,23,0.1);
+}
+
+.corner-slogan {
+  font-family: var(--serif);
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+.corner-left .corner-slogan { color: #bf5700; }
+.corner-right .corner-slogan { color: #841617; }
+
+.corner-pct {
+  font-family: var(--mono);
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+.corner-left .corner-pct { color: #bf5700; }
+.corner-right .corner-pct { color: #841617; }
+
+.corner-votes {
+  font-size: 0.7rem;
+  color: var(--faded-ink);
+  margin-top: 2px;
+}
+
+.rivalry-vs {
+  font-family: var(--serif);
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: var(--dark-brown);
+  text-align: center;
+}
+
+.rivalry-bar {
+  margin-top: 14px;
+  height: 10px;
+  border-radius: 5px;
+  overflow: hidden;
+  display: flex;
+  border: 1px solid rgba(59,47,30,0.15);
+}
+.rivalry-bar-left {
+  width: 56%;
+  background: linear-gradient(90deg, #bf5700, #d97020);
+  transition: width 0.5s;
+}
+.rivalry-bar-right {
+  width: 44%;
+  background: linear-gradient(90deg, #a01a1b, #841617);
+  transition: width 0.5s;
+}
+
+/* ========================================
+   RIGHT COLUMN — The Press Box
+   ======================================== */
+.sidebar-section {
+  margin-bottom: 22px;
+}
+
+.sidebar-title {
+  font-family: var(--serif);
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--dark-brown);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  padding-bottom: 6px;
+  border-bottom: 2px solid var(--dark-brown);
+  margin-bottom: 12px;
+  position: relative;
+}
+.sidebar-title::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 40px;
+  height: 2px;
+  background: var(--crimson);
+}
+
+/* Recruiting Wire — Telegram Dispatches */
+.dispatch {
+  background: var(--cream);
+  border: 1px solid var(--tan);
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  position: relative;
+  font-size: 0.82rem;
+}
+.dispatch::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+}
+.dispatch.flash::before { background: var(--crimson); }
+.dispatch.bulletin::before { background: var(--gold); }
+
+.dispatch-label {
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 4px;
+}
+.dispatch.flash .dispatch-label { color: var(--crimson); }
+.dispatch.bulletin .dispatch-label { color: var(--gold); }
+
+.dispatch-stars {
+  color: var(--gold);
+  font-size: 0.7rem;
+  letter-spacing: 1px;
+}
+
+.dispatch-text {
+  font-family: var(--typewriter);
+  font-size: 0.82rem;
+  color: var(--ink);
+  line-height: 1.5;
+}
+
+.dispatch-time {
+  font-size: 0.65rem;
+  color: var(--light-brown);
+  margin-top: 4px;
+  font-family: var(--mono);
+}
+
+/* Transfer Portal Ticker */
+.portal-ticker {
+  background: var(--dark-brown);
+  border-radius: 3px;
+  padding: 8px 0;
+  overflow: hidden;
+  position: relative;
+  margin-bottom: 10px;
+}
+.portal-ticker::before,
+.portal-ticker::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 30px;
+  z-index: 2;
+}
+.portal-ticker::before {
+  left: 0;
+  background: linear-gradient(90deg, var(--dark-brown), transparent);
+}
+.portal-ticker::after {
+  right: 0;
+  background: linear-gradient(-90deg, var(--dark-brown), transparent);
+}
+
+.portal-ticker-track {
+  display: flex;
+  gap: 28px;
+  animation: portal-scroll 20s linear infinite;
+  white-space: nowrap;
+}
+
+@keyframes portal-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.portal-name {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--tan);
+  letter-spacing: 0.5px;
+}
+.portal-name .portal-arrow {
+  color: var(--gold);
+  margin: 0 4px;
+}
+
+/* Trending Stories — Newspaper Headlines */
+.headline-item {
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(59,47,30,0.1);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.headline-item:hover {
+  padding-left: 6px;
+}
+.headline-item:last-child {
+  border-bottom: none;
+}
+
+.headline-number {
+  font-family: var(--serif);
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--crimson);
+  margin-right: 6px;
+}
+
+.headline-text {
+  font-family: var(--serif);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.4;
+}
+
+.headline-meta {
+  font-size: 0.68rem;
+  color: var(--light-brown);
+  margin-top: 2px;
+  font-family: var(--mono);
+}
+
+/* The Vault — Today in History */
+.vault-card {
+  background:
+    linear-gradient(135deg, rgba(196,154,47,0.06), transparent),
+    var(--cream);
+  border: 1.5px solid var(--gold);
+  padding: 14px;
+  border-radius: 2px;
+  position: relative;
+}
+.vault-card::before {
+  content: 'VAULT';
+  position: absolute;
+  top: -8px;
+  right: 10px;
+  font-size: 0.55rem;
+  font-family: var(--mono);
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--gold);
+  background: var(--aged-paper);
+  padding: 0 4px;
+}
+
+.vault-year {
+  font-family: var(--serif);
+  font-size: 1.8rem;
+  font-weight: 900;
+  color: var(--gold);
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+.vault-text {
+  font-family: var(--serif);
+  font-size: 0.85rem;
+  font-style: italic;
+  color: var(--ink);
+  line-height: 1.5;
+}
+
+.vault-link {
+  display: block;
+  margin-top: 8px;
+  font-family: var(--sans);
+  font-size: 0.7rem;
+  color: var(--crimson);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Hall of Fame — Dynasty Leaderboard Plaque */
+.plaque {
+  background:
+    linear-gradient(180deg, #f5ecd4, #e8ddc0, #f5ecd4);
+  border: 4px double var(--dark-brown);
+  padding: 14px;
+  border-radius: 3px;
+  box-shadow:
+    inset 0 0 8px rgba(59,47,30,0.08),
+    0 2px 6px rgba(59,47,30,0.12);
+}
+
+.plaque-title {
+  font-family: var(--serif);
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--dark-brown);
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  margin-bottom: 12px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--dark-brown);
+}
+
+.plaque-entry {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 1px dotted var(--tan);
+  font-size: 0.82rem;
+}
+.plaque-entry:last-child {
+  border-bottom: none;
+}
+
+.plaque-rank {
+  font-family: var(--serif);
+  font-weight: 800;
+  color: var(--gold);
+  width: 22px;
+  text-align: center;
+  font-size: 0.95rem;
+}
+
+.plaque-name {
+  font-family: var(--sans);
+  font-weight: 600;
+  color: var(--dark-brown);
+  flex: 1;
+}
+
+.plaque-school {
+  font-size: 0.65rem;
+  color: var(--faded-ink);
+  font-family: var(--mono);
+}
+
+.plaque-xp {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--gold);
+  font-weight: 700;
+}
+
+/* ========================================
+   FOOTER
+   ======================================== */
+.footer {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 16px 20px;
+  border-top: 3px double var(--dark-brown);
+  text-align: center;
+  font-family: var(--sans);
+  font-size: 0.7rem;
+  color: var(--faded-ink);
+  letter-spacing: 1px;
+}
+
+.footer-ornament {
+  font-family: var(--serif);
+  font-size: 0.9rem;
+  color: var(--dark-brown);
+  margin-bottom: 6px;
+}
+
+/* ========================================
+   UTILITY CLASSES
+   ======================================== */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  border: 0;
+}
+</style>
+</head>
+<body>
+
+<!-- ============================
+     TOP BORDER STRIPE
+     ============================ -->
+<div class="header-top-border"></div>
+
+<!-- ============================
+     HEADER — Aged Paper Masthead
+     ============================ -->
+<header class="header">
+  <div class="header-inner">
+    <!-- Left: Date & Edition -->
+    <div class="header-left">
+      <div>
+        <div class="header-date">MARCH 26, 2026</div>
+        <div class="header-edition">Vol. I &middot; No. 87</div>
+      </div>
+    </div>
+
+    <!-- Center: Masthead -->
+    <div class="header-brand">
+      <h1 class="header-title">THE GRIDIRON</h1>
+      <div class="header-subtitle">College Football's Social Home &mdash; Est. 2026</div>
+    </div>
+
+    <!-- Right: Actions -->
+    <div class="header-actions">
+      <button class="header-btn" title="Search" aria-label="Search">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="7"/><line x1="16" y1="16" x2="22" y2="22"/></svg>
+      </button>
+      <button class="header-btn" title="Notifications" aria-label="Notifications">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span class="notif-badge">5</span>
+      </button>
+      <div class="header-profile" title="Profile">GR</div>
+    </div>
+  </div>
+</header>
+
+<!-- ============================
+     SCORES RIBBON — Old Scoreboard
+     ============================ -->
+<div class="scores-ribbon">
+  <div class="scores-track" id="scoresTrack">
+    <!-- Set 1 -->
+    <div class="score-item">
+      <span class="score-label final">FINAL</span>
+      <span class="score-teams"><strong>OHIO ST 24</strong> &mdash; <strong>MICHIGAN 21</strong></span>
+    </div>
+    <span class="score-divider">&vert;</span>
+    <div class="score-item">
+      <span class="score-label live">LIVE</span>
+      <span class="score-teams"><strong>BAMA 14</strong> &mdash; <strong>AUBURN 10</strong> &nbsp;Q3 8:42</span>
+    </div>
+    <span class="score-divider">&vert;</span>
+    <div class="score-item">
+      <span class="score-label final">FINAL</span>
+      <span class="score-teams"><strong>GEORGIA 31</strong> &mdash; <strong>FLORIDA 17</strong></span>
+    </div>
+    <span class="score-divider">&vert;</span>
+    <div class="score-item">
+      <span class="score-label live">LIVE</span>
+      <span class="score-teams"><strong>TEXAS 21</strong> &mdash; <strong>OKLAHOMA 21</strong> &nbsp;Q4 2:15</span>
+    </div>
+    <span class="score-divider">&vert;</span>
+    <div class="score-item">
+      <span class="score-label final">FINAL</span>
+      <span class="score-teams"><strong>USC 28</strong> &mdash; <strong>UCLA 24</strong></span>
+    </div>
+    <span class="score-divider">&vert;</span>
+    <div class="score-item">
+      <span class="score-label final">FINAL</span>
+      <span class="score-teams"><strong>CLEMSON 35</strong> &mdash; <strong>S. CAROLINA 20</strong></span>
+    </div>
+    <span class="score-divider">&vert;</span>
+    <div class="score-item">
+      <span class="score-label live">LIVE</span>
+      <span class="score-teams"><strong>LSU 7</strong> &mdash; <strong>OLE MISS 3</strong> &nbsp;Q2 11:03</span>
+    </div>
+    <span class="score-divider">&vert;</span>
+    <!-- Duplicate set for seamless scroll -->
+    <div class="score-item">
+      <span class="score-label final">FINAL</span>
+      <span class="score-teams"><strong>OHIO ST 24</strong> &mdash; <strong>MICHIGAN 21</strong></span>
+    </div>
+    <span class="score-divider">&vert;</span>
+    <div class="score-item">
+      <span class="score-label live">LIVE</span>
+      <span class="score-teams"><strong>BAMA 14</strong> &mdash; <strong>AUBURN 10</strong> &nbsp;Q3 8:42</span>
+    </div>
+    <span class="score-divider">&vert;</span>
+    <div class="score-item">
+      <span class="score-label final">FINAL</span>
+      <span class="score-teams"><strong>GEORGIA 31</strong> &mdash; <strong>FLORIDA 17</strong></span>
+    </div>
+    <span class="score-divider">&vert;</span>
+    <div class="score-item">
+      <span class="score-label live">LIVE</span>
+      <span class="score-teams"><strong>TEXAS 21</strong> &mdash; <strong>OKLAHOMA 21</strong> &nbsp;Q4 2:15</span>
+    </div>
+    <span class="score-divider">&vert;</span>
+    <div class="score-item">
+      <span class="score-label final">FINAL</span>
+      <span class="score-teams"><strong>USC 28</strong> &mdash; <strong>UCLA 24</strong></span>
+    </div>
+    <span class="score-divider">&vert;</span>
+    <div class="score-item">
+      <span class="score-label final">FINAL</span>
+      <span class="score-teams"><strong>CLEMSON 35</strong> &mdash; <strong>S. CAROLINA 20</strong></span>
+    </div>
+    <span class="score-divider">&vert;</span>
+    <div class="score-item">
+      <span class="score-label live">LIVE</span>
+      <span class="score-teams"><strong>LSU 7</strong> &mdash; <strong>OLE MISS 3</strong> &nbsp;Q2 11:03</span>
+    </div>
+    <span class="score-divider">&vert;</span>
+  </div>
+</div>
+
+<!-- ============================
+     MAIN 3-COLUMN LAYOUT
+     ============================ -->
+<main class="main-layout">
+
+  <!-- ======== LEFT COLUMN — The Bulletin Board ======== -->
+  <aside class="col-left">
+    <div class="bulletin-title">The Bulletin Board</div>
+
+    <!-- Corkboard Navigation -->
+    <nav class="corkboard">
+      <button class="nav-pin active">
+        <span class="nav-label">The Feed</span>
+      </button>
+      <button class="nav-pin">
+        <span class="nav-label">Rivalry Ring</span>
+      </button>
+      <button class="nav-pin">
+        <span class="nav-label">Coach's Call</span>
+      </button>
+      <button class="nav-pin">
+        <span class="nav-label">Hall of Fame</span>
+      </button>
+      <button class="nav-pin">
+        <span class="nav-label">Portal Wire</span>
+      </button>
+      <button class="nav-pin">
+        <span class="nav-label">Recruiting Desk</span>
+      </button>
+      <button class="nav-pin">
+        <span class="nav-label">The Vault</span>
+      </button>
+    </nav>
+
+    <!-- Dynasty Ticket Stub -->
+    <div class="ticket-stub">
+      <div class="ticket-title">Dynasty Stats</div>
+      <div class="ticket-stat">
+        <span class="ticket-stat-label">Level</span>
+        <span class="ticket-stat-value">12</span>
+      </div>
+      <div class="ticket-stat">
+        <span class="ticket-stat-label">Total XP</span>
+        <span class="ticket-stat-value">2,450</span>
+      </div>
+      <div class="ticket-stat">
+        <span class="ticket-stat-label">Rank</span>
+        <span class="ticket-stat-value">Coordinator</span>
+      </div>
+      <div class="ticket-stat">
+        <span class="ticket-stat-label">Takes Filed</span>
+        <span class="ticket-stat-value">187</span>
+      </div>
+      <div class="ticket-stat">
+        <span class="ticket-stat-label">Win Rate</span>
+        <span class="ticket-stat-value">68%</span>
+      </div>
+      <div class="xp-bar-track">
+        <div class="xp-bar-fill"></div>
+      </div>
+      <div class="xp-text">550 XP to Level 13</div>
+    </div>
+  </aside>
+
+  <!-- ======== CENTER COLUMN — The Feed ======== -->
+  <section class="col-center">
+
+    <!-- Feed Header -->
+    <div class="feed-header">
+      <h2 class="feed-title">The Feed</h2>
+      <div class="feed-tabs">
+        <button class="feed-tab active">Latest</button>
+        <button class="feed-tab">Top Takes</button>
+        <button class="feed-tab">Receipts</button>
+        <button class="feed-tab">Following</button>
+      </div>
+    </div>
+
+    <!-- Composer -->
+    <div class="composer">
+      <textarea class="composer-input" placeholder="File your report from the press box..." rows="2"></textarea>
+      <div class="composer-footer">
+        <div class="composer-tools">
+          <button class="composer-tool">Receipt</button>
+          <button class="composer-tool">Poll</button>
+          <button class="composer-tool">Photo</button>
+          <button class="composer-tool">Challenge</button>
+        </div>
+        <button class="composer-submit">Publish</button>
+      </div>
+    </div>
+
+    <!-- ============ POST 1 — Classic Take ============ -->
+    <div class="post-card">
+      <article class="post-classic">
+        <div class="post-user-row">
+          <div class="post-avatar scarlet">BN</div>
+          <div>
+            <span class="post-username">@BuckeyeNation</span>
+            <span class="post-pennant ohio-state">OHIO STATE</span>
+          </div>
+          <span class="post-badge">HEISMAN CONTENDER</span>
+          <span class="post-time">2h ago</span>
+        </div>
+        <div class="post-body">
+          Travis Hunter is the greatest two-way talent since Deion Sanders walked the earth. Playing elite on both sides of the ball in the modern era? Put him in the Hall now.
+        </div>
+        <div class="post-reactions">
+          <button class="ballot-btn">
+            <span class="vote-symbol">&#x2713;</span>
+            <span class="vote-label">Touchdown</span>
+            <span class="vote-count">342</span>
+          </button>
+          <button class="ballot-btn">
+            <span class="vote-symbol">&#x2717;</span>
+            <span class="vote-label">Fumble</span>
+            <span class="vote-count">89</span>
+          </button>
+        </div>
+        <div class="post-actions">
+          <button class="post-action">FACT CHECK</button>
+          <button class="post-action">CHALLENGE</button>
+          <button class="post-action">REVISIT</button>
+          <button class="post-action">Reply (47)</button>
+        </div>
+      </article>
+    </div>
+
+    <!-- ============ POST 2 — Receipt / Newspaper Clipping ============ -->
+    <div class="post-card">
+      <article class="post-receipt">
+        <!-- Wax Seal -->
+        <div class="receipt-seal">
+          <span class="receipt-seal-icon" style="font-size:0.65rem; font-family:var(--serif); font-weight:800; letter-spacing:1px;">RCT</span>
+          <span class="receipt-seal-text">Receipt<br>Filed</span>
+        </div>
+
+        <div class="post-user-row">
+          <div class="post-avatar crimson-bg">TR</div>
+          <div>
+            <span class="post-username">@TideRollin</span>
+            <span class="post-pennant alabama">ALABAMA</span>
+          </div>
+          <span class="post-time">5h ago</span>
+        </div>
+        <div class="post-body">
+          Mark my words: Alabama finishes 11-1 this season. The only loss comes in Athens. Milroe is a dark-horse Heisman candidate and the defense will be the best in the SEC.
+        </div>
+        <div class="receipt-stamp">
+          RECEIPT FILED &mdash; To be reviewed Week 12
+        </div>
+        <div style="margin-top: 14px;">
+          <div class="post-reactions">
+            <button class="ballot-btn">
+              <span class="vote-symbol">&#x2713;</span>
+              <span class="vote-label">Touchdown</span>
+              <span class="vote-count">234</span>
+            </button>
+            <button class="ballot-btn">
+              <span class="vote-symbol">&#x2717;</span>
+              <span class="vote-label">Fumble</span>
+              <span class="vote-count">156</span>
+            </button>
+          </div>
+        </div>
+      </article>
+    </div>
+
+    <!-- ============ POST 3 — Penalty Flag (AI Moderation) ============ -->
+    <div class="post-card">
+      <article class="post-penalty">
+        <div class="penalty-header">
+          <span class="penalty-flag-icon" style="font-family:var(--serif); font-weight:900; color:var(--penalty-yellow); font-size:1.2rem;">FLAG</span>
+          <div>
+            <div class="penalty-title">Penalty</div>
+            <div class="penalty-subtitle">Unsportsmanlike Conduct</div>
+          </div>
+          <!-- Whistle icon via SVG -->
+          <svg style="margin-left:auto; opacity:0.4;" width="28" height="28" viewBox="0 0 24 24" fill="var(--dark-brown)">
+            <ellipse cx="8" cy="14" rx="6" ry="5"/>
+            <rect x="13" y="11" width="8" height="4" rx="2"/>
+            <circle cx="8" cy="14" r="2" fill="var(--penalty-bg)"/>
+          </svg>
+        </div>
+        <div class="penalty-body">
+          The referee has flagged this post for off-topic political content. All participants are reminded to keep discussion focused on college football.
+        </div>
+        <div class="penalty-ruling">
+          WARNING: This play has been nullified. All football, all the time.
+        </div>
+        <button class="penalty-appeal">
+          Appeal to the booth
+        </button>
+      </article>
+    </div>
+
+    <!-- ============ POST 4 — Sideline Report / Press Box ============ -->
+    <div class="post-card">
+      <article class="post-pressbox">
+        <div class="pressbox-header">
+          <span class="pressbox-title">SIDELINE REPORT</span>
+          <span class="pressbox-time">Q1 &bull; 4:32 Remaining</span>
+        </div>
+        <div class="pressbox-meta">
+          AUBURN vs LSU &mdash; Jordan-Hare Stadium, Auburn, AL
+        </div>
+        <div class="pressbox-body">
+          <div class="post-user-row" style="margin-bottom:8px;">
+            <div class="post-avatar blue-bg">WE</div>
+            <div>
+              <span class="post-username">@WarEagle</span>
+              <span class="post-pennant auburn">AUBURN</span>
+            </div>
+            <span class="pressbox-verified">VERIFIED &mdash; Press Box Confirmed</span>
+          </div>
+          <div class="pressbox-content">
+            Auburn defense absolutely dominant early in this one. Three sacks already, zero first downs allowed for LSU. The Tiger defense is flying to the ball and Jordan-Hare is rocking. This could be a long night for Baton Rouge.
+          </div>
+          <div class="post-reactions">
+            <button class="ballot-btn">
+              <span class="vote-symbol">&#x2713;</span>
+              <span class="vote-label">Touchdown</span>
+              <span class="vote-count">189</span>
+            </button>
+            <button class="ballot-btn">
+              <span class="vote-symbol">&#x2717;</span>
+              <span class="vote-label">Fumble</span>
+              <span class="vote-count">12</span>
+            </button>
+          </div>
+        </div>
+      </article>
+    </div>
+
+    <!-- ============ POST 5 — Rivalry Ring ============ -->
+    <div class="post-card">
+      <article class="post-rivalry">
+        <div class="rivalry-header">
+          <div class="rivalry-label">The Rivalry Ring</div>
+          <div class="rivalry-title">Texas vs Oklahoma</div>
+          <div class="rivalry-subtitle">Red River Showdown</div>
+        </div>
+        <div class="rivalry-body">
+          <div class="rivalry-question">Is Texas actually back? Cast your vote.</div>
+          <div class="rivalry-matchup">
+            <div class="rivalry-corner corner-left">
+              <div class="corner-slogan">HOOK 'EM</div>
+              <div class="corner-pct">56%</div>
+              <div class="corner-votes">1,247 votes</div>
+            </div>
+            <div class="rivalry-vs">VS</div>
+            <div class="rivalry-corner corner-right">
+              <div class="corner-slogan">BOOMER</div>
+              <div class="corner-pct">44%</div>
+              <div class="corner-votes">981 votes</div>
+            </div>
+          </div>
+          <div class="rivalry-bar">
+            <div class="rivalry-bar-left"></div>
+            <div class="rivalry-bar-right"></div>
+          </div>
+          <div style="text-align:center; margin-top:8px;">
+            <span style="font-family:var(--mono); font-size:0.7rem; color:var(--faded-ink);">2,228 total votes &bull; 6h remaining</span>
+          </div>
+        </div>
+      </article>
+    </div>
+
+  </section>
+
+  <!-- ======== RIGHT COLUMN — The Press Box ======== -->
+  <aside class="col-right">
+
+    <!-- Recruiting Wire -->
+    <div class="sidebar-section">
+      <div class="sidebar-title">Recruiting Wire</div>
+
+      <div class="dispatch flash">
+        <div class="dispatch-label">FLASH</div>
+        <div class="dispatch-stars">5-STAR</div>
+        <div class="dispatch-text">Top QB prospect announces commitment to USC in primetime reveal. The Trojans land the No. 1 overall recruit.</div>
+        <div class="dispatch-time">32 min ago</div>
+      </div>
+
+      <div class="dispatch bulletin">
+        <div class="dispatch-label">Bulletin</div>
+        <div class="dispatch-stars">4-STAR</div>
+        <div class="dispatch-text">No. 2 RB in the class narrows list to Georgia, Alabama, and Ohio State. Decision expected within the week.</div>
+        <div class="dispatch-time">1h ago</div>
+      </div>
+
+      <div class="dispatch bulletin">
+        <div class="dispatch-label">Bulletin</div>
+        <div class="dispatch-stars">5-STAR</div>
+        <div class="dispatch-text">Elite DE from Texas decommits from Texas A&amp;M. Multiple SEC programs now in pursuit.</div>
+        <div class="dispatch-time">3h ago</div>
+      </div>
+    </div>
+
+    <!-- Transfer Portal Ticker -->
+    <div class="sidebar-section">
+      <div class="sidebar-title">Portal Wire</div>
+      <div class="portal-ticker">
+        <div class="portal-ticker-track" id="portalTrack">
+          <span class="portal-name">J. Williams (QB) <span class="portal-arrow">&rarr;</span> USC</span>
+          <span class="portal-name">M. Carter (WR) <span class="portal-arrow">&rarr;</span> Oregon</span>
+          <span class="portal-name">D. Smith (LB) <span class="portal-arrow">&rarr;</span> Georgia</span>
+          <span class="portal-name">K. Johnson (RB) <span class="portal-arrow">&rarr;</span> Alabama</span>
+          <span class="portal-name">T. Brown (CB) <span class="portal-arrow">&rarr;</span> Ohio St</span>
+          <span class="portal-name">R. Davis (DE) <span class="portal-arrow">&rarr;</span> Michigan</span>
+          <!-- Duplicate for seamless loop -->
+          <span class="portal-name">J. Williams (QB) <span class="portal-arrow">&rarr;</span> USC</span>
+          <span class="portal-name">M. Carter (WR) <span class="portal-arrow">&rarr;</span> Oregon</span>
+          <span class="portal-name">D. Smith (LB) <span class="portal-arrow">&rarr;</span> Georgia</span>
+          <span class="portal-name">K. Johnson (RB) <span class="portal-arrow">&rarr;</span> Alabama</span>
+          <span class="portal-name">T. Brown (CB) <span class="portal-arrow">&rarr;</span> Ohio St</span>
+          <span class="portal-name">R. Davis (DE) <span class="portal-arrow">&rarr;</span> Michigan</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Trending Stories -->
+    <div class="sidebar-section">
+      <div class="sidebar-title">Trending Stories</div>
+
+      <div class="headline-item">
+        <span class="headline-number">1.</span>
+        <span class="headline-text">CFP Committee Releases First Rankings; Chaos Ensues</span>
+        <div class="headline-meta">4,521 takes &bull; 2h ago</div>
+      </div>
+      <div class="headline-item">
+        <span class="headline-number">2.</span>
+        <span class="headline-text">Saban Protege Named Head Coach at Florida State</span>
+        <div class="headline-meta">3,102 takes &bull; 4h ago</div>
+      </div>
+      <div class="headline-item">
+        <span class="headline-number">3.</span>
+        <span class="headline-text">SEC Announces New Scheduling Format for 2027</span>
+        <div class="headline-meta">2,890 takes &bull; 5h ago</div>
+      </div>
+      <div class="headline-item">
+        <span class="headline-number">4.</span>
+        <span class="headline-text">Walk-On Kicker Hits 62-Yarder to Win the Game</span>
+        <div class="headline-meta">2,445 takes &bull; 6h ago</div>
+      </div>
+      <div class="headline-item">
+        <span class="headline-number">5.</span>
+        <span class="headline-text">NIL Deal Worth $4.2M Reported for Top Freshman QB</span>
+        <div class="headline-meta">1,998 takes &bull; 8h ago</div>
+      </div>
+    </div>
+
+    <!-- The Vault — Today in History -->
+    <div class="sidebar-section">
+      <div class="sidebar-title">The Vault</div>
+      <div class="vault-card">
+        <div style="font-family:var(--sans); font-size:0.65rem; text-transform:uppercase; letter-spacing:2px; color:var(--faded-ink); margin-bottom:4px;">On This Day</div>
+        <div class="vault-year">2007</div>
+        <div class="vault-text">
+          Boise State shocks Oklahoma in the Fiesta Bowl with the unforgettable Statue of Liberty play on the two-point conversion. One of the greatest games in college football history.
+        </div>
+        <a href="#" class="vault-link">Read the full story &rarr;</a>
+      </div>
+    </div>
+
+    <!-- Hall of Fame — Dynasty Leaderboard -->
+    <div class="sidebar-section">
+      <div class="sidebar-title">Hall of Fame</div>
+      <div class="plaque">
+        <div class="plaque-title">Dynasty Leaderboard</div>
+
+        <div class="plaque-entry">
+          <span class="plaque-rank">1</span>
+          <div>
+            <div class="plaque-name">GridironGuru</div>
+            <div class="plaque-school">OHIO STATE</div>
+          </div>
+          <span class="plaque-xp">48,200 XP</span>
+        </div>
+        <div class="plaque-entry">
+          <span class="plaque-rank">2</span>
+          <div>
+            <div class="plaque-name">TideCommander</div>
+            <div class="plaque-school">ALABAMA</div>
+          </div>
+          <span class="plaque-xp">45,800 XP</span>
+        </div>
+        <div class="plaque-entry">
+          <span class="plaque-rank">3</span>
+          <div>
+            <div class="plaque-name">DawgPound_99</div>
+            <div class="plaque-school">GEORGIA</div>
+          </div>
+          <span class="plaque-xp">42,100 XP</span>
+        </div>
+        <div class="plaque-entry">
+          <span class="plaque-rank">4</span>
+          <div>
+            <div class="plaque-name">HookEmHorns</div>
+            <div class="plaque-school">TEXAS</div>
+          </div>
+          <span class="plaque-xp">39,500 XP</span>
+        </div>
+        <div class="plaque-entry">
+          <span class="plaque-rank">5</span>
+          <div>
+            <div class="plaque-name">TigerProwl</div>
+            <div class="plaque-school">CLEMSON</div>
+          </div>
+          <span class="plaque-xp">37,900 XP</span>
+        </div>
+      </div>
+    </div>
+
+  </aside>
+
+</main>
+
+<!-- ============================
+     FOOTER
+     ============================ -->
+<footer class="footer">
+  <div class="footer-ornament">&mdash; &#x2766; &mdash;</div>
+  <div>THE GRIDIRON &middot; College Football's Social Home &middot; Est. 2026 &middot; All Football, All The Time</div>
+  <div style="margin-top:4px;">A CFB Social Platform &middot; Terms &middot; Privacy &middot; About</div>
+</footer>
+
+<!-- ============================
+     JAVASCRIPT — Interactions
+     ============================ -->
+<script>
+(function() {
+  'use strict';
+
+  // --- Nav pin active state ---
+  const navPins = document.querySelectorAll('.nav-pin');
+  navPins.forEach(function(pin) {
+    pin.addEventListener('click', function() {
+      navPins.forEach(function(p) { p.classList.remove('active'); });
+      pin.classList.add('active');
+    });
+  });
+
+  // --- Feed tab switching ---
+  const feedTabs = document.querySelectorAll('.feed-tab');
+  feedTabs.forEach(function(tab) {
+    tab.addEventListener('click', function() {
+      feedTabs.forEach(function(t) { t.classList.remove('active'); });
+      tab.classList.add('active');
+    });
+  });
+
+  // --- Ballot button interactions ---
+  const ballotBtns = document.querySelectorAll('.ballot-btn');
+  ballotBtns.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var countEl = btn.querySelector('.vote-count');
+      if (countEl) {
+        var current = parseInt(countEl.textContent.replace(/,/g, ''), 10);
+        if (!btn.classList.contains('voted')) {
+          btn.classList.add('voted');
+          btn.style.background = 'var(--dark-brown)';
+          btn.style.color = 'var(--cream)';
+          countEl.style.color = 'var(--cream)';
+          countEl.textContent = (current + 1).toLocaleString();
+        } else {
+          btn.classList.remove('voted');
+          btn.style.background = 'var(--cream)';
+          btn.style.color = 'var(--dark-brown)';
+          countEl.style.color = 'var(--faded-ink)';
+          countEl.textContent = (current - 1).toLocaleString();
+        }
+      }
+    });
+  });
+
+  // --- Rivalry corner hover/click ---
+  var corners = document.querySelectorAll('.rivalry-corner');
+  corners.forEach(function(corner) {
+    corner.addEventListener('click', function() {
+      corners.forEach(function(c) {
+        c.style.outline = 'none';
+        c.style.boxShadow = 'none';
+      });
+      corner.style.outline = '3px solid var(--gold)';
+      corner.style.boxShadow = '0 0 12px rgba(196,154,47,0.3)';
+    });
+  });
+
+  // --- Composer focus effect ---
+  var composerInput = document.querySelector('.composer-input');
+  var composer = document.querySelector('.composer');
+  if (composerInput && composer) {
+    composerInput.addEventListener('focus', function() {
+      composer.style.borderColor = 'var(--crimson)';
+      composer.style.boxShadow = '0 0 0 1px var(--crimson)';
+    });
+    composerInput.addEventListener('blur', function() {
+      composer.style.borderColor = 'var(--dark-brown)';
+      composer.style.boxShadow = 'none';
+    });
+  }
+
+  // --- Penalty appeal hover ---
+  var appealBtn = document.querySelector('.penalty-appeal');
+  if (appealBtn) {
+    appealBtn.addEventListener('click', function() {
+      appealBtn.textContent = 'Appeal submitted \u2014 Under review';
+      appealBtn.style.background = 'var(--faded-ink)';
+      appealBtn.style.color = '#fff';
+      appealBtn.style.borderColor = 'var(--faded-ink)';
+      appealBtn.disabled = true;
+    });
+  }
+
+  // --- Post action hover sounds (visual feedback) ---
+  var postActions = document.querySelectorAll('.post-action');
+  postActions.forEach(function(action) {
+    action.addEventListener('click', function() {
+      action.style.color = 'var(--crimson)';
+      action.style.fontWeight = '600';
+      setTimeout(function() {
+        action.style.fontWeight = '400';
+      }, 300);
+    });
+  });
+
+  // --- Header search button toggle ---
+  var searchBtn = document.querySelector('.header-btn[title="Search"]');
+  if (searchBtn) {
+    searchBtn.addEventListener('click', function() {
+      var existing = document.querySelector('.search-popup');
+      if (existing) {
+        existing.remove();
+        return;
+      }
+      var popup = document.createElement('div');
+      popup.className = 'search-popup';
+      popup.style.cssText = 'position:absolute;top:100%;right:0;width:280px;background:var(--cream);border:2px solid var(--dark-brown);padding:12px;z-index:100;box-shadow:0 4px 12px rgba(59,47,30,0.2);';
+      popup.innerHTML = '<input type="text" placeholder="Search the archives..." style="width:100%;border:1px solid var(--tan);padding:8px 10px;font-family:var(--typewriter);font-size:0.85rem;background:var(--warm-white);outline:none;color:var(--ink);">';
+      searchBtn.parentElement.style.position = 'relative';
+      searchBtn.parentElement.appendChild(popup);
+      popup.querySelector('input').focus();
+    });
+  }
+
+  // --- Subtle page-load animation ---
+  document.body.style.opacity = '0';
+  document.body.style.transition = 'opacity 0.6s ease';
+  requestAnimationFrame(function() {
+    requestAnimationFrame(function() {
+      document.body.style.opacity = '1';
+    });
+  });
+
+})();
+</script>
+
+</body>
+</html>

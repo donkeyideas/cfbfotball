@@ -89,14 +89,14 @@ async function ModerationQueue() {
                 <div className="mt-2 space-y-1">
                   {(post.reports as Array<{ id: string; reason: string; description: string | null; reporter: { username: string } | null }>).map((r) => (
                     <p key={r.id} className="text-xs text-[var(--admin-warning)]">
-                      Reported by @{r.reporter?.username ?? 'unknown'}: {r.reason}
+                      Reported by @{r.reporter?.username ?? 'unknown'}: {r.reason.replace(/_/g, ' ')}
                       {r.description && <span className="text-[var(--admin-text-muted)]"> — {r.description}</span>}
                     </p>
                   ))}
                 </div>
               )}
               <p className="mt-1 text-xs uppercase tracking-wider text-[var(--admin-warning)]">
-                {post.post_type}
+                {post.post_type.replace(/_/g, ' ')}
               </p>
             </div>
             <ModerationActions postId={post.id} />

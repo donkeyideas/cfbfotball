@@ -1,5 +1,7 @@
+import Link from 'next/link';
 import { FollowButton } from './FollowButton';
 import { ProfileEditButton } from './ProfileEditButton';
+import { SignOutButton } from './SignOutButton';
 
 interface ProfileHeaderProps {
   user: {
@@ -71,7 +73,29 @@ export function ProfileHeader({ user, isOwnProfile = false }: ProfileHeaderProps
             )}
           </div>
           <div className="flex items-center gap-2 pb-1">
-            {isOwnProfile && <ProfileEditButton profileUserId={user.id} />}
+            {isOwnProfile && (
+              <>
+                <Link
+                  href="/settings"
+                  style={{
+                    padding: '6px 14px',
+                    fontFamily: 'var(--sans)',
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    letterSpacing: '0.5px',
+                    textTransform: 'uppercase',
+                    color: 'var(--text-secondary)',
+                    background: 'transparent',
+                    border: '1px solid var(--border)',
+                    borderRadius: 2,
+                    textDecoration: 'none',
+                  }}
+                >
+                  Settings
+                </Link>
+                <SignOutButton />
+              </>
+            )}
             {!isOwnProfile && <FollowButton userId={user.id} />}
           </div>
         </div>

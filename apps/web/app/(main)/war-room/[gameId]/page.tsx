@@ -2,6 +2,8 @@ import { Suspense } from 'react';
 import Link from 'next/link';
 import { GameThread } from './GameThread';
 
+export const dynamic = 'force-dynamic';
+
 interface GamePageProps {
   params: Promise<{ gameId: string }>;
 }

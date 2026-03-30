@@ -9,17 +9,25 @@ import {
   Platform,
   ScrollView,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { useRouter, Link } from 'expo-router';
+import * as WebBrowser from 'expo-web-browser';
+import * as AppleAuthentication from 'expo-apple-authentication';
+import { makeRedirectUri } from 'expo-auth-session';
 import { supabase } from '@/lib/supabase';
+import { useSchoolTheme } from '@/lib/theme/SchoolThemeProvider';
+import { OrnamentDivider } from '@/components/ui/OrnamentDivider';
 import { colors } from '@/lib/theme/colors';
 import { typography } from '@/lib/theme/typography';
 
 export default function LoginScreen() {
   const router = useRouter();
+  const { dark } = useSchoolTheme();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [oauthLoading, setOauthLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function handleLogin() {
@@ -41,6 +49,84 @@ export default function LoginScreen() {
     router.replace('/(tabs)/feed');
   }
 
+  async function handleGoogleSignIn() {
+    setOauthLoading(true);
+    setError(null);
+
+    try {
+      const redirectTo = makeRedirectUri();
+
+      const { data, error: oauthError } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo,
+          skipBrowserRedirect: true,
+        },
+      });
+
+      if (oauthError) {
+        setError(oauthError.message);
+        setOauthLoading(false);
+        return;
+      }
+
+      if (data?.url) {
+        const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo);
+
+        if (result.type === 'success') {
+          router.replace('/(tabs)/feed');
+        }
+      }
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Google sign-in failed';
+      setError(message);
+    } finally {
+      setOauthLoading(false);
+    }
+  }
+
+  async function handleAppleSignIn() {
+    setOauthLoading(true);
+    setError(null);
+
+    try {
+      const credential = await AppleAuthentication.signInAsync({
+        requestedScopes: [
+          AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+          AppleAuthentication.AppleAuthenticationScope.EMAIL,
+        ],
+      });
+
+      if (!credential.identityToken) {
+        setError('No identity token received from Apple');
+        setOauthLoading(false);
+        return;
+      }
+
+      const { error: tokenError } = await supabase.auth.signInWithIdToken({
+        provider: 'apple',
+        token: credential.identityToken,
+      });
+
+      if (tokenError) {
+        setError(tokenError.message);
+        setOauthLoading(false);
+        return;
+      }
+
+      router.replace('/(tabs)/feed');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Apple sign-in failed';
+      if (message.includes('ERR_REQUEST_CANCELED')) {
+        // User cancelled -- not an error
+      } else {
+        setError(message);
+      }
+    } finally {
+      setOauthLoading(false);
+    }
+  }
+
   return (
     <KeyboardAvoidingView
       style={styles.container}
@@ -51,7 +137,7 @@ export default function LoginScreen() {
         keyboardShouldPersistTaps="handled"
       >
         {/* Header */}
-        <Text style={styles.title}>The Gridiron</Text>
+        <Text style={styles.title}>CFB Social</Text>
         <View style={styles.divider} />
         <Text style={styles.subtitle}>Sign In</Text>
 
@@ -90,9 +176,9 @@ export default function LoginScreen() {
           </View>
 
           <Pressable
-            style={[styles.button, loading && styles.buttonDisabled]}
+            style={[styles.button, { backgroundColor: dark }, loading && styles.buttonDisabled]}
             onPress={handleLogin}
-            disabled={loading}
+            disabled={loading || oauthLoading}
           >
             {loading ? (
               <ActivityIndicator color="#ffffff" />
@@ -102,9 +188,39 @@ export default function LoginScreen() {
           </Pressable>
         </View>
 
+        {/* OAuth divider */}
+        <View style={styles.oauthDividerContainer}>
+          <OrnamentDivider />
+        </View>
+
+        {/* OAuth buttons */}
+        <View style={styles.oauthContainer}>
+          <Pressable
+            style={[styles.oauthButton, oauthLoading && styles.buttonDisabled]}
+            onPress={handleGoogleSignIn}
+            disabled={loading || oauthLoading}
+          >
+            {oauthLoading ? (
+              <ActivityIndicator color={colors.ink} />
+            ) : (
+              <Text style={styles.oauthButtonText}>Continue with Google</Text>
+            )}
+          </Pressable>
+
+          {Platform.OS === 'ios' && (
+            <Pressable
+              style={[styles.oauthButton, oauthLoading && styles.buttonDisabled]}
+              onPress={handleAppleSignIn}
+              disabled={loading || oauthLoading}
+            >
+              <Text style={styles.oauthButtonText}>Continue with Apple</Text>
+            </Pressable>
+          )}
+        </View>
+
         {/* Register link */}
         <View style={styles.footer}>
-          <Text style={styles.footerText}>New to The Gridiron? </Text>
+          <Text style={styles.footerText}>New to CFB Social?</Text>
           <Link href="/(auth)/register" asChild>
             <Pressable>
               <Text style={styles.footerLink}>Create an account</Text>
@@ -179,7 +295,6 @@ const styles = StyleSheet.create({
     color: colors.ink,
   },
   button: {
-    backgroundColor: colors.crimson,
     paddingVertical: 16,
     borderRadius: 8,
     alignItems: 'center',
@@ -192,6 +307,25 @@ const styles = StyleSheet.create({
     fontFamily: typography.sansBold,
     fontSize: 16,
     color: '#ffffff',
+  },
+  oauthDividerContainer: {
+    marginVertical: 20,
+  },
+  oauthContainer: {
+    gap: 12,
+  },
+  oauthButton: {
+    borderWidth: 1.5,
+    borderColor: colors.borderStrong,
+    paddingVertical: 14,
+    borderRadius: 8,
+    alignItems: 'center',
+    backgroundColor: 'transparent',
+  },
+  oauthButtonText: {
+    fontFamily: typography.sansSemiBold,
+    fontSize: 15,
+    color: colors.ink,
   },
   footer: {
     flexDirection: 'row',

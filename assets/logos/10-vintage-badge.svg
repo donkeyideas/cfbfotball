@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 380" width="340" height="380">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&amp;family=Source+Sans+3:wght@600;700&amp;display=swap');
+    </style>
+  </defs>
+
+  <!-- Badge shape - ornate vertical badge -->
+  <path d="M170 10 L240 30 L280 80 L290 150 L280 220 L260 260 L230 290 L200 320 L170 340 L140 320 L110 290 L80 260 L60 220 L50 150 L60 80 L100 30 Z" fill="#3b2f1e"/>
+  <!-- Inner border -->
+  <path d="M170 22 L234 40 L270 86 L280 150 L270 214 L252 252 L224 282 L198 310 L170 328 L142 310 L116 282 L88 252 L70 214 L60 150 L70 86 L106 40 Z" fill="#f4efe4"/>
+  <!-- Third border -->
+  <path d="M170 32 L228 48 L262 90 L271 150 L262 210 L246 246 L220 274 L196 300 L170 316 L144 300 L120 274 L94 246 L78 210 L69 150 L78 90 L112 48 Z" fill="none" stroke="#c49a2f" stroke-width="2"/>
+
+  <!-- Top banner -->
+  <rect x="98" y="55" width="144" height="28" fill="#8b1a1a" rx="3"/>
+  <text x="170" y="75" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-weight="700" font-size="14" fill="#f4efe4" letter-spacing="4">COLLEGE</text>
+
+  <!-- Horizontal divider -->
+  <line x1="90" y1="95" x2="250" y2="95" stroke="#c49a2f" stroke-width="1.5"/>
+
+  <!-- CFB SOCIAL stacked -->
+  <text x="170" y="126" text-anchor="middle" font-family="'Playfair Display', Georgia, serif" font-weight="900" font-size="38" fill="#3b2f1e" letter-spacing="4">CFB</text>
+
+  <!-- Center football emblem -->
+  <ellipse cx="170" cy="162" rx="35" ry="22" fill="#3b2f1e"/>
+  <ellipse cx="170" cy="162" rx="32" ry="19" fill="none" stroke="#c49a2f" stroke-width="1.5"/>
+  <line x1="152" y1="162" x2="188" y2="162" stroke="#f4efe4" stroke-width="1.5"/>
+  <line x1="159" y1="147" x2="159" y2="177" stroke="#f4efe4" stroke-width="1"/>
+  <line x1="166" y1="145" x2="166" y2="179" stroke="#f4efe4" stroke-width="1"/>
+  <line x1="174" y1="145" x2="174" y2="179" stroke="#f4efe4" stroke-width="1"/>
+  <line x1="181" y1="147" x2="181" y2="177" stroke="#f4efe4" stroke-width="1"/>
+
+  <!-- SOCIAL below football -->
+  <text x="170" y="210" text-anchor="middle" font-family="'Playfair Display', Georgia, serif" font-weight="900" font-size="30" fill="#3b2f1e" letter-spacing="5">SOCIAL</text>
+
+  <!-- Divider below -->
+  <line x1="100" y1="222" x2="240" y2="222" stroke="#c49a2f" stroke-width="1.5"/>
+
+  <!-- FOOTBALL'S SOCIAL HOME -->
+  <text x="170" y="244" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-weight="600" font-size="10" fill="#6b5d4d" letter-spacing="3">FOOTBALL'S SOCIAL HOME</text>
+
+  <!-- Stars row -->
+  <polygon points="130,260 132,266 139,266 134,270 136,276 130,272 124,276 126,270 121,266 128,266" fill="#c49a2f"/>
+  <polygon points="170,256 172,262 179,262 174,266 176,272 170,268 164,272 166,266 161,262 168,262" fill="#c49a2f"/>
+  <polygon points="210,260 212,266 219,266 214,270 216,276 210,272 204,276 206,270 201,266 208,266" fill="#c49a2f"/>
+
+  <!-- EST 2026 -->
+  <text x="170" y="298" text-anchor="middle" font-family="'Playfair Display', Georgia, serif" font-weight="700" font-size="14" fill="#8b1a1a" letter-spacing="3">EST. 2026</text>
+</svg>

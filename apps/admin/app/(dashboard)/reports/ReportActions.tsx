@@ -34,7 +34,7 @@ export function ReportActions({ reportId, postId, reportedUserId }: ReportAction
       <button
         onClick={() => handleAction('action')}
         disabled={loading}
-        className="rounded-md bg-[var(--admin-error)]/20 px-3 py-1.5 text-xs font-semibold text-[var(--admin-error)]"
+        className="rounded-md border border-[var(--admin-border)] px-3 py-1.5 text-xs font-semibold text-[var(--admin-error)]"
         style={{ opacity: loading ? 0.5 : 1, cursor: loading ? 'not-allowed' : 'pointer' }}
       >
         Action

@@ -28,6 +28,30 @@ interface RecruitingClaim {
   created_at: string;
 }
 
+interface CFBDRecruit {
+  name: string;
+  stars: number;
+  rating: number;
+  position: string;
+  committedTo: string | null;
+  city: string;
+  stateProvince: string;
+  year: number;
+  ranking: number;
+}
+
+interface CFBDTransfer {
+  firstName: string;
+  lastName: string;
+  position: string;
+  origin: string;
+  destination: string | null;
+  transferDate: string;
+  stars: number;
+  rating: number;
+  eligibility: string;
+}
+
 interface LeaderboardEntry {
   username: string;
   xp: number;
@@ -66,6 +90,8 @@ export function PressBoxSidebar() {
   const [portalPlayers, setPortalPlayers] = useState<PortalPlayer[]>([]);
   const [claims, setClaims] = useState<RecruitingClaim[]>([]);
   const [leaders, setLeaders] = useState<LeaderboardEntry[]>([]);
+  const [recruits, setRecruits] = useState<CFBDRecruit[]>([]);
+  const [transfers, setTransfers] = useState<CFBDTransfer[]>([]);
 
   useEffect(() => {
     const supabase = createClient();
@@ -141,10 +167,43 @@ export function PressBoxSidebar() {
       if (data) setLeaders(data as unknown as LeaderboardEntry[]);
     }
 
+    // Load CFBD recruiting commits
+    async function loadRecruits() {
+      try {
+        const res = await fetch('/api/cfbd?type=recruiting&year=2026');
+        if (!res.ok) return;
+        const json = await res.json();
+        const data = (json.data ?? []) as CFBDRecruit[];
+        // Show top 5 committed recruits sorted by ranking
+        const committed = data
+          .filter((r) => r.committedTo)
+          .sort((a, b) => (a.ranking || 9999) - (b.ranking || 9999))
+          .slice(0, 5);
+        if (committed.length > 0) setRecruits(committed);
+      } catch { /* CFBD unavailable */ }
+    }
+
+    // Load CFBD transfer portal entries
+    async function loadTransfers() {
+      try {
+        const res = await fetch('/api/cfbd?type=portal&year=2026');
+        if (!res.ok) return;
+        const json = await res.json();
+        const data = (json.data ?? []) as CFBDTransfer[];
+        // Show latest 5 transfers
+        const sorted = data
+          .sort((a, b) => new Date(b.transferDate || 0).getTime() - new Date(a.transferDate || 0).getTime())
+          .slice(0, 5);
+        if (sorted.length > 0) setTransfers(sorted);
+      } catch { /* CFBD unavailable */ }
+    }
+
     loadNews();
     loadPortal();
     loadClaims();
     loadLeaders();
+    loadRecruits();
+    loadTransfers();
   }, []);
 
   function handleArticleClick(article: ESPNArticle) {
@@ -164,9 +223,39 @@ export function PressBoxSidebar() {
       {/* Section 1: Recruiting Wire */}
       <div className="sidebar-section">
         <div className="sidebar-title">Recruiting Wire</div>
-        {claims.length > 0 ? (
+
+        {/* Real CFBD recruiting commits */}
+        {recruits.map((r, i) => (
+          <div key={`recruit-${i}`} className="dispatch flash" style={{ marginBottom: 6 }}>
+            <div className="dispatch-label">Commit</div>
+            <div className="dispatch-text">
+              {r.stars > 0 ? `${r.stars}-star ` : ''}{r.position} {r.name} commits to {r.committedTo}
+            </div>
+            <div className="dispatch-time">
+              {r.city && r.stateProvince ? `${r.city}, ${r.stateProvince}` : `#${r.ranking} nationally`}
+            </div>
+          </div>
+        ))}
+
+        {/* Real CFBD transfer portal entries */}
+        {transfers.map((t, i) => (
+          <div key={`transfer-${i}`} className="dispatch bulletin" style={{ marginBottom: 6 }}>
+            <div className="dispatch-label">Transfer</div>
+            <div className="dispatch-text">
+              {t.position} {t.firstName} {t.lastName}: {t.origin}{t.destination ? ` to ${t.destination}` : ' (entered portal)'}
+            </div>
+            <div className="dispatch-time">
+              {t.transferDate
+                ? new Date(t.transferDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                : t.stars > 0 ? `${t.stars}-star` : ''}
+            </div>
+          </div>
+        ))}
+
+        {/* Fallback: user roster claims when no CFBD data */}
+        {recruits.length === 0 && transfers.length === 0 && claims.length > 0 && (
           claims.map((claim, i) => (
-            <div key={i} className="dispatch bulletin" style={{ marginBottom: 6 }}>
+            <div key={`claim-${i}`} className="dispatch bulletin" style={{ marginBottom: 6 }}>
               <div className="dispatch-label">Dispatch</div>
               <div className="dispatch-text">
                 {claim.school?.abbreviation ?? 'UNK'} claims {claim.player?.name ?? 'Unknown'}
@@ -177,7 +266,10 @@ export function PressBoxSidebar() {
               </div>
             </div>
           ))
-        ) : (
+        )}
+
+        {/* Empty state */}
+        {recruits.length === 0 && transfers.length === 0 && claims.length === 0 && (
           <div className="dispatch bulletin">
             <div className="dispatch-label">Bulletin</div>
             <div className="dispatch-text">
@@ -193,7 +285,20 @@ export function PressBoxSidebar() {
         <div className="sidebar-title">Portal Wire</div>
         <div className="portal-ticker">
           <div className="portal-ticker-track">
-            {portalPlayers.length > 0 ? (
+            {transfers.length > 0 ? (
+              <>
+                {transfers.slice(0, 8).map((t, i) => (
+                  <span key={i} className="portal-name">
+                    {t.firstName} {t.lastName} ({t.position}) &mdash; {t.origin}{t.destination ? ` to ${t.destination}` : ''}
+                  </span>
+                ))}
+                {transfers.slice(0, 8).map((t, i) => (
+                  <span key={`dup-${i}`} className="portal-name">
+                    {t.firstName} {t.lastName} ({t.position}) &mdash; {t.origin}{t.destination ? ` to ${t.destination}` : ''}
+                  </span>
+                ))}
+              </>
+            ) : portalPlayers.length > 0 ? (
               <>
                 {portalPlayers.map((p, i) => (
                   <span key={i} className="portal-name">

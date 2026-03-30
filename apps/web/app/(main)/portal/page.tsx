@@ -2,6 +2,8 @@ import { Suspense } from 'react';
 import { PortalCard } from '@/components/portal/PortalCard';
 import { PortalFilters } from '@/components/portal/PortalFilters';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata = {
   title: 'Portal Wire | College Football Transfer Portal Tracker',
   description: 'Track every college football transfer portal entry. Filter by position, star rating, and status. Predict where players will commit.',

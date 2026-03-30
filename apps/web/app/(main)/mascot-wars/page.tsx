@@ -1,5 +1,7 @@
 import { MascotWarsClient } from './MascotWarsClient';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata = {
   title: 'Mascot Wars | College Football Mascot Tournament Bracket',
   description: '64 college football mascots enter the bracket. Vote in head-to-head matchups to crown the ultimate CFB mascot champion.',
