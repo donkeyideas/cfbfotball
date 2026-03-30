@@ -27,6 +27,12 @@ export function PostActions({ postId, authorId, replyCount = 0, bookmarkCount = 
   const [bmCount, setBmCount] = useState(bookmarkCount);
   const [reposted, setReposted] = useState(false);
   const [rpCount, setRpCount] = useState(repostCount);
+  const [showEdit, setShowEdit] = useState(false);
+  const [editContent, setEditContent] = useState('');
+  const [editSaving, setEditSaving] = useState(false);
+  const [deleted, setDeleted] = useState(false);
+
+  const isOwner = userId && authorId && userId === authorId;
 
   function requireAuth(): boolean {
     if (isLoggedIn === false) {
@@ -102,6 +108,45 @@ export function PostActions({ postId, authorId, replyCount = 0, bookmarkCount = 
     }
   }
 
+  async function handleEdit() {
+    if (!isOwner) return;
+    if (!showEdit) {
+      const supabase = createClient();
+      const { data } = await supabase.from('posts').select('content').eq('id', postId).single();
+      if (data) setEditContent(data.content);
+      setShowEdit(true);
+    } else {
+      setShowEdit(false);
+    }
+  }
+
+  async function handleEditSave() {
+    if (!isOwner || !editContent.trim() || editSaving) return;
+    setEditSaving(true);
+    const supabase = createClient();
+    const { error } = await supabase.from('posts').update({ content: editContent.trim() }).eq('id', postId);
+    setEditSaving(false);
+    if (!error) {
+      setShowEdit(false);
+      router.refresh();
+    }
+  }
+
+  async function handleDelete() {
+    if (!isOwner) return;
+    if (!window.confirm('Delete this post? This cannot be undone.')) return;
+    const supabase = createClient();
+    const { error } = await supabase.from('posts').delete().eq('id', postId);
+    if (!error) {
+      setDeleted(true);
+      router.refresh();
+    }
+  }
+
+  if (deleted) {
+    return <div className="post-actions" style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>Post deleted</div>;
+  }
+
   return (
     <>
       <div className="post-actions">
@@ -132,7 +177,36 @@ export function PostActions({ postId, authorId, replyCount = 0, bookmarkCount = 
         <button className="post-action" onClick={() => { if (requireAuth()) setShowReport(true); }}>
           FLAG
         </button>
+        {isOwner && (
+          <>
+            <button className="post-action" onClick={handleEdit} style={showEdit ? { color: 'var(--crimson)' } : undefined}>
+              EDIT
+            </button>
+            <button className="post-action post-action-delete" onClick={handleDelete}>
+              DELETE
+            </button>
+          </>
+        )}
       </div>
+
+      {showEdit && (
+        <div className="post-edit-inline">
+          <textarea
+            value={editContent}
+            onChange={(e) => setEditContent(e.target.value)}
+            className="post-edit-textarea"
+            rows={4}
+            maxLength={3000}
+          />
+          <div className="post-edit-row">
+            <span className="post-edit-count">{editContent.length}/3,000</span>
+            <button onClick={() => setShowEdit(false)} className="post-edit-cancel">Cancel</button>
+            <button onClick={handleEditSave} disabled={!editContent.trim() || editSaving} className="post-edit-save">
+              {editSaving ? 'Saving...' : 'Save'}
+            </button>
+          </div>
+        </div>
+      )}
 
       {showChallenge && (
         <div className="challenge-inline">

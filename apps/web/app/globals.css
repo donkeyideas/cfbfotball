@@ -1823,6 +1823,8 @@ html.dark .sideline-field {
   line-height: 1.65;
   color: var(--ink);
   margin-bottom: 14px;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .post-body-link {
@@ -1975,6 +1977,83 @@ html.dark .challenge-inline {
 }
 
 html.dark .challenge-inline-input {
+  background: #2a2520;
+  border-color: rgba(200,180,140,0.15);
+  color: #ccc8be;
+}
+
+/* --- Post Edit Inline --- */
+.post-edit-inline {
+  margin-top: 8px;
+  padding: 8px 10px;
+  background: rgba(59,47,30,0.04);
+  border: 1px solid rgba(59,47,30,0.1);
+  border-radius: 2px;
+}
+.post-edit-textarea {
+  width: 100%;
+  font-family: var(--serif);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  padding: 8px 10px;
+  background: var(--warm-white);
+  border: 1px solid rgba(59,47,30,0.15);
+  border-radius: 2px;
+  color: var(--ink);
+  resize: vertical;
+}
+.post-edit-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+.post-edit-count {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  color: var(--faded-ink);
+  margin-right: auto;
+}
+.post-edit-cancel {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  background: none;
+  border: 1px solid rgba(59,47,30,0.2);
+  padding: 4px 12px;
+  color: var(--faded-ink);
+  cursor: pointer;
+  border-radius: 2px;
+}
+.post-edit-save {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  background: var(--crimson);
+  color: #fff;
+  border: none;
+  padding: 4px 14px;
+  cursor: pointer;
+  border-radius: 2px;
+}
+.post-edit-save:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.post-action-delete {
+  color: var(--error, #b91c1c) !important;
+}
+.post-action-delete:hover {
+  opacity: 0.8;
+}
+
+html.dark .post-edit-inline {
+  background: rgba(200,180,140,0.04);
+  border-color: rgba(200,180,140,0.1);
+}
+html.dark .post-edit-textarea {
   background: #2a2520;
   border-color: rgba(200,180,140,0.15);
   color: #ccc8be;
@@ -2276,6 +2355,8 @@ html.dark .receipt-filed-stamp {
   line-height: 1.6;
   margin-bottom: 8px;
   padding: 8px 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
   border-left: 2px solid var(--dark-brown);
 }
 
@@ -2372,6 +2453,8 @@ html.dark .receipt-filed-stamp {
   line-height: 1.75;
   color: var(--ink);
   margin-bottom: 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .pressbox-verified {
@@ -2612,6 +2695,8 @@ html.dark .receipt-filed-stamp {
   padding: 8px 0;
   border-top: 1px dashed rgba(196,154,47,0.3);
   border-bottom: 1px dashed rgba(196,154,47,0.3);
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .prediction-footer {
@@ -2683,6 +2768,8 @@ html.dark .receipt-filed-stamp {
   padding: 10px 16px;
   border-left: 3px solid var(--post-school-color, var(--crimson));
   margin-bottom: 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .aging-status {
