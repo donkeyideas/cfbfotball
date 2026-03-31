@@ -23,6 +23,7 @@ import {
   Mail,
   Share2,
   MessageSquare,
+  Bot,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -59,6 +60,7 @@ const navSections: NavSection[] = [
     items: [
       { href: '/admin/content', label: 'Content', icon: FileText },
       { href: '/admin/engagement', label: 'Engagement', icon: TrendingUp },
+      { href: '/admin/bots', label: 'AI Bots', icon: Bot },
     ],
   },
   {

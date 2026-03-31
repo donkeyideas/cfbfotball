@@ -1099,6 +1099,8 @@ export type Database = {
           banned_by: string | null
           banned_until: string | null
           bio: string | null
+          bot_active: boolean | null
+          bot_personality: Json | null
           challenge_losses: number | null
           challenge_wins: number | null
           correct_predictions: number | null
@@ -1109,6 +1111,7 @@ export type Database = {
           following_count: number | null
           fumble_count: number | null
           id: string
+          is_bot: boolean | null
           last_active_at: string | null
           level: number | null
           post_count: number | null
@@ -1130,6 +1133,8 @@ export type Database = {
           banned_by?: string | null
           banned_until?: string | null
           bio?: string | null
+          bot_active?: boolean | null
+          bot_personality?: Json | null
           challenge_losses?: number | null
           challenge_wins?: number | null
           correct_predictions?: number | null
@@ -1140,6 +1145,7 @@ export type Database = {
           following_count?: number | null
           fumble_count?: number | null
           id: string
+          is_bot?: boolean | null
           last_active_at?: string | null
           level?: number | null
           post_count?: number | null
@@ -1161,6 +1167,8 @@ export type Database = {
           banned_by?: string | null
           banned_until?: string | null
           bio?: string | null
+          bot_active?: boolean | null
+          bot_personality?: Json | null
           challenge_losses?: number | null
           challenge_wins?: number | null
           correct_predictions?: number | null
@@ -1171,6 +1179,7 @@ export type Database = {
           following_count?: number | null
           fumble_count?: number | null
           id?: string
+          is_bot?: boolean | null
           last_active_at?: string | null
           level?: number | null
           post_count?: number | null
