@@ -69,7 +69,7 @@ export function ReportModal({ postId, onClose }: ReportModalProps) {
         style={{
           position: 'fixed',
           inset: 0,
-          zIndex: 1000,
+          zIndex: 99999,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -127,7 +127,7 @@ export function ReportModal({ postId, onClose }: ReportModalProps) {
       style={{
         position: 'fixed',
         inset: 0,
-        zIndex: 1000,
+        zIndex: 99999,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',

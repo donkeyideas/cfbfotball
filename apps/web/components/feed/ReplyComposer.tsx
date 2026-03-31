@@ -36,6 +36,15 @@ export function ReplyComposer({ parentId, parentAuthorId }: ReplyComposerProps) 
 
     if (!error) {
       setContent('');
+      // Update reply_count on the parent post
+      const { count } = await supabase
+        .from('posts')
+        .select('id', { count: 'exact', head: true })
+        .eq('parent_id', parentId)
+        .eq('status', 'PUBLISHED');
+      if (count !== null) {
+        await supabase.from('posts').update({ reply_count: count }).eq('id', parentId);
+      }
       // Notify the parent post author
       if (parentAuthorId && parentAuthorId !== profile.id) {
         await supabase.from('notifications').insert({
