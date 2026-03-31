@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { MarkForAgingButton } from '@/components/predictions/MarkForAgingButton';
 import { ReportModal } from '@/components/moderation/ReportModal';
+import { FactCheckPanel } from './FactCheckPanel';
 
 interface PostActionsProps {
   postId: string;
@@ -14,6 +15,7 @@ interface PostActionsProps {
   replyCount?: number;
   bookmarkCount?: number;
   repostCount?: number;
+  postContent?: string;
 }
 
 export function PostActions({ postId, authorId, replyCount = 0, bookmarkCount = 0, repostCount = 0 }: PostActionsProps) {
@@ -21,6 +23,7 @@ export function PostActions({ postId, authorId, replyCount = 0, bookmarkCount = 
   const { isLoggedIn, userId } = useAuth();
   const [showReport, setShowReport] = useState(false);
   const [showChallenge, setShowChallenge] = useState(false);
+  const [showFactCheck, setShowFactCheck] = useState(false);
   const [challengeTopic, setChallengeTopic] = useState('');
   const [challengeSubmitting, setChallengeSubmitting] = useState(false);
   const [bookmarked, setBookmarked] = useState(false);
@@ -72,16 +75,25 @@ export function PostActions({ postId, authorId, replyCount = 0, bookmarkCount = 
     if (reposted) {
       setReposted(false);
       setRpCount((c) => c - 1);
-      await supabase.from('reposts').delete().eq('user_id', userId).eq('post_id', postId);
+      const { error } = await supabase.from('reposts').delete().eq('user_id', userId).eq('post_id', postId);
+      if (error) {
+        setReposted(true);
+        setRpCount((c) => c + 1);
+      }
     } else {
       setReposted(true);
       setRpCount((c) => c + 1);
-      await supabase.from('reposts').insert({ user_id: userId, post_id: postId });
+      const { error } = await supabase.from('reposts').insert({ user_id: userId, post_id: postId });
+      if (error) {
+        setReposted(false);
+        setRpCount((c) => c - 1);
+      }
     }
   }
 
-  async function handleFactCheck() {
-    router.push(`/post/${postId}`);
+  function handleFactCheck() {
+    if (!requireAuth()) return;
+    setShowFactCheck(!showFactCheck);
   }
 
   async function handleChallengeSubmit() {
@@ -150,7 +162,7 @@ export function PostActions({ postId, authorId, replyCount = 0, bookmarkCount = 
   return (
     <>
       <div className="post-actions">
-        <button className="post-action" onClick={handleFactCheck}>
+        <button className="post-action" onClick={handleFactCheck} style={showFactCheck ? { color: 'var(--crimson)' } : undefined}>
           FACT CHECK
         </button>
         <button className="post-action" onClick={() => { if (requireAuth()) setShowChallenge(!showChallenge); }}>
@@ -188,6 +200,10 @@ export function PostActions({ postId, authorId, replyCount = 0, bookmarkCount = 
           </>
         )}
       </div>
+
+      {showFactCheck && (
+        <FactCheckPanel postId={postId} onClose={() => setShowFactCheck(false)} />
+      )}
 
       {showEdit && (
         <div className="post-edit-inline">

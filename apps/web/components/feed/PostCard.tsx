@@ -160,6 +160,9 @@ function PostBottom({ post }: { post: Post }) {
         postId={post.id}
         authorId={post.author_id}
         replyCount={post.reply_count ?? 0}
+        bookmarkCount={post.bookmark_count ?? 0}
+        repostCount={post.repost_count ?? 0}
+        postContent={post.content}
       />
     </>
   );

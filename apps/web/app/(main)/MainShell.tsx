@@ -3,21 +3,43 @@
 import { useState } from 'react';
 import dynamic from 'next/dynamic';
 import { Masthead } from '@/components/layout/Masthead';
-import { Footer } from '@/components/layout/Footer';
 import { CorkboardNav } from '@/components/layout/CorkboardNav';
-import { DynastyTicket } from '@/components/layout/DynastyTicket';
-import { FeaturesBreakdown } from '@/components/layout/FeaturesBreakdown';
 import { SchoolThemeProvider } from '@/components/layout/SchoolThemeProvider';
-import { AuthCtaBanner } from '@/components/layout/AuthCtaBanner';
 import { AuthProvider } from '@/components/auth/AuthProvider';
 
-// Lazy-load heavy sidebar + scores ribbon to improve LCP
+// Lazy-load non-critical components to reduce initial JS bundle and improve LCP.
+// Only Masthead + CorkboardNav are eagerly loaded (above-the-fold, critical path).
 const ScoresRibbon = dynamic(
   () => import('@/components/layout/ScoresRibbon').then((m) => m.ScoresRibbon),
   { ssr: false },
 );
+function SidebarSkeleton() {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      {[120, 80, 140, 60, 100].map((h, i) => (
+        <div key={i} className="skeleton" style={{ height: h, borderRadius: 4 }} />
+      ))}
+    </div>
+  );
+}
 const PressBoxSidebar = dynamic(
   () => import('@/components/layout/PressBoxSidebar').then((m) => m.PressBoxSidebar),
+  { ssr: false, loading: () => <SidebarSkeleton /> },
+);
+const DynastyTicket = dynamic(
+  () => import('@/components/layout/DynastyTicket').then((m) => m.DynastyTicket),
+  { ssr: false },
+);
+const FeaturesBreakdown = dynamic(
+  () => import('@/components/layout/FeaturesBreakdown').then((m) => m.FeaturesBreakdown),
+  { ssr: false },
+);
+const Footer = dynamic(
+  () => import('@/components/layout/Footer').then((m) => m.Footer),
+  { ssr: false },
+);
+const AuthCtaBanner = dynamic(
+  () => import('@/components/layout/AuthCtaBanner').then((m) => m.AuthCtaBanner),
   { ssr: false },
 );
 
