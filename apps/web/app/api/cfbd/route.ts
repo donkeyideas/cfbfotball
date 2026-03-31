@@ -54,11 +54,41 @@ function getCached(key: string): CacheEntry | null {
 
 const CFBD_BASE = 'https://api.collegefootballdata.com';
 
+interface RecruitRaw {
+  ranking?: number;
+  name?: string;
+  committedTo?: string | null;
+  position?: string;
+  stars?: number;
+  rating?: number;
+  city?: string;
+  stateProvince?: string;
+  year?: number;
+}
+
+interface TransferRaw {
+  firstName?: string;
+  lastName?: string;
+  position?: string;
+  origin?: string;
+  destination?: string | null;
+  transferDate?: string;
+  stars?: number;
+  rating?: number;
+  eligibility?: string;
+}
+
 async function fetchCFBD(path: string): Promise<unknown[]> {
   const apiKey = process.env.CFBD_API_KEY;
-  if (!apiKey) return [];
+  if (!apiKey) {
+    console.error('CFBD: CFBD_API_KEY is not set');
+    return [];
+  }
 
-  const res = await fetch(`${CFBD_BASE}${path}`, {
+  const url = `${CFBD_BASE}${path}`;
+  console.log(`CFBD: fetching ${url}`);
+
+  const res = await fetch(url, {
     headers: {
       Authorization: `Bearer ${apiKey}`,
       Accept: 'application/json',
@@ -66,11 +96,53 @@ async function fetchCFBD(path: string): Promise<unknown[]> {
   });
 
   if (!res.ok) {
-    console.error(`CFBD API error: ${res.status} ${res.statusText} for ${path}`);
+    const body = await res.text().catch(() => '');
+    console.error(`CFBD API error: ${res.status} ${res.statusText} for ${path} — ${body}`);
     return [];
   }
 
-  return res.json();
+  const data = await res.json();
+  console.log(`CFBD: got ${Array.isArray(data) ? data.length : 0} results for ${path}`);
+  return Array.isArray(data) ? data : [];
+}
+
+/* ── Trim helpers — send only the fields the sidebar needs ──── */
+
+function trimRecruits(raw: unknown[]): RecruitRaw[] {
+  return (raw as RecruitRaw[])
+    .filter((r) => r.committedTo)
+    .sort((a, b) => (a.ranking || 9999) - (b.ranking || 9999))
+    .slice(0, 10)
+    .map((r) => ({
+      ranking: r.ranking,
+      name: r.name,
+      committedTo: r.committedTo,
+      position: r.position,
+      stars: r.stars,
+      rating: r.rating,
+      city: r.city,
+      stateProvince: r.stateProvince,
+      year: r.year,
+    }));
+}
+
+function trimTransfers(raw: unknown[]): TransferRaw[] {
+  return (raw as TransferRaw[])
+    .sort((a, b) =>
+      new Date(b.transferDate || 0).getTime() - new Date(a.transferDate || 0).getTime(),
+    )
+    .slice(0, 10)
+    .map((t) => ({
+      firstName: t.firstName,
+      lastName: t.lastName,
+      position: t.position,
+      origin: t.origin,
+      destination: t.destination,
+      transferDate: t.transferDate,
+      stars: t.stars,
+      rating: t.rating,
+      eligibility: t.eligibility,
+    }));
 }
 
 /* ── Route Handler ─────────────────────────────────────────────── */
@@ -119,11 +191,16 @@ export async function GET(request: NextRequest) {
     path = `/player/portal?year=${year}`;
   }
 
-  const data = await fetchCFBD(path);
+  const rawData = await fetchCFBD(path);
   incrementCounter();
 
-  // Store in cache (even empty results to avoid hammering)
-  cache.set(cacheKey, { data, fetchedAt: Date.now() });
+  // Trim server-side: only keep the fields & rows the sidebar needs
+  const data = type === 'recruiting' ? trimRecruits(rawData) : trimTransfers(rawData);
+
+  // Only cache non-empty results — don't let a transient failure lock us out
+  if (data.length > 0) {
+    cache.set(cacheKey, { data, fetchedAt: Date.now() });
+  }
 
   return NextResponse.json({
     data,

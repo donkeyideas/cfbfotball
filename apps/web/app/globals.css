@@ -668,7 +668,7 @@ html.dark .skeleton {
    ============================================================ */
 
 html {
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 body {
@@ -677,7 +677,7 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  overflow-x: hidden;
+  overflow-x: clip;
   max-width: 100vw;
   background-color: var(--aged-paper);
   background-image:
@@ -903,8 +903,10 @@ h1, h2, h3, h4, h5, h6,
 }
 
 .masthead-inner {
-  max-width: 1240px;
+  max-width: 1300px;
   margin: 0 auto;
+  padding: 0 30px;
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1261,13 +1263,14 @@ html.dark .account-switcher-divider {
    ============================================================ */
 
 .main-layout {
-  max-width: 1240px;
+  max-width: 1300px;
   margin: 0 auto;
   display: grid;
   grid-template-columns: 250px 1fr 300px;
   gap: 0;
-  padding: 0;
-  min-height: calc(100vh - 200px);
+  padding: 0 30px;
+  box-sizing: border-box;
+  min-height: calc(100vh - var(--header-total-h, 120px));
 }
 
 .col-left {
@@ -1275,7 +1278,7 @@ html.dark .account-switcher-divider {
   padding: 20px 18px 20px 0;
   position: sticky;
   top: var(--header-total-h, 120px);
-  max-height: calc(100vh - var(--header-total-h, 120px));
+  height: calc(100vh - var(--header-total-h, 120px));
   overflow-y: auto;
   align-self: start;
 }
@@ -1291,7 +1294,7 @@ html.dark .account-switcher-divider {
   padding: 20px 0 20px 18px;
   position: sticky;
   top: var(--header-total-h, 120px);
-  max-height: calc(100vh - var(--header-total-h, 120px));
+  height: calc(100vh - var(--header-total-h, 120px));
   overflow-y: auto;
   align-self: start;
 }
@@ -3268,9 +3271,10 @@ html.dark .aging-footer {
    ============================================================ */
 
 .site-footer {
-  max-width: 1240px;
+  max-width: 1300px;
   margin: 0 auto;
-  padding: 16px 20px;
+  padding: 16px 30px;
+  box-sizing: border-box;
   border-top: 3px double var(--dark-brown);
   text-align: center;
   font-family: var(--sans);
@@ -3301,7 +3305,7 @@ html.dark .aging-footer {
   }
   .main-layout {
     grid-template-columns: 1fr;
-    overflow-x: hidden;
+    overflow-x: clip;
   }
 
   .col-left,
