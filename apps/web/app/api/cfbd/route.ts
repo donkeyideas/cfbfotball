@@ -150,7 +150,16 @@ function trimTransfers(raw: unknown[]): TransferRaw[] {
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const type = searchParams.get('type');
-  const year = searchParams.get('year') || '2026';
+  // Recruiting calendar: classes sign in Feb, so Mar-Dec = next year's class
+  // Transfer portal uses current year since transfers happen year-round
+  const now = new Date();
+  const recruitingYear = now.getMonth() >= 2
+    ? String(now.getFullYear() + 1)
+    : String(now.getFullYear());
+  const portalYear = String(now.getFullYear());
+  const year = searchParams.get('year')
+    || process.env.CFBD_YEAR
+    || (type === 'recruiting' ? recruitingYear : portalYear);
 
   if (!type || !['recruiting', 'portal'].includes(type)) {
     return NextResponse.json(

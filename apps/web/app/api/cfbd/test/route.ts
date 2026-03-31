@@ -6,8 +6,12 @@ import { NextResponse } from 'next/server';
  */
 export async function GET() {
   const apiKey = process.env.CFBD_API_KEY;
+  const now = new Date();
+  const autoYear = now.getMonth() >= 2 ? String(now.getFullYear() + 1) : String(now.getFullYear());
+  const year = process.env.CFBD_YEAR || autoYear;
   const diagnostics: Record<string, unknown> = {
     timestamp: new Date().toISOString(),
+    year,
     hasApiKey: !!apiKey,
     keyLength: apiKey?.length ?? 0,
     keyPrefix: apiKey?.slice(0, 4) ?? 'N/A',
@@ -21,7 +25,7 @@ export async function GET() {
   // Test recruiting endpoint
   try {
     const recruitRes = await fetch(
-      'https://api.collegefootballdata.com/recruiting/players?year=2026',
+      `https://api.collegefootballdata.com/recruiting/players?year=${year}`,
       {
         headers: {
           Authorization: `Bearer ${apiKey}`,
@@ -54,7 +58,7 @@ export async function GET() {
   // Test portal endpoint
   try {
     const portalRes = await fetch(
-      'https://api.collegefootballdata.com/player/portal?year=2026',
+      `https://api.collegefootballdata.com/player/portal?year=${year}`,
       {
         headers: {
           Authorization: `Bearer ${apiKey}`,

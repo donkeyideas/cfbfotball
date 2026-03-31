@@ -170,7 +170,7 @@ export function PressBoxSidebar() {
     // Load CFBD recruiting commits
     async function loadRecruits() {
       try {
-        const res = await fetch('/api/cfbd?type=recruiting&year=2026');
+        const res = await fetch('/api/cfbd?type=recruiting');
         if (!res.ok) return;
         const json = await res.json();
         const data = (json.data ?? []) as CFBDRecruit[];
@@ -186,7 +186,7 @@ export function PressBoxSidebar() {
     // Load CFBD transfer portal entries
     async function loadTransfers() {
       try {
-        const res = await fetch('/api/cfbd?type=portal&year=2026');
+        const res = await fetch('/api/cfbd?type=portal');
         if (!res.ok) return;
         const json = await res.json();
         const data = (json.data ?? []) as CFBDTransfer[];
