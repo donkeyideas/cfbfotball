@@ -32,7 +32,8 @@ interface ChatInputProps {
 
 export function ChatInput({ threadId, onMessageSent }: ChatInputProps) {
   const colors = useColors();
-  const { session, userId } = useAuth();
+  const { session, profile } = useAuth();
+  const userId = profile?.id ?? null;
   const { dark } = useSchoolTheme();
   const router = useRouter();
   const [text, setText] = useState('');

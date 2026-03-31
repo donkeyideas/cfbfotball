@@ -13,7 +13,8 @@ import { supabase } from '@/lib/supabase';
 export default function DeleteAccountScreen() {
   const colors = useColors();
   const router = useRouter();
-  const { userId, session } = useAuth();
+  const { profile, session } = useAuth();
+  const userId = profile?.id ?? null;
   const { dark } = useSchoolTheme();
 
   const [confirmation, setConfirmation] = useState('');

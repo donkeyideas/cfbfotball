@@ -40,7 +40,8 @@ type FeedItem = PostData | typeof DYNASTY_SENTINEL;
 
 export default function FeedScreen() {
   const colors = useColors();
-  const { session, userId, profile } = useAuth();
+  const { session, profile } = useAuth();
+  const userId = profile?.id ?? null;
   const { dark } = useSchoolTheme();
   const { newPostCount, resetCount } = useRealtimeFeed(profile?.school_id ?? undefined);
   const router = useRouter();

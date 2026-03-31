@@ -13,7 +13,8 @@ interface MarkForAgingButtonProps {
 
 export function MarkForAgingButton({ postId }: MarkForAgingButtonProps) {
   const colors = useColors();
-  const { session, userId } = useAuth();
+  const { session, profile } = useAuth();
+  const userId = profile?.id ?? null;
   const router = useRouter();
   const { showAlert } = useThemedAlert();
   const [submitting, setSubmitting] = useState(false);

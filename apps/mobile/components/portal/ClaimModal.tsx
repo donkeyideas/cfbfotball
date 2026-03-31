@@ -43,7 +43,8 @@ export function ClaimModal({
   onCreated,
 }: ClaimModalProps) {
   const colors = useColors();
-  const { userId } = useAuth();
+  const { profile } = useAuth();
+  const userId = profile?.id ?? null;
   const { dark } = useSchoolTheme();
   const { showAlert } = useThemedAlert();
 

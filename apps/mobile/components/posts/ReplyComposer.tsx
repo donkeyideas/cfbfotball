@@ -86,13 +86,14 @@ export function ReplyComposer({ postId, onReplySent }: ReplyComposerProps) {
   }
 
   const handleSend = async () => {
-    if (!content.trim() || !userId) return;
+    const activeId = profile?.id;
+    if (!content.trim() || !activeId) return;
 
     setSubmitting(true);
     const { error } = await supabase.from('posts').insert({
       content: content.trim(),
       post_type: 'STANDARD',
-      author_id: userId,
+      author_id: activeId,
       school_id: profile?.school_id ?? null,
       parent_id: postId,
       status: 'PUBLISHED',

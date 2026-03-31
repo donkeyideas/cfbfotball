@@ -30,6 +30,7 @@ import { useSchoolTheme } from '@/lib/theme/SchoolThemeProvider';
 
 interface ProfileData {
   id: string;
+  owner_id: string;
   username: string;
   display_name: string | null;
   avatar_url: string | null;
@@ -58,7 +59,7 @@ export default function ProfileScreen() {
   const colors = useColors();
   const { username } = useLocalSearchParams<{ username: string }>();
   const router = useRouter();
-  const { userId, refreshProfile } = useAuth();
+  const { userId, profile: authProfile, refreshProfile } = useAuth();
   const { dark } = useSchoolTheme();
   const { showAlert } = useThemedAlert();
   const [profile, setProfile] = useState<ProfileData | null>(null);
@@ -158,7 +159,7 @@ export default function ProfileScreen() {
     },
   }), [colors]);
 
-  const isOwnProfile = profile?.id === userId;
+  const isOwnProfile = !!userId && !!profile && (userId === profile.id || userId === profile.owner_id);
 
   const fetchProfile = useCallback(async () => {
     if (!username) return;
@@ -166,7 +167,7 @@ export default function ProfileScreen() {
     const { data, error } = await supabase
       .from('profiles')
       .select(`
-        id, username, display_name, avatar_url, banner_url, bio,
+        id, owner_id, username, display_name, avatar_url, banner_url, bio,
         xp, level, dynasty_tier,
         post_count, touchdown_count, fumble_count,
         follower_count, following_count,

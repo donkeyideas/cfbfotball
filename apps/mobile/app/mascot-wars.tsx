@@ -36,7 +36,8 @@ const MATCHUP_SELECT = `
 
 export default function MascotWarsScreen() {
   const colors = useColors();
-  const { userId } = useAuth();
+  const { profile } = useAuth();
+  const userId = profile?.id ?? null;
   const { dark } = useSchoolTheme();
   const [bracketId, setBracketId] = useState<string | null>(null);
   const [bracketName, setBracketName] = useState<string>('');

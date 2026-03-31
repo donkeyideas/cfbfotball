@@ -229,13 +229,14 @@ export function PostComposer({ visible, onClose, onPostCreated }: PostComposerPr
   }), [colors]);
 
   const handleSubmit = async () => {
-    if (!content.trim() || !userId) return;
+    const activeId = profile?.id;
+    if (!content.trim() || !activeId) return;
 
     setSubmitting(true);
     const insertData: Record<string, unknown> = {
       content: content.trim(),
       post_type: postType,
-      author_id: userId,
+      author_id: activeId,
       school_id: profile?.school_id ?? null,
       status: 'PUBLISHED',
     };

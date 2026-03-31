@@ -36,7 +36,8 @@ const CHALLENGE_SELECT = `
 
 export default function RivalryScreen() {
   const colors = useColors();
-  const { session, userId } = useAuth();
+  const { session, profile } = useAuth();
+  const userId = profile?.id ?? null;
   const { dark } = useSchoolTheme();
 
   const [activeTab, setActiveTab] = useState<RivalryTab>('active');

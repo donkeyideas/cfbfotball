@@ -8,6 +8,7 @@ import { useSchoolTheme } from '@/lib/theme/SchoolThemeProvider';
 import { useColors } from '@/lib/theme/ThemeProvider';
 import { typography } from '@/lib/theme/typography';
 import { MAX_POST_CHARS } from '@/lib/constants';
+import { FactCheckPanel } from './FactCheckPanel';
 
 const REVISIT_OPTIONS = [7, 14, 30, 60, 90];
 const HIT_SLOP = { top: 8, bottom: 8, left: 4, right: 4 };
@@ -40,7 +41,8 @@ export function PostActions({
   repostCount: initialRepostCount,
 }: PostActionsProps) {
   const colors = useColors();
-  const { userId } = useAuth();
+  const { profile } = useAuth();
+  const userId = profile?.id ?? null;
   const { dark } = useSchoolTheme();
   const router = useRouter();
   const { showAlert } = useThemedAlert();
@@ -61,6 +63,9 @@ export function PostActions({
   const [challengeExpanded, setChallengeExpanded] = useState(false);
   const [challengeTopic, setChallengeTopic] = useState('');
   const [challengeBusy, setChallengeBusy] = useState(false);
+
+  // FACT CHECK state
+  const [factCheckOpen, setFactCheckOpen] = useState(false);
 
   // EDIT state
   const [editing, setEditing] = useState(false);
@@ -286,10 +291,10 @@ export function PostActions({
     [userId, showAlert]
   );
 
-  // FACT CHECK
+  // FACT CHECK — toggle inline panel
   const handleFactCheck = useCallback(() => {
-    router.push(`/post/${postId}` as never);
-  }, [postId, router]);
+    setFactCheckOpen((prev) => !prev);
+  }, []);
 
   // CHALLENGE — toggle inline form
   const handleChallenge = useCallback(() => {
@@ -556,7 +561,7 @@ export function PostActions({
       <View style={styles.container}>
         {/* FACT CHECK */}
         <Pressable onPress={handleFactCheck} style={styles.action} hitSlop={HIT_SLOP}>
-          <Text style={styles.actionText}>FACT CHECK</Text>
+          <Text style={[styles.actionText, factCheckOpen && styles.activeText]}>FACT CHECK</Text>
         </Pressable>
 
         <Sep />
@@ -712,6 +717,15 @@ export function PostActions({
             RECEIPT FILED — Review {revisitDate}
           </Text>
         </View>
+      )}
+
+      {/* FACT CHECK panel */}
+      {factCheckOpen && (
+        <FactCheckPanel
+          postId={postId}
+          postContent={postContent}
+          onClose={() => setFactCheckOpen(false)}
+        />
       )}
 
       {/* Inline edit UI */}

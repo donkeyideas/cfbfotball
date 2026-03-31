@@ -56,7 +56,9 @@ const APP_VERSION = Constants.expoConfig?.version ?? '1.0.0';
 
 export default function SettingsScreen() {
   const router = useRouter();
-  const { session, userId, profile, refreshProfile } = useAuth();
+  const { session, profile, refreshProfile } = useAuth();
+  const editId = profile?.id ?? null;
+  const ownerId = profile?.owner_id ?? null;
   const { showAlert } = useThemedAlert();
   const { dark } = useSchoolTheme();
   const { colorMode, toggleColorMode } = useTheme();
@@ -86,7 +88,7 @@ export default function SettingsScreen() {
   // Load profile and notification preferences
   useEffect(() => {
     async function loadData() {
-      if (!session?.user || !userId) {
+      if (!session?.user || !editId) {
         setLoading(false);
         return;
       }
@@ -112,7 +114,7 @@ export default function SettingsScreen() {
       const { data: prefsData } = await supabase
         .from('notification_preferences')
         .select('*')
-        .eq('user_id', userId)
+        .eq('user_id', editId)
         .maybeSingle();
 
       if (prefsData) {
@@ -130,7 +132,7 @@ export default function SettingsScreen() {
     }
 
     loadData();
-  }, [session, userId, profile]);
+  }, [session, editId, profile]);
 
   const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -169,8 +171,8 @@ export default function SettingsScreen() {
 
     try {
       const asset = result.assets[0];
-      const fileExt = asset.uri.split('.').pop() || 'jpg';
-      const fileName = `${userId}_${Date.now()}.${fileExt}`;
+      const storageBase = editId === ownerId ? ownerId : `${ownerId}/${editId}`;
+      const fileName = `${storageBase}/avatar`;
 
       const response = await fetch(asset.uri);
       const blob = await response.blob();
@@ -179,7 +181,7 @@ export default function SettingsScreen() {
       const { error: uploadError } = await supabase.storage
         .from('avatars')
         .upload(fileName, arrayBuffer, {
-          contentType: asset.mimeType || `image/${fileExt}`,
+          contentType: asset.mimeType || 'image/jpeg',
           upsert: true,
         });
 
@@ -193,7 +195,7 @@ export default function SettingsScreen() {
         .from('avatars')
         .getPublicUrl(fileName);
 
-      setAvatarUrl(urlData.publicUrl);
+      setAvatarUrl(`${urlData.publicUrl}?v=${Date.now()}`);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Unknown error';
       showAlert('Incomplete Pass', `Upload failed: ${message}`);
@@ -203,7 +205,7 @@ export default function SettingsScreen() {
   }
 
   async function handleSave() {
-    if (!userId) return;
+    if (!editId) return;
     setSaving(true);
 
     const profileUpdates: Record<string, unknown> = {
@@ -219,7 +221,7 @@ export default function SettingsScreen() {
     const { error: profileError } = await supabase
       .from('profiles')
       .update(profileUpdates)
-      .eq('id', userId);
+      .eq('id', editId);
 
     if (profileError) {
       showAlert('Incomplete Pass', profileError.message);
@@ -230,7 +232,7 @@ export default function SettingsScreen() {
     const { error: prefsError } = await supabase
       .from('notification_preferences')
       .upsert({
-        user_id: userId,
+        user_id: editId,
         ...prefs,
       });
 

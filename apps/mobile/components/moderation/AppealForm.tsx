@@ -12,7 +12,8 @@ interface AppealFormProps {
 
 export function AppealForm({ postId }: AppealFormProps) {
   const colors = useColors();
-  const { userId } = useAuth();
+  const { profile } = useAuth();
+  const userId = profile?.id ?? null;
   const { dark } = useSchoolTheme();
   const [expanded, setExpanded] = useState(false);
   const [reason, setReason] = useState('');

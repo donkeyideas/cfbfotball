@@ -165,7 +165,8 @@ export function ReportModal({ visible, postId, postAuthorId, onClose }: ReportMo
     },
   }), [colors]);
 
-  const { userId } = useAuth();
+  const { profile } = useAuth();
+  const userId = profile?.id ?? null;
 
   async function handleSubmit() {
     if (!reason || !userId) return;

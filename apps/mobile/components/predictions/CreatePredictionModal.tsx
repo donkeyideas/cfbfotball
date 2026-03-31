@@ -116,12 +116,15 @@ export function CreatePredictionModal({ visible, onClose, onCreated }: CreatePre
     setSubmitting(true);
 
     // 1. Create the post
+    const activeId = profile?.id;
+    if (!activeId) return;
+
     const { data: postData, error: postError } = await supabase
       .from('posts')
       .insert({
         content: content.trim(),
         post_type: 'PREDICTION',
-        author_id: userId,
+        author_id: activeId,
         school_id: profile?.school_id ?? null,
         status: 'PUBLISHED',
       })
@@ -139,7 +142,7 @@ export function CreatePredictionModal({ visible, onClose, onCreated }: CreatePre
       .from('predictions')
       .insert({
         post_id: postData.id,
-        user_id: userId,
+        user_id: activeId,
         status: 'PENDING',
       });
 

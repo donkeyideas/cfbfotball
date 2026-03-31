@@ -8,8 +8,11 @@ import {
   useMemo,
   type PropsWithChildren,
 } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { type Session } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
+
+const ACTIVE_PROFILE_KEY = 'cfb_active_profile';
 
 interface AuthProfile {
   id: string;
@@ -29,13 +32,21 @@ interface AuthProfile {
   following_count: number;
   touchdown_count: number;
   fumble_count: number;
+  owner_id: string;
 }
 
 interface AuthContextType {
   session: Session | null;
   loading: boolean;
+  /** The Supabase auth user ID (owner of all profiles) */
   userId: string | null;
+  /** The currently active profile */
   profile: AuthProfile | null;
+  /** All profiles owned by this user */
+  profiles: AuthProfile[];
+  /** Switch active profile (instant, no re-auth) */
+  switchProfile: (profileId: string) => void;
+  /** Re-fetch all profiles from DB */
   refreshProfile: () => Promise<void>;
 }
 
@@ -44,6 +55,8 @@ const AuthContext = createContext<AuthContextType>({
   loading: true,
   userId: null,
   profile: null,
+  profiles: [],
+  switchProfile: () => {},
   refreshProfile: async () => {},
 });
 
@@ -54,49 +67,65 @@ export function useAuth() {
 export function AuthProvider({ children }: PropsWithChildren) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-  const [profile, setProfile] = useState<AuthProfile | null>(null);
+  const [profiles, setProfiles] = useState<AuthProfile[]>([]);
+  const [activeProfileId, setActiveId] = useState<string | null>(null);
   const userIdRef = useRef<string | null>(null);
 
-  const fetchProfile = useCallback(async (uid: string) => {
+  const fetchProfiles = useCallback(async (uid: string) => {
     const { data } = await supabase
       .from('profiles')
       .select(
-        'id, username, display_name, avatar_url, banner_url, bio, school_id, dynasty_tier, xp, level, post_count, correct_predictions, prediction_count, follower_count, following_count, touchdown_count, fumble_count'
+        'id, username, display_name, avatar_url, banner_url, bio, school_id, dynasty_tier, xp, level, post_count, correct_predictions, prediction_count, follower_count, following_count, touchdown_count, fumble_count, owner_id'
       )
-      .eq('id', uid)
-      .single();
+      .eq('owner_id', uid)
+      .order('created_at', { ascending: true });
 
-    if (data) {
-      setProfile({
-        id: data.id,
-        username: data.username ?? null,
-        display_name: data.display_name ?? null,
-        avatar_url: data.avatar_url ?? null,
-        banner_url: data.banner_url ?? null,
-        bio: data.bio ?? null,
-        school_id: data.school_id ?? null,
-        dynasty_tier: data.dynasty_tier ?? null,
-        xp: data.xp ?? 0,
-        level: data.level ?? 1,
-        post_count: data.post_count ?? 0,
-        correct_predictions: data.correct_predictions ?? 0,
-        prediction_count: data.prediction_count ?? 0,
-        follower_count: data.follower_count ?? 0,
-        following_count: data.following_count ?? 0,
-        touchdown_count: data.touchdown_count ?? 0,
-        fumble_count: data.fumble_count ?? 0,
-      });
+    if (data && data.length > 0) {
+      const mapped: AuthProfile[] = data.map((d: Record<string, unknown>) => ({
+        id: d.id as string,
+        username: (d.username as string) ?? null,
+        display_name: (d.display_name as string) ?? null,
+        avatar_url: (d.avatar_url as string) ?? null,
+        banner_url: (d.banner_url as string) ?? null,
+        bio: (d.bio as string) ?? null,
+        school_id: (d.school_id as string) ?? null,
+        dynasty_tier: (d.dynasty_tier as string) ?? null,
+        xp: (d.xp as number) ?? 0,
+        level: (d.level as number) ?? 1,
+        post_count: (d.post_count as number) ?? 0,
+        correct_predictions: (d.correct_predictions as number) ?? 0,
+        prediction_count: (d.prediction_count as number) ?? 0,
+        follower_count: (d.follower_count as number) ?? 0,
+        following_count: (d.following_count as number) ?? 0,
+        touchdown_count: (d.touchdown_count as number) ?? 0,
+        fumble_count: (d.fumble_count as number) ?? 0,
+        owner_id: (d.owner_id as string) ?? uid,
+      }));
+
+      setProfiles(mapped);
+
+      // Determine active profile
+      const stored = await AsyncStorage.getItem(ACTIVE_PROFILE_KEY);
+      const match = stored ? mapped.find((p) => p.id === stored) : null;
+      if (match) {
+        setActiveId(match.id);
+      } else {
+        // Default to primary profile (id === owner_id)
+        const primary = mapped.find((p) => p.id === p.owner_id) ?? mapped[0];
+        setActiveId(primary.id);
+        AsyncStorage.setItem(ACTIVE_PROFILE_KEY, primary.id);
+      }
     }
   }, []);
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session: initialSession }, error }) => {
       if (error) {
-        // Refresh token expired/invalid — clear session and start fresh
         console.warn('Auth session error, signing out:', error.message);
         await supabase.auth.signOut();
         setSession(null);
-        setProfile(null);
+        setProfiles([]);
+        setActiveId(null);
         userIdRef.current = null;
         setLoading(false);
         return;
@@ -104,7 +133,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
       setSession(initialSession);
       if (initialSession?.user) {
         userIdRef.current = initialSession.user.id;
-        await fetchProfile(initialSession.user.id);
+        await fetchProfiles(initialSession.user.id);
       }
       setLoading(false);
     });
@@ -115,29 +144,43 @@ export function AuthProvider({ children }: PropsWithChildren) {
       setSession(newSession);
       if (newSession?.user) {
         userIdRef.current = newSession.user.id;
-        fetchProfile(newSession.user.id);
+        fetchProfiles(newSession.user.id);
       } else {
         userIdRef.current = null;
-        setProfile(null);
+        setProfiles([]);
+        setActiveId(null);
       }
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [fetchProfile]);
+  }, [fetchProfiles]);
+
+  const switchProfile = useCallback((profileId: string) => {
+    const target = profiles.find((p) => p.id === profileId);
+    if (target) {
+      setActiveId(profileId);
+      AsyncStorage.setItem(ACTIVE_PROFILE_KEY, profileId);
+    }
+  }, [profiles]);
 
   const refreshProfile = useCallback(async () => {
     if (userIdRef.current) {
-      await fetchProfile(userIdRef.current);
+      await fetchProfiles(userIdRef.current);
     }
-  }, [fetchProfile]);
+  }, [fetchProfiles]);
 
   const userId = session?.user?.id ?? null;
 
+  const activeProfile = useMemo(
+    () => profiles.find((p) => p.id === activeProfileId) ?? null,
+    [profiles, activeProfileId],
+  );
+
   const value = useMemo<AuthContextType>(
-    () => ({ session, loading, userId, profile, refreshProfile }),
-    [session, loading, userId, profile, refreshProfile]
+    () => ({ session, loading, userId, profile: activeProfile, profiles, switchProfile, refreshProfile }),
+    [session, loading, userId, activeProfile, profiles, switchProfile, refreshProfile]
   );
 
   return (

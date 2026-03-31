@@ -24,7 +24,8 @@ export function BallotButtons({
   prefetchedVote,
 }: BallotButtonsProps) {
   const colors = useColors();
-  const { userId } = useAuth();
+  const { profile } = useAuth();
+  const userId = profile?.id ?? null;
   const { showAlert } = useThemedAlert();
   const [voted, setVoted] = useState<'TD' | 'FUMBLE' | null>(null);
   const [tdCount, setTdCount] = useState(initialTdCount);

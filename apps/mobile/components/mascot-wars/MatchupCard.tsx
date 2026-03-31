@@ -39,7 +39,8 @@ interface MatchupCardProps {
 
 export function MatchupCard({ matchup, userVoteSchoolId, onVoted }: MatchupCardProps) {
   const colors = useColors();
-  const { userId } = useAuth();
+  const { profile } = useAuth();
+  const userId = profile?.id ?? null;
   const { dark } = useSchoolTheme();
   const { showAlert } = useThemedAlert();
   const [voting, setVoting] = useState(false);

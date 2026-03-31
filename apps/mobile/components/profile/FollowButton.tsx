@@ -12,7 +12,8 @@ interface FollowButtonProps {
 
 export function FollowButton({ targetUserId }: FollowButtonProps) {
   const colors = useColors();
-  const { userId } = useAuth();
+  const { profile } = useAuth();
+  const userId = profile?.id ?? null;
   const { dark } = useSchoolTheme();
   const [isFollowing, setIsFollowing] = useState(false);
   const [loading, setLoading] = useState(true);

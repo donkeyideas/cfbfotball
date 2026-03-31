@@ -32,7 +32,8 @@ const NOTIFICATION_SELECT = `
 export default function NotificationsScreen() {
   const colors = useColors();
   const { dark } = useSchoolTheme();
-  const { session, userId } = useAuth();
+  const { session, profile } = useAuth();
+  const userId = profile?.id ?? null;
   const [notifications, setNotifications] = useState<NotificationData[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);

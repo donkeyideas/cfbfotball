@@ -67,7 +67,8 @@ const BOOKMARK_SELECT = `
 export default function VaultScreen() {
   const colors = useColors();
   const router = useRouter();
-  const { session, userId } = useAuth();
+  const { session, profile } = useAuth();
+  const userId = profile?.id ?? null;
   const { dark } = useSchoolTheme();
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
   const [loading, setLoading] = useState(true);

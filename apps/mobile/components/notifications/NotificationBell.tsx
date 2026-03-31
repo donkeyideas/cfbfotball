@@ -11,7 +11,8 @@ import { typography } from '@/lib/theme/typography';
 
 export function NotificationBell() {
   const colors = useColors();
-  const { userId } = useAuth();
+  const { profile } = useAuth();
+  const userId = profile?.id ?? null;
   const { dark } = useSchoolTheme();
   const router = useRouter();
   const { unreadCount: realtimeCount, resetCount } = useRealtimeNotifications(userId);

@@ -89,7 +89,8 @@ function daysRemaining(revisitDate: string): number {
 export default function ReceiptsScreen() {
   const colors = useColors();
   const router = useRouter();
-  const { session, userId } = useAuth();
+  const { session, profile } = useAuth();
+  const userId = profile?.id ?? null;
   const { dark } = useSchoolTheme();
   const [receipts, setReceipts] = useState<AgingTake[]>([]);
   const [loading, setLoading] = useState(true);
