@@ -106,6 +106,16 @@ export function ReplyComposer({ postId, onReplySent }: ReplyComposerProps) {
       return;
     }
 
+    // Update reply_count on the parent post
+    const { count } = await supabase
+      .from('posts')
+      .select('id', { count: 'exact', head: true })
+      .eq('parent_id', postId)
+      .eq('status', 'PUBLISHED');
+    if (count !== null) {
+      await supabase.from('posts').update({ reply_count: count }).eq('id', postId);
+    }
+
     setContent('');
     onReplySent();
   };

@@ -114,6 +114,7 @@ export const TicketStubCard = memo(function TicketStubCard({ post }: TicketStubC
         prefetchedReposted={post._userReposted}
         prefetchedSaved={post._userSaved}
         repostCount={post.repost_count}
+        replyCount={post.reply_count}
         onReport={() => setReportVisible(true)}
       />
 

@@ -17,13 +17,13 @@ import { useAuth } from '@/lib/auth/AuthProvider';
 import { supabase } from '@/lib/supabase';
 
 const REASONS = [
-  'Spam',
-  'Harassment',
-  'Hate Speech',
-  'Off Topic',
-  'Politics',
-  'Misinformation',
-  'Other',
+  { value: 'SPAM', label: 'Spam' },
+  { value: 'HARASSMENT', label: 'Harassment' },
+  { value: 'HATE_SPEECH', label: 'Hate Speech' },
+  { value: 'OFF_TOPIC', label: 'Off Topic' },
+  { value: 'POLITICS', label: 'Politics' },
+  { value: 'MISINFORMATION', label: 'Misinformation' },
+  { value: 'OTHER', label: 'Other' },
 ];
 
 interface ReportModalProps {
@@ -268,14 +268,14 @@ export function ReportModal({ visible, postId, postAuthorId, onClose }: ReportMo
 
               {REASONS.map((r) => (
                 <Pressable
-                  key={r}
+                  key={r.value}
                   style={styles.radioRow}
-                  onPress={() => setReason(r)}
+                  onPress={() => setReason(r.value)}
                 >
-                  <View style={[styles.radio, reason === r && { borderColor: dark }]}>
-                    {reason === r && <View style={[styles.radioDot, { backgroundColor: dark }]} />}
+                  <View style={[styles.radio, reason === r.value && { borderColor: dark }]}>
+                    {reason === r.value && <View style={[styles.radioDot, { backgroundColor: dark }]} />}
                   </View>
-                  <Text style={styles.radioLabel}>{r}</Text>
+                  <Text style={styles.radioLabel}>{r.label}</Text>
                 </Pressable>
               ))}
 

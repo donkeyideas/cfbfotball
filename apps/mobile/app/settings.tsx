@@ -56,7 +56,7 @@ const APP_VERSION = Constants.expoConfig?.version ?? '1.0.0';
 
 export default function SettingsScreen() {
   const router = useRouter();
-  const { session, profile, refreshProfile } = useAuth();
+  const { session, profile, profiles, switchProfile, refreshProfile } = useAuth();
   const editId = profile?.id ?? null;
   const ownerId = profile?.owner_id ?? null;
   const { showAlert } = useThemedAlert();
@@ -474,6 +474,50 @@ export default function SettingsScreen() {
 
         {/* ===================== ACCOUNT ===================== */}
         <Text style={styles.sectionTitle}>Account</Text>
+
+        {/* Profile switcher */}
+        {profiles.length > 1 && (
+          <View style={{ gap: 6, marginBottom: 8 }}>
+            <Text style={styles.label}>Active Profile</Text>
+            {profiles.map((p) => {
+              const isActive = p.id === profile?.id;
+              return (
+                <Pressable
+                  key={p.id}
+                  onPress={() => {
+                    if (!isActive) {
+                      switchProfile(p.id);
+                      showAlert('Switched', `Now using @${p.username ?? 'profile'}`);
+                    }
+                  }}
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: 10,
+                    padding: 12,
+                    borderWidth: isActive ? 2 : 1,
+                    borderColor: isActive ? dark : colors.border,
+                    borderRadius: 8,
+                    backgroundColor: isActive ? `${dark}10` : colors.surfaceRaised,
+                  }}
+                >
+                  <Avatar url={p.avatar_url} name={p.display_name || p.username} size={36} />
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ fontFamily: typography.sansSemiBold, fontSize: 15, color: colors.ink }}>
+                      {p.display_name || p.username || 'Unnamed'}
+                    </Text>
+                    <Text style={{ fontFamily: typography.mono, fontSize: 11, color: colors.textMuted }}>
+                      @{p.username ?? 'unknown'}
+                    </Text>
+                  </View>
+                  {isActive && (
+                    <Text style={{ fontFamily: typography.mono, fontSize: 10, color: dark, letterSpacing: 1 }}>ACTIVE</Text>
+                  )}
+                </Pressable>
+              );
+            })}
+          </View>
+        )}
 
         <Pressable style={[styles.signOutButton, { borderColor: dark }]} onPress={handleSignOut}>
           <Text style={[styles.signOutText, { color: dark }]}>Sign Out</Text>

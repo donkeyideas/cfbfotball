@@ -26,6 +26,7 @@ interface PostActionsProps {
   prefetchedReposted?: boolean;
   prefetchedSaved?: boolean;
   repostCount?: number;
+  replyCount?: number;
 }
 
 export function PostActions({
@@ -39,6 +40,7 @@ export function PostActions({
   prefetchedReposted,
   prefetchedSaved,
   repostCount: initialRepostCount,
+  replyCount = 0,
 }: PostActionsProps) {
   const colors = useColors();
   const { profile } = useAuth();
@@ -608,7 +610,7 @@ export function PostActions({
 
         {/* REPLY */}
         <Pressable onPress={handleReply} style={styles.action} hitSlop={HIT_SLOP}>
-          <Text style={styles.actionText}>REPLY</Text>
+          <Text style={styles.actionText}>REPLY{fmtCount(replyCount)}</Text>
         </Pressable>
 
         <Sep />

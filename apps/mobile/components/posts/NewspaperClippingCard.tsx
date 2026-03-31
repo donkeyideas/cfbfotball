@@ -256,6 +256,7 @@ export const NewspaperClippingCard = memo(function NewspaperClippingCard({ post,
         prefetchedReposted={post._userReposted}
         prefetchedSaved={post._userSaved}
         repostCount={post.repost_count}
+        replyCount={post.reply_count}
         onReport={() => setReportVisible(true)}
       />
 
