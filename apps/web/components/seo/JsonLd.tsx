@@ -18,7 +18,7 @@ export function WebsiteJsonLd() {
         '@context': 'https://schema.org',
         '@type': 'WebSite',
         name: 'CFB Social',
-        alternateName: 'The Gridiron',
+        alternateName: 'CFB Social - College Football Community',
         url: 'https://cfbsocial.com',
         description:
           "College football's social home. Stake claims, debate rivalries, track the transfer portal, and build your dynasty.",
@@ -42,7 +42,7 @@ export function OrganizationJsonLd() {
         '@context': 'https://schema.org',
         '@type': 'Organization',
         name: 'CFB Social',
-        alternateName: 'The Gridiron',
+        alternateName: 'CFB Social - College Football Community',
         url: 'https://cfbsocial.com',
         description:
           'The college football fan community. Debates, predictions, transfer portal tracking, and dynasty building across 653 schools.',

@@ -5,10 +5,10 @@ const CONTACT_EMAIL = 'info@donkeyideas.com';
 
 export const metadata = {
   title: 'Terms of Service | CFB Social',
-  description: 'Terms of Service for CFB Social (The Gridiron), operated by Donkey Ideas. Read our terms before using the platform.',
+  description: 'Terms of Service for CFB Social (CFB Social), operated by Donkey Ideas. Read our terms before using the platform.',
   openGraph: {
     title: 'Terms of Service | CFB Social',
-    description: 'Terms of Service for CFB Social (The Gridiron), operated by Donkey Ideas.',
+    description: 'Terms of Service for CFB Social (CFB Social), operated by Donkey Ideas.',
   },
 };
 
@@ -24,7 +24,7 @@ export default function TermsOfServicePage() {
 
       <div className="content-card" style={{ padding: '28px 32px' }}>
         <p style={bodyStyle}>
-          Welcome to CFB Social (&quot;The Gridiron&quot;). These Terms of Service (&quot;Terms&quot;) govern your use of the CFB Social website, mobile application, and related services operated by Donkey Ideas (&quot;we,&quot; &quot;us,&quot; or &quot;our&quot;). By creating an account or using the platform, you agree to these Terms.
+          Welcome to CFB Social (&quot;CFB Social&quot;). These Terms of Service (&quot;Terms&quot;) govern your use of the CFB Social website, mobile application, and related services operated by Donkey Ideas (&quot;we,&quot; &quot;us,&quot; or &quot;our&quot;). By creating an account or using the platform, you agree to these Terms.
         </p>
 
         <h2 style={headingStyle}>1. Eligibility</h2>
@@ -89,7 +89,7 @@ export default function TermsOfServicePage() {
 
         <h2 style={headingStyle}>7. Intellectual Property</h2>
         <p style={bodyStyle}>
-          The CFB Social platform, including its design, features, and branding (&quot;The Gridiron&quot;), is the property of Donkey Ideas. You may not copy, modify, distribute, or reverse-engineer any part of the platform without our written permission.
+          The CFB Social platform, including its design, features, and branding (&quot;CFB Social&quot;), is the property of Donkey Ideas. You may not copy, modify, distribute, or reverse-engineer any part of the platform without our written permission.
         </p>
         <p style={bodyStyle}>
           College football team names, logos, and related marks are the property of their respective institutions and conferences. CFB Social is not affiliated with, endorsed by, or sponsored by the NCAA, any conference, or any university.
@@ -142,7 +142,7 @@ export default function TermsOfServicePage() {
 
         <div style={{ marginTop: 32, paddingTop: 16, borderTop: '1px solid var(--border)', textAlign: 'center' }}>
           <p style={{ fontFamily: 'var(--mono)', fontSize: '0.7rem', color: 'var(--faded-ink)', letterSpacing: '0.5px', lineHeight: 1.8 }}>
-            Donkey Ideas<br />CFB Social / The Gridiron
+            Donkey Ideas<br />CFB Social / CFB Social
           </p>
         </div>
       </div>

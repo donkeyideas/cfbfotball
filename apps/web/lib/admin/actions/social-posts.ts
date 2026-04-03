@@ -108,7 +108,7 @@ function buildPrompt(platform: SocialPlatform, topic: string | undefined, tone: 
     ? `Write about: ${topic}`
     : 'Pick a trending college football topic (rivalries, transfer portal, game predictions, recruiting, playoff debates, coaching changes).';
 
-  return `You are a college football social media content creator for "The Gridiron" -- a passionate CFB community platform.
+  return `You are a college football social media content creator for "CFB Social" -- a passionate college football community platform.
 
 ${topicLine}
 

@@ -5,10 +5,10 @@ const CONTACT_EMAIL = 'info@donkeyideas.com';
 
 export const metadata = {
   title: 'Privacy Policy | CFB Social',
-  description: 'Privacy Policy for CFB Social (The Gridiron), operated by Donkey Ideas. Learn how we collect, use, and protect your information.',
+  description: 'Privacy Policy for CFB Social (CFB Social), operated by Donkey Ideas. Learn how we collect, use, and protect your information.',
   openGraph: {
     title: 'Privacy Policy | CFB Social',
-    description: 'Privacy Policy for CFB Social (The Gridiron), operated by Donkey Ideas.',
+    description: 'Privacy Policy for CFB Social (CFB Social), operated by Donkey Ideas.',
   },
 };
 
@@ -24,7 +24,7 @@ export default function PrivacyPolicyPage() {
 
       <div className="content-card" style={{ padding: '28px 32px' }}>
         <p style={bodyStyle}>
-          CFB Social (&quot;The Gridiron,&quot; &quot;we,&quot; &quot;us,&quot; or &quot;our&quot;) is operated by Donkey Ideas. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our website, mobile application, and related services.
+          CFB Social (&quot;CFB Social,&quot; &quot;we,&quot; &quot;us,&quot; or &quot;our&quot;) is operated by Donkey Ideas. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our website, mobile application, and related services.
         </p>
 
         <h2 style={headingStyle}>1. Information We Collect</h2>
@@ -129,7 +129,7 @@ export default function PrivacyPolicyPage() {
 
         <div style={{ marginTop: 32, paddingTop: 16, borderTop: '1px solid var(--border)', textAlign: 'center' }}>
           <p style={{ fontFamily: 'var(--mono)', fontSize: '0.7rem', color: 'var(--faded-ink)', letterSpacing: '0.5px', lineHeight: 1.8 }}>
-            Donkey Ideas<br />CFB Social / The Gridiron
+            Donkey Ideas<br />CFB Social / CFB Social
           </p>
         </div>
       </div>

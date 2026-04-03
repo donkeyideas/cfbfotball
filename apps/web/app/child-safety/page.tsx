@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Child Safety Standards | The Gridiron",
+  title: "Child Safety Standards | CFB Social",
   description:
-    "Child safety standards and policies for The Gridiron college football social platform.",
+    "Child safety standards and policies for CFB Social college football social platform.",
 };
 
 export default function ChildSafetyPage() {
@@ -26,7 +26,7 @@ export default function ChildSafetyPage() {
       <section style={{ marginBottom: 32 }}>
         <h2 style={{ fontSize: 20, marginBottom: 12 }}>Our Commitment</h2>
         <p>
-          The Gridiron is a college football social platform designed for adult
+          CFB Social is a college football social platform designed for adult
           sports fans. We are committed to preventing child sexual abuse and
           exploitation (CSAE) on our platform and maintaining a safe environment
           for all users.
@@ -38,7 +38,7 @@ export default function ChildSafetyPage() {
           Age Requirement
         </h2>
         <p>
-          The Gridiron is intended for users aged 17 and older. We do not
+          CFB Social is intended for users aged 17 and older. We do not
           knowingly collect personal information from children under 17. If we
           become aware that a user is under 17, their account will be
           immediately suspended and removed.

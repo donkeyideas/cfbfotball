@@ -24,7 +24,7 @@ export function AuthCtaBanner() {
     <div className="auth-cta-banner">
       <div className="auth-cta-inner">
         <div className="auth-cta-text">
-          <span className="auth-cta-headline">Join The Gridiron</span>
+          <span className="auth-cta-headline">Join CFB Social</span>
           <span className="auth-cta-sub">
             Stake claims. Call shots. Build your dynasty.
           </span>
