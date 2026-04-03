@@ -42,11 +42,13 @@ export const metadata: Metadata = {
     siteName: 'CFB Social',
     title: 'CFB Social — College Football Fan Community',
     description: 'The college football fan community. Debate rivalries, file predictions, track the transfer portal, and build your dynasty.',
+    images: [{ url: 'https://cfbsocial.com/logo.png', width: 256, height: 256, alt: 'CFB Social Logo' }],
   },
   twitter: {
-    card: 'summary_large_image',
+    card: 'summary',
     title: 'CFB Social — College Football Fan Community',
     description: 'The college football fan community. Debates. Predictions. Transfer Portal. Dynasty.',
+    images: ['https://cfbsocial.com/logo.png'],
   },
   icons: {
     icon: [
