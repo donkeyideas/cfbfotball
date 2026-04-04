@@ -117,7 +117,7 @@ export default function GameThreadScreen() {
         .from('game_threads')
         .insert({
           espn_game_id: gameId,
-          title: `Game Thread ${gameId}`,
+          title: 'Game Thread',
           away_team: 'TBD',
           home_team: 'TBD',
           away_score: 0,
@@ -131,7 +131,7 @@ export default function GameThreadScreen() {
 
       if (fallback) {
         setThreadId(fallback.id);
-        setGameName(`Game Thread ${gameId}`);
+        setGameName('Game Thread');
       }
     }
 
@@ -147,7 +147,7 @@ export default function GameThreadScreen() {
       .limit(100);
 
     if (data) {
-      setMessages(data as any);
+      setMessages(data as unknown as typeof messages);
     }
   };
 

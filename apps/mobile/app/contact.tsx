@@ -136,13 +136,13 @@ export default function ContactScreen() {
         });
 
       if (insertError) {
-        // Table may not exist yet — fall back to no-op with success UI
-        console.warn('Contact submission failed:', insertError.message);
+        setSubmitting(false);
+        return;
       }
 
       setSubmitted(true);
     } catch {
-      setSubmitted(true);
+      setSubmitting(false);
     } finally {
       setSubmitting(false);
     }

@@ -155,15 +155,26 @@ export default function DeleteAccountScreen() {
     setDeleting(true);
 
     try {
-      // Clear profile data
+      // Clear all profile data
       await supabase
         .from('profiles')
         .update({
-          display_name: null,
+          display_name: '[deleted]',
           avatar_url: null,
           bio: null,
+          school_id: null,
         })
         .eq('id', userId);
+
+      // Remove user's follows
+      await supabase.from('follows').delete().eq('follower_id', userId);
+      await supabase.from('follows').delete().eq('following_id', userId);
+
+      // Remove user's reactions
+      await supabase.from('reactions').delete().eq('user_id', userId);
+
+      // Remove user's saves
+      await supabase.from('saves').delete().eq('user_id', userId);
 
       // Sign out
       await supabase.auth.signOut();
@@ -199,8 +210,9 @@ export default function DeleteAccountScreen() {
         <View style={styles.successContainer}>
           <Text style={styles.successTitle}>Account Deleted</Text>
           <Text style={styles.successBody}>
-            Your profile data has been cleared and you have been signed out. If you need further
-            assistance, contact us at info@donkeyideas.com.
+            Your account data has been removed and you have been signed out.
+            Full account deletion will be completed within 30 days. If you need
+            further assistance, contact us at info@donkeyideas.com.
           </Text>
         </View>
       </View>
