@@ -1,45 +1,91 @@
-import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import { useEffect } from 'react';
+import { Platform } from 'react-native';
+import Constants from 'expo-constants';
 import { useAuth } from '@/lib/auth/AuthProvider';
+import { supabase } from '@/lib/supabase';
 
-// Push notifications require a development build (not Expo Go).
-// expo-notifications was removed from Expo Go in SDK 53.
-//
-// The server-side infrastructure is ready:
-//   - device_tokens table stores push tokens per user/platform
-//   - on_notification_created trigger sends pushes via Expo push API
-//
-// To enable client-side push registration in a dev build:
-//   1. Run: npx eas build --profile development --platform android
-//   2. Uncomment the expo-notifications code in this file
-//   3. The hook will register the device and save the token to Supabase
+const isExpoGo = Constants.appOwnership === 'expo';
 
+let Notifications: typeof import('expo-notifications') | null = null;
+if (!isExpoGo) {
+  try {
+    Notifications = require('expo-notifications');
+    Notifications!.setNotificationHandler({
+      handleNotification: async () => ({
+        shouldShowAlert: true,
+        shouldPlaySound: true,
+        shouldSetBadge: true,
+        shouldShowBanner: true,
+        shouldShowList: true,
+      }),
+    });
+  } catch {
+    /* expo-notifications not available */
+  }
+}
+
+/**
+ * Registers the device for push notifications when the user is signed in.
+ * Uses native FCM/APNs tokens (not Expo Push tokens) and stores them
+ * directly in the device_tokens table via Supabase.
+ */
 export function usePushNotifications() {
   const { userId } = useAuth();
-  const [expoPushToken, setExpoPushToken] = useState<string | null>(null);
 
-  // Save push token to device_tokens table when user is logged in
+  // Register push token
   useEffect(() => {
-    if (!userId || !expoPushToken) return;
+    if (!userId || !Notifications) return;
 
-    (async () => {
+    async function registerPush() {
       try {
-        await supabase
+        // Request permission
+        const { status: existingStatus } = await Notifications!.getPermissionsAsync();
+        let finalStatus = existingStatus;
+        if (existingStatus !== 'granted') {
+          const { status } = await Notifications!.requestPermissionsAsync();
+          finalStatus = status;
+        }
+        if (finalStatus !== 'granted') return;
+
+        // Get native FCM/APNs token (NOT Expo Push token — that hangs on Android)
+        const tokenData = await Notifications!.getDevicePushTokenAsync();
+        const pushToken = tokenData.data as string;
+        const platform = Platform.OS === 'ios' ? 'ios' : 'android';
+
+        // Store directly via Supabase (avoids API URL redirect issues)
+        const { error } = await supabase
           .from('device_tokens')
           .upsert(
             {
               user_id: userId,
-              token: expoPushToken,
-              platform: 'expo',
+              token: pushToken,
+              platform,
               is_active: true,
+              updated_at: new Date().toISOString(),
             },
-            { onConflict: 'user_id,token' }
+            { onConflict: 'token' }
           );
-      } catch (err) {
-        console.warn('Failed to save push token:', err);
-      }
-    })();
-  }, [userId, expoPushToken]);
 
-  return { expoPushToken };
+        if (error) {
+          console.log('Push token save failed:', error.message);
+        }
+      } catch (err) {
+        console.log('Push registration error:', err);
+      }
+    }
+
+    registerPush();
+  }, [userId]);
+
+  // Set up Android notification channel
+  useEffect(() => {
+    if (!Notifications || Platform.OS !== 'android') return;
+    Notifications.setNotificationChannelAsync('default', {
+      name: 'CFB Social',
+      importance: Notifications.AndroidImportance.MAX,
+      vibrationPattern: [0, 250, 250, 250],
+      lightColor: '#8b1a1a',
+      sound: 'default',
+    });
+  }, []);
 }

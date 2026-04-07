@@ -20,7 +20,7 @@ async function sendToToken(
   token: string,
   payload: PushPayload
 ): Promise<{ success: boolean; error?: string }> {
-  const messaging = getMessagingInstance();
+  const messaging = await getMessagingInstance();
   if (!messaging) return { success: false, error: 'FCM not configured' };
 
   try {
