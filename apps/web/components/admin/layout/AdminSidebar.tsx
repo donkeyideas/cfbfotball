@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard,
@@ -145,8 +146,7 @@ export function AdminSidebar() {
         alignItems: 'center',
         gap: '8px',
       }}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/logo.png" alt="CFB Social" style={{ width: '32px', height: '32px', borderRadius: '4px', objectFit: 'cover' }} />
+        <Image src="/logo.png" alt="CFB Social" width={32} height={32} style={{ borderRadius: '4px', objectFit: 'cover' }} />
         <span style={{
           fontFamily: 'var(--admin-serif)',
           fontSize: '1.1rem',

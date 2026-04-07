@@ -6,7 +6,15 @@ import { DynastyTierBadge } from '@/components/dynasty/DynastyTierBadge';
 export const dynamic = 'force-dynamic';
 
 export const metadata = {
-  title: 'Dynasty Mode',
+  title: 'Dynasty Mode | Build Your College Football Legacy',
+  description: 'Build your college football dynasty on CFB Social. Earn XP, unlock achievements, climb the leaderboard, and rise through tiers from Walk-On to Hall of Fame across 653 schools.',
+  openGraph: {
+    title: 'Dynasty Mode | CFB Social',
+    description: 'Build your college football dynasty. Earn XP, unlock achievements, and climb the leaderboard.',
+  },
+  alternates: {
+    canonical: 'https://cfbsocial.com/dynasty',
+  },
 };
 
 interface DynastyPageProps {
@@ -41,6 +49,12 @@ export default async function DynastyPage({ searchParams }: DynastyPageProps) {
           ))}
         </div>
       </div>
+
+      <section style={{ fontFamily: 'var(--sans)', fontSize: '0.85rem', lineHeight: 1.6, color: 'var(--text-secondary)', marginBottom: 16, padding: '0 4px' }}>
+        <p>
+          Dynasty Mode is how you build your legacy on CFB Social. Earn XP by posting takes, winning challenges, nailing predictions, and engaging with the college football fan community. Rise through the tiers from Walk-On to Hall of Fame, unlock achievements, and compete on the all-time dynasty leaderboard. Every interaction counts toward your dynasty.
+        </p>
+      </section>
 
       <Suspense fallback={<DynastySkeleton />}>
         {tab === 'profile' && <DynastyProfile />}

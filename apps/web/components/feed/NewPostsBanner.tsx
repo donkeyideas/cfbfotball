@@ -11,13 +11,13 @@ export function NewPostsBanner({ schoolId }: NewPostsBannerProps) {
   const router = useRouter();
   const { newPosts, clearNewPosts } = useRealtimeFeed(schoolId);
 
-  if (newPosts.length === 0) return null;
-
   function handleClick() {
     clearNewPosts();
     router.refresh();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
+
+  if (newPosts.length === 0) return <div style={{ minHeight: 0 }} />;
 
   return (
     <button

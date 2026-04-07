@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 
 interface NotificationCardProps {
   id: string;
@@ -122,12 +123,12 @@ export function NotificationCard({
     >
       {/* Actor avatar */}
       {actorAvatarUrl ? (
-        <img
+        <Image
           src={actorAvatarUrl}
           alt={actor}
+          width={36}
+          height={36}
           style={{
-            width: 36,
-            height: 36,
             borderRadius: '50%',
             objectFit: 'cover',
             flexShrink: 0,

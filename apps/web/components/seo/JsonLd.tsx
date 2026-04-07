@@ -145,3 +145,80 @@ export function BreadcrumbJsonLd({
     />
   );
 }
+
+export function CollectionPageJsonLd({
+  name,
+  description,
+  url,
+}: {
+  name: string;
+  description: string;
+  url: string;
+}) {
+  return (
+    <JsonLd
+      data={{
+        '@context': 'https://schema.org',
+        '@type': 'CollectionPage',
+        name,
+        description,
+        url,
+        isPartOf: {
+          '@type': 'WebSite',
+          name: 'CFB Social',
+          url: 'https://cfbsocial.com',
+        },
+      }}
+    />
+  );
+}
+
+export function ProfilePageJsonLd({
+  name,
+  url,
+  description,
+}: {
+  name: string;
+  url: string;
+  description?: string;
+}) {
+  return (
+    <JsonLd
+      data={{
+        '@context': 'https://schema.org',
+        '@type': 'ProfilePage',
+        name,
+        url,
+        ...(description ? { description } : {}),
+        isPartOf: {
+          '@type': 'WebSite',
+          name: 'CFB Social',
+          url: 'https://cfbsocial.com',
+        },
+      }}
+    />
+  );
+}
+
+export function FAQPageJsonLd({
+  questions,
+}: {
+  questions: Array<{ question: string; answer: string }>;
+}) {
+  return (
+    <JsonLd
+      data={{
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: questions.map((q) => ({
+          '@type': 'Question',
+          name: q.question,
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: q.answer,
+          },
+        })),
+      }}
+    />
+  );
+}

@@ -81,36 +81,6 @@ export function CorkboardNav({ onNavigate }: CorkboardNavProps) {
         })}
       </div>
 
-      {/* Legal links */}
-      <div style={{
-        marginTop: 16,
-        paddingTop: 12,
-        borderTop: '1px solid var(--border)',
-        display: 'flex',
-        flexWrap: 'wrap',
-        gap: '4px 12px',
-      }}>
-        {[
-          { href: '/privacy', label: 'Privacy' },
-          { href: '/terms', label: 'Terms' },
-          { href: '/contact', label: 'Contact' },
-        ].map((link) => (
-          <Link
-            key={link.href}
-            href={link.href}
-            onClick={onNavigate}
-            style={{
-              fontFamily: 'var(--mono)',
-              fontSize: '0.65rem',
-              color: 'var(--faded-ink)',
-              textDecoration: 'none',
-              letterSpacing: '0.3px',
-            }}
-          >
-            {link.label}
-          </Link>
-        ))}
-      </div>
     </div>
   );
 }

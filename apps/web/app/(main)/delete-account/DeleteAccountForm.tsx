@@ -64,7 +64,7 @@ export function DeleteAccountForm() {
           Account Deleted
         </p>
         <p style={{ fontFamily: 'var(--sans)', fontSize: '0.88rem', color: 'var(--faded-ink)', lineHeight: 1.6, maxWidth: 420, margin: '0 auto 16px' }}>
-          Your profile information has been removed and you have been signed out. If you have any questions, contact us at{' '}
+          Your account has been permanently deleted and you have been signed out. If you have any questions, contact us at{' '}
           <a href={`mailto:${CONTACT_EMAIL}`} style={{ color: 'var(--crimson)' }}>{CONTACT_EMAIL}</a>.
         </p>
         <Link
@@ -89,26 +89,20 @@ export function DeleteAccountForm() {
     setError('');
 
     try {
+      const res = await fetch('/api/delete-account', { method: 'POST' });
+
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error || 'Failed to delete account');
+      }
+
+      // Sign out client-side after server deletes the auth user
       const supabase = createClient();
-
-      // Clear profile data (nullify personal info)
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .update({
-          display_name: null,
-          avatar_url: null,
-          bio: null,
-        })
-        .eq('id', userId);
-
-      if (profileError) throw profileError;
-
-      // Sign out
       await supabase.auth.signOut();
 
       setDone(true);
-    } catch {
-      setError('Failed to delete account data. Please try again or contact support.');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete account. Please try again or contact support.');
       setDeleting(false);
     }
   }
@@ -150,8 +144,8 @@ export function DeleteAccountForm() {
           paddingLeft: 20,
           marginBottom: 10,
         }}>
-          <li>Remove your profile information (name, avatar, bio)</li>
-          <li>Sign you out of the platform</li>
+          <li>Permanently delete your account and all profile information</li>
+          <li>Remove your login credentials — you will not be able to sign back in</li>
           <li>Your posts will remain but will no longer be associated with your profile</li>
         </ul>
         <p style={{

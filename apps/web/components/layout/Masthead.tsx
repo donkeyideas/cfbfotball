@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useMemo } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Search, Menu, X } from 'lucide-react';
 import { NotificationBell } from '@/components/notifications/NotificationBell';
 import { useAuth } from '@/components/auth/AuthProvider';
@@ -91,7 +92,7 @@ export function Masthead({ onMenuToggle, menuOpen }: MastheadProps) {
                       style={{ cursor: 'pointer', border: 'none', background: 'none', padding: 0 }}
                     >
                       {profile?.avatar_url ? (
-                        <img src={profile.avatar_url} alt={username} className="masthead-profile-img" />
+                        <Image src={profile.avatar_url} alt={username} width={36} height={36} className="masthead-profile-img" />
                       ) : (
                         username[0]?.toUpperCase()
                       )}
@@ -118,7 +119,7 @@ export function Masthead({ onMenuToggle, menuOpen }: MastheadProps) {
                         >
                           <div className="account-switcher-avatar">
                             {profile?.avatar_url ? (
-                              <img src={profile.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                              <Image src={profile.avatar_url} alt="" width={32} height={32} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                             ) : (
                               (username?.[0] ?? '?').toUpperCase()
                             )}
@@ -143,7 +144,7 @@ export function Masthead({ onMenuToggle, menuOpen }: MastheadProps) {
                           >
                             <div className="account-switcher-avatar">
                               {p.avatar_url ? (
-                                <img src={p.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                <Image src={p.avatar_url} alt="" width={32} height={32} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                               ) : (
                                 (p.username?.[0] ?? '?').toUpperCase()
                               )}

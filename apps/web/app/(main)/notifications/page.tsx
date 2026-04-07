@@ -4,6 +4,7 @@ export const dynamic = 'force-dynamic';
 
 export const metadata = {
   title: 'Notifications',
+  description: 'Your CFB Social notifications. See who interacted with your posts, new followers, challenge results, and more.',
 };
 
 export default function NotificationsPage() {

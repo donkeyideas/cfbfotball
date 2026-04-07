@@ -7,6 +7,9 @@ export const metadata = {
     title: 'Delete Account | CFB Social',
     description: 'Permanently delete your CFB Social account and associated data.',
   },
+  alternates: {
+    canonical: 'https://cfbsocial.com/delete-account',
+  },
 };
 
 export default function DeleteAccountPage() {

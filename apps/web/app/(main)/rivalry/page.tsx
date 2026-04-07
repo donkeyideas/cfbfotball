@@ -3,6 +3,7 @@ import { RivalryCard } from '@/components/rivalry/RivalryCard';
 import { ChallengeCard } from '@/components/rivalry/ChallengeCard';
 import { CreateChallenge } from '@/components/rivalry/CreateChallenge';
 import { RivalryTabs } from '@/components/rivalry/RivalryTabs';
+import { CollectionPageJsonLd } from '@/components/seo/JsonLd';
 
 export const revalidate = 60;
 
@@ -54,12 +55,23 @@ export default async function RivalryPage({ searchParams }: RivalryPageProps) {
 
   return (
     <div>
+      <CollectionPageJsonLd
+        name="Rivalry Ring — College Football Fan Debates"
+        description="Debate college football rivalries and settle fan arguments. Pick sides in school-vs-school matchups and issue challenges."
+        url="https://cfbsocial.com/rivalry"
+      />
       <div className="feed-header">
         <h1 className="feed-title">Rivalry Ring</h1>
         <Suspense>
           <RivalryTabs />
         </Suspense>
       </div>
+
+      <section style={{ fontFamily: 'var(--sans)', fontSize: '0.85rem', lineHeight: 1.6, color: 'var(--text-secondary)', marginBottom: 16, padding: '0 4px' }}>
+        <p>
+          The Rivalry Ring is where college football fan debates come to life. Pick a side in school-vs-school matchups, issue head-to-head challenges to other fans, and let the community cast the deciding vote. From the Iron Bowl to Bedlam, every rivalry has a place here. Whether you are defending your program or calling out a rival, this is the best place for CFB fan debates online.
+        </p>
+      </section>
 
       {tab === 'challenges' && <CreateChallenge />}
 

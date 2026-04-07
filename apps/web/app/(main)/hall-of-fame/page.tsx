@@ -1,21 +1,41 @@
 import { Suspense } from 'react';
 import Link from 'next/link';
+import { CollectionPageJsonLd } from '@/components/seo/JsonLd';
 
 export const revalidate = 300;
 
 export const metadata = {
-  title: 'Hall of Fame',
+  title: 'Hall of Fame | Top College Football Fans & Dynasty Leaders',
+  description: 'The all-time greats of CFB Social. See the top dynasty leaders, touchdown leaders, most followed fans, most prolific posters, and best prediction records across the college football fan community.',
+  openGraph: {
+    title: 'Hall of Fame | CFB Social',
+    description: 'The all-time greats of CFB Social. Dynasty leaders, touchdown leaders, and prediction oracles.',
+  },
+  alternates: {
+    canonical: 'https://cfbsocial.com/hall-of-fame',
+  },
 };
 
 export default function HallOfFamePage() {
   return (
     <div>
+      <CollectionPageJsonLd
+        name="Hall of Fame — Top College Football Fans"
+        description="The all-time greats of CFB Social. Dynasty leaders, touchdown leaders, and prediction oracles."
+        url="https://cfbsocial.com/hall-of-fame"
+      />
       <div className="feed-header">
         <h1 className="feed-title">Hall of Fame</h1>
         <p style={{ fontFamily: 'var(--sans)', fontSize: '0.82rem', color: 'var(--faded-ink)', marginTop: 4 }}>
           The all-time greats of CFB Social. Legends are made here.
         </p>
       </div>
+
+      <section style={{ fontFamily: 'var(--sans)', fontSize: '0.85rem', lineHeight: 1.6, color: 'var(--text-secondary)', marginBottom: 16, padding: '0 4px' }}>
+        <p>
+          The Hall of Fame honors the all-time greats of the CFB Social college football fan community. These leaderboards rank the top dynasty earners, touchdown leaders, most-followed fans, most prolific posters, and prediction oracles. Legends are made through consistent engagement, sharp takes, and community respect across 653 schools.
+        </p>
+      </section>
 
       <Suspense fallback={<HofSkeleton />}>
         <HallOfFameContent />

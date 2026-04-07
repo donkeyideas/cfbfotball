@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import Image from 'next/image';
 
 interface ProfileEditModalProps {
   userId: string;
@@ -205,7 +206,7 @@ export function ProfileEditModal({ userId, onClose, onSaved }: ProfileEditModalP
               onClick={() => document.getElementById('avatarUpload')?.click()}
             >
               {avatarSrc ? (
-                <img src={avatarSrc} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <Image src={avatarSrc} alt="Avatar" width={80} height={80} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               ) : (
                 <span style={{ fontFamily: 'var(--serif)', fontSize: '1.8rem', fontWeight: 700, color: '#fff' }}>{initial}</span>
               )}

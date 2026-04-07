@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { FollowButton } from './FollowButton';
 import { SignOutButton } from './SignOutButton';
+import Image from 'next/image';
 
 interface ProfileHeaderProps {
   user: {
@@ -60,9 +61,11 @@ export function ProfileHeader({ user, isOwnProfile = false }: ProfileHeaderProps
         <div className="flex items-end justify-between">
           <div className="-mt-12">
             {user.avatar_url ? (
-              <img
+              <Image
                 src={user.avatar_url}
                 alt={displayName}
+                width={96}
+                height={96}
                 className="h-24 w-24 rounded-full border-4 border-[var(--surface-raised)] object-cover"
               />
             ) : (

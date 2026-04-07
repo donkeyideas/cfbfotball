@@ -42,6 +42,9 @@ export async function generateMetadata({ params }: PostPageProps) {
       title,
       description,
     },
+    alternates: {
+      canonical: `https://cfbsocial.com/post/${id}`,
+    },
   };
 }
 

@@ -63,6 +63,12 @@ export default async function PortalPage({ searchParams }: PortalPageProps) {
 
       <hr className="gridiron-divider" />
 
+      <section style={{ fontFamily: 'var(--sans)', fontSize: '0.85rem', lineHeight: 1.6, color: 'var(--text-secondary)', margin: '12px 0 16px', padding: '0 4px' }}>
+        <p>
+          The Portal Wire is your real-time college football transfer portal tracker. Follow every entry and commitment across FBS, filter by position, star rating, and status, and predict where top players will land. File your claims, track recruiting activity, and join the college football fan community in debating the biggest portal moves of the year.
+        </p>
+      </section>
+
       <Suspense fallback={<PortalSkeleton />}>
         <PortalFilters />
         <PortalList

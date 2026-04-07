@@ -10,6 +10,9 @@ export const metadata = {
     title: 'Privacy Policy | CFB Social',
     description: 'Privacy Policy for CFB Social (CFB Social), operated by Donkey Ideas.',
   },
+  alternates: {
+    canonical: 'https://cfbsocial.com/privacy',
+  },
 };
 
 export default function PrivacyPolicyPage() {

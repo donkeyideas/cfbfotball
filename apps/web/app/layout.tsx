@@ -84,6 +84,9 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <head>
+        <link rel="preconnect" href="https://lazwferoamyntvrgsqcu.supabase.co" />
+        <link rel="dns-prefetch" href="https://lazwferoamyntvrgsqcu.supabase.co" />
+        <link rel="preload" href="/logo.png" as="image" />
         <script
           dangerouslySetInnerHTML={{
             __html: `(function(){try{if(localStorage.getItem('cfb-theme')==='dark')document.documentElement.classList.add('dark');if(localStorage.getItem('cfb-font-pref')==='modern')document.documentElement.setAttribute('data-font','modern')}catch(e){}})()`,

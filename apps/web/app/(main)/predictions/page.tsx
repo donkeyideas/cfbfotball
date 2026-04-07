@@ -2,6 +2,7 @@ import { Suspense } from 'react';
 import { PredictionCard } from '@/components/predictions/PredictionCard';
 import { CreatePrediction } from '@/components/predictions/CreatePrediction';
 import { PredictionLeaderboard } from '@/components/predictions/PredictionLeaderboard';
+import { CollectionPageJsonLd } from '@/components/seo/JsonLd';
 
 export const revalidate = 60;
 
@@ -32,6 +33,11 @@ export default async function PredictionsPage({ searchParams }: PredictionsPageP
 
   return (
     <div>
+      <CollectionPageJsonLd
+        name="College Football Predictions — File Takes & Track Your Record"
+        description="Make college football predictions and put your takes on record. Track prediction accuracy and collect receipts."
+        url="https://cfbsocial.com/predictions"
+      />
       {/* Header */}
       <div style={{ marginBottom: 16 }}>
         <h1 className="section-headline" style={{ marginBottom: 4 }}>Predictions</h1>
@@ -47,6 +53,12 @@ export default async function PredictionsPage({ searchParams }: PredictionsPageP
       </div>
 
       <hr className="gridiron-divider" />
+
+      <section style={{ fontFamily: 'var(--sans)', fontSize: '0.85rem', lineHeight: 1.6, color: 'var(--text-secondary)', margin: '12px 0 4px', padding: '0 4px' }}>
+        <p>
+          Make your college football predictions and put your takes on the record. When the season plays out, your calls are graded as receipts or busts for all to see. Track your prediction accuracy on the leaderboard, compete against the community, and prove you know college football better than anyone. The best predictors earn their place on the Oracle Board.
+        </p>
+      </section>
 
       {/* Tabs */}
       <PredictionTabs activeTab={activeTab} />

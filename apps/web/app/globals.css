@@ -903,9 +903,9 @@ h1, h2, h3, h4, h5, h6,
 }
 
 .masthead-inner {
-  max-width: 1300px;
+  max-width: 1600px;
   margin: 0 auto;
-  padding: 0 30px;
+  padding: 0 20px;
   box-sizing: border-box;
   display: flex;
   align-items: center;
@@ -1263,12 +1263,12 @@ html.dark .account-switcher-divider {
    ============================================================ */
 
 .main-layout {
-  max-width: 1300px;
+  max-width: 1600px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: 250px 1fr 300px;
+  grid-template-columns: 280px 1fr 320px;
   gap: 0;
-  padding: 0 30px;
+  padding: 0 20px;
   box-sizing: border-box;
   min-height: calc(100vh - var(--header-total-h, 120px));
 }
@@ -3271,9 +3271,9 @@ html.dark .aging-footer {
    ============================================================ */
 
 .site-footer {
-  max-width: 1300px;
+  max-width: 1600px;
   margin: 0 auto;
-  padding: 16px 30px;
+  padding: 16px 20px;
   box-sizing: border-box;
   border-top: 3px double var(--dark-brown);
   text-align: center;
@@ -5080,7 +5080,8 @@ html[data-font="modern"] {
 
 .news-modal-image {
   width: 100%;
-  height: auto;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
   border-radius: 3px;
   margin-bottom: 16px;
   border: 1px solid rgba(59,47,30,0.1);

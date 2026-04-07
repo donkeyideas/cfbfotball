@@ -4,6 +4,7 @@ import { ProfileHeader } from '@/components/profile/ProfileHeader';
 import { ProfileStats } from '@/components/profile/ProfileStats';
 import { DynastyProgress } from '@/components/profile/DynastyProgress';
 import { PostCard } from '@/components/feed/PostCard';
+import { ProfilePageJsonLd } from '@/components/seo/JsonLd';
 
 export const revalidate = 60;
 
@@ -19,6 +20,9 @@ export async function generateMetadata({
     openGraph: {
       title: `@${username} | CFB Social`,
       description: `@${username}'s college football takes and dynasty stats.`,
+    },
+    alternates: {
+      canonical: `https://cfbsocial.com/profile/${username}`,
     },
   };
 }
@@ -59,9 +63,16 @@ export default async function ProfilePage({
   const { username } = await params;
 
   return (
-    <Suspense fallback={<ProfileSkeleton />}>
-      <ProfileContent username={username} />
-    </Suspense>
+    <>
+      <ProfilePageJsonLd
+        name={`@${username} on CFB Social`}
+        url={`https://cfbsocial.com/profile/${username}`}
+        description={`${username}'s college football takes, predictions, and dynasty stats.`}
+      />
+      <Suspense fallback={<ProfileSkeleton />}>
+        <ProfileContent username={username} />
+      </Suspense>
+    </>
   );
 }
 

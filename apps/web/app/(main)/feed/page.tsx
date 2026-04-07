@@ -5,6 +5,7 @@ import type { FeedTab } from '@/components/feed/FeedTabs';
 import { PostComposer } from '@/components/feed/PostComposer';
 import { NewPostsBanner } from '@/components/feed/NewPostsBanner';
 import { FeedListClient } from '@/components/feed/FeedListClient';
+import { CollectionPageJsonLd } from '@/components/seo/JsonLd';
 
 export const revalidate = 30; // revalidate feed every 30 seconds
 
@@ -60,6 +61,11 @@ export default async function FeedPage({ searchParams }: FeedPageProps) {
 
   return (
     <div>
+      <CollectionPageJsonLd
+        name="The Feed — College Football Fan Opinions & Takes"
+        description="Read the latest college football fan opinions, hot takes, predictions, and rivalry debates from fans across 653 schools."
+        url="https://cfbsocial.com/feed"
+      />
       <div className="feed-header">
         <h1 className="feed-title">The Feed</h1>
         <Suspense>

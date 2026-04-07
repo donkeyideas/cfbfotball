@@ -31,6 +31,9 @@ export async function generateMetadata({ params }: SchoolPageProps) {
       title: `${data.name} | CFB Social`,
       description,
     },
+    alternates: {
+      canonical: `https://cfbsocial.com/school/${slug}`,
+    },
   };
 }
 

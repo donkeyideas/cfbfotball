@@ -2,7 +2,11 @@ import { Suspense } from 'react';
 import Link from 'next/link';
 
 export const metadata = {
-  title: 'The Vault',
+  title: 'The Vault | Saved College Football Posts & Bookmarks',
+  description: 'Your saved college football posts and bookmarks on CFB Social. Save the best takes, predictions, and debates to revisit later.',
+  alternates: {
+    canonical: 'https://cfbsocial.com/vault',
+  },
 };
 
 export default function VaultPage() {

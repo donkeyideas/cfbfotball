@@ -2,6 +2,7 @@
 
 import { memo } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import type { PostType } from '@cfb-social/types';
 import { BallotButtons } from './BallotButtons';
 import { PostActions } from './PostActions';
@@ -120,7 +121,7 @@ function PostUserRow({ post }: { post: Post }) {
         style={{ backgroundColor: schoolColor }}
       >
         {post.author?.avatar_url ? (
-          <img src={post.author.avatar_url} alt={authorUsername} className="post-avatar-img" />
+          <Image src={post.author.avatar_url} alt={authorUsername} width={38} height={38} className="post-avatar-img" />
         ) : (
           authorName[0]?.toUpperCase()
         )}

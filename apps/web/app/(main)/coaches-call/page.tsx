@@ -1,7 +1,15 @@
 import { Suspense } from 'react';
 
 export const metadata = {
-  title: "Coach's Call",
+  title: "Coach's Call | College Football Community Polls & Hot-Seat Debates",
+  description: "Vote on the biggest decisions in college football. Community polls, hot-seat debates, and the hottest fan predictions on CFB Social.",
+  openGraph: {
+    title: "Coach's Call | CFB Social",
+    description: "Community polls and hot-seat debates. Cast your vote on the biggest decisions in CFB.",
+  },
+  alternates: {
+    canonical: 'https://cfbsocial.com/coaches-call',
+  },
 };
 
 export default function CoachesCallPage() {
