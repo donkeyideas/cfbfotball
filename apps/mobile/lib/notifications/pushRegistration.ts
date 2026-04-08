@@ -4,12 +4,22 @@ import { Platform } from 'react-native';
 
 const isExpoGo = Constants.appOwnership === 'expo';
 
-// Lazy-load to avoid crash in Expo Go
-let Notifications: typeof import('expo-notifications') | null = null;
-try {
-  if (!isExpoGo) {
-    Notifications = require('expo-notifications');
-    Notifications!.setNotificationHandler({
+/**
+ * Register for push notifications using native FCM/APNs tokens.
+ * Loads expo-notifications lazily to avoid TurboModule crashes
+ * during app launch.
+ * Returns the token string or null if registration failed.
+ */
+export async function registerForPushNotifications(
+  apiBaseUrl: string,
+  getAccessToken: () => Promise<string | null>
+): Promise<string | null> {
+  try {
+    if (isExpoGo || !Device.isDevice) return null;
+
+    const Notifications = require('expo-notifications') as typeof import('expo-notifications');
+
+    Notifications.setNotificationHandler({
       handleNotification: async () => ({
         shouldShowAlert: true,
         shouldPlaySound: true,
@@ -18,21 +28,6 @@ try {
         shouldShowList: true,
       }),
     });
-  }
-} catch (e) {
-  console.error('Failed to load expo-notifications:', e);
-}
-
-/**
- * Register for push notifications using native FCM/APNs tokens.
- * Returns the token string or null if registration failed.
- */
-export async function registerForPushNotifications(
-  apiBaseUrl: string,
-  getAccessToken: () => Promise<string | null>
-): Promise<string | null> {
-  try {
-    if (isExpoGo || !Notifications || !Device.isDevice) return null;
 
     // Request permissions
     let { status } = await Notifications.getPermissionsAsync();
@@ -74,7 +69,7 @@ export async function registerForPushNotifications(
     return pushToken;
   } catch (error: unknown) {
     const err = error as { message?: string };
-    console.error('Push registration failed:', err?.message || error);
+    console.log('Push registration failed:', err?.message || error);
     return null;
   }
 }

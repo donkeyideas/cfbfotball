@@ -6,38 +6,38 @@ import { supabase } from '@/lib/supabase';
 
 const isExpoGo = Constants.appOwnership === 'expo';
 
-let Notifications: typeof import('expo-notifications') | null = null;
-if (!isExpoGo) {
-  try {
-    Notifications = require('expo-notifications');
-    Notifications!.setNotificationHandler({
-      handleNotification: async () => ({
-        shouldShowAlert: true,
-        shouldPlaySound: true,
-        shouldSetBadge: true,
-        shouldShowBanner: true,
-        shouldShowList: true,
-      }),
-    });
-  } catch {
-    /* expo-notifications not available */
-  }
-}
-
 /**
  * Registers the device for push notifications when the user is signed in.
  * Uses native FCM/APNs tokens (not Expo Push tokens) and stores them
  * directly in the device_tokens table via Supabase.
+ *
+ * expo-notifications is loaded lazily inside useEffect to avoid
+ * TurboModule crashes during app launch on devices without APNs
+ * entitlements properly configured.
  */
 export function usePushNotifications() {
   const { userId } = useAuth();
 
   // Register push token
   useEffect(() => {
-    if (!userId || !Notifications) return;
+    if (!userId || isExpoGo) return;
+
+    let Notifications: typeof import('expo-notifications') | null = null;
 
     async function registerPush() {
       try {
+        Notifications = require('expo-notifications');
+
+        Notifications!.setNotificationHandler({
+          handleNotification: async () => ({
+            shouldShowAlert: true,
+            shouldPlaySound: true,
+            shouldSetBadge: true,
+            shouldShowBanner: true,
+            shouldShowList: true,
+          }),
+        });
+
         // Request permission
         const { status: existingStatus } = await Notifications!.getPermissionsAsync();
         let finalStatus = existingStatus;
@@ -79,13 +79,19 @@ export function usePushNotifications() {
 
   // Set up Android notification channel
   useEffect(() => {
-    if (!Notifications || Platform.OS !== 'android') return;
-    Notifications.setNotificationChannelAsync('default', {
-      name: 'CFB Social',
-      importance: Notifications.AndroidImportance.MAX,
-      vibrationPattern: [0, 250, 250, 250],
-      lightColor: '#8b1a1a',
-      sound: 'default',
-    });
+    if (isExpoGo || Platform.OS !== 'android') return;
+
+    try {
+      const Notifications = require('expo-notifications');
+      Notifications.setNotificationChannelAsync('default', {
+        name: 'CFB Social',
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: '#8b1a1a',
+        sound: 'default',
+      });
+    } catch {
+      /* expo-notifications not available */
+    }
   }, []);
 }
