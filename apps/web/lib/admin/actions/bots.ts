@@ -346,51 +346,33 @@ export async function getBotStats(): Promise<{
   postsToday: number;
 }> {
   const supabase = createAdminClient();
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
 
-  const { count: totalBots } = await supabase
-    .from('profiles')
-    .select('id', { count: 'exact', head: true })
-    .eq('is_bot', true);
+  // Phase 1: Get bot counts + IDs in parallel
+  const [totalBotsR, activeBotsR, botIdsR] = await Promise.all([
+    supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('is_bot', true),
+    supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('is_bot', true).eq('bot_active', true),
+    supabase.from('profiles').select('id').eq('is_bot', true),
+  ]);
 
-  const { count: activeBots } = await supabase
-    .from('profiles')
-    .select('id', { count: 'exact', head: true })
-    .eq('is_bot', true)
-    .eq('bot_active', true);
-
-  // Get all bot IDs
-  const { data: botIds } = await supabase
-    .from('profiles')
-    .select('id')
-    .eq('is_bot', true);
-
-  const ids = (botIds ?? []).map((b) => b.id);
-
+  const ids = (botIdsR.data ?? []).map((b) => b.id);
   let totalBotPosts = 0;
   let postsToday = 0;
 
   if (ids.length > 0) {
-    const { count: totalPosts } = await supabase
-      .from('posts')
-      .select('id', { count: 'exact', head: true })
-      .in('author_id', ids)
-      .eq('status', 'PUBLISHED');
-    totalBotPosts = totalPosts ?? 0;
-
-    const todayStart = new Date();
-    todayStart.setHours(0, 0, 0, 0);
-    const { count: todayPosts } = await supabase
-      .from('posts')
-      .select('id', { count: 'exact', head: true })
-      .in('author_id', ids)
-      .eq('status', 'PUBLISHED')
-      .gte('created_at', todayStart.toISOString());
-    postsToday = todayPosts ?? 0;
+    // Phase 2: Post counts in parallel
+    const [totalPostsR, todayPostsR] = await Promise.all([
+      supabase.from('posts').select('id', { count: 'exact', head: true }).in('author_id', ids).eq('status', 'PUBLISHED'),
+      supabase.from('posts').select('id', { count: 'exact', head: true }).in('author_id', ids).eq('status', 'PUBLISHED').gte('created_at', todayStart.toISOString()),
+    ]);
+    totalBotPosts = totalPostsR.count ?? 0;
+    postsToday = todayPostsR.count ?? 0;
   }
 
   return {
-    totalBots: totalBots ?? 0,
-    activeBots: activeBots ?? 0,
+    totalBots: totalBotsR.count ?? 0,
+    activeBots: activeBotsR.count ?? 0,
     totalBotPosts,
     postsToday,
   };
