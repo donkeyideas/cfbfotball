@@ -170,6 +170,10 @@ export async function GET(request: NextRequest) {
 
   const cacheKey = `${type}-${year}`;
 
+  const cacheHeaders = {
+    'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=600',
+  };
+
   // Check cache first
   const cached = getCached(cacheKey);
   if (cached) {
@@ -177,7 +181,7 @@ export async function GET(request: NextRequest) {
       data: cached.data,
       cached: true,
       callsRemaining: getCallsRemaining(),
-    });
+    }, { headers: cacheHeaders });
   }
 
   // Check rate limit
@@ -215,5 +219,5 @@ export async function GET(request: NextRequest) {
     data,
     cached: false,
     callsRemaining: getCallsRemaining(),
-  });
+  }, { headers: cacheHeaders });
 }

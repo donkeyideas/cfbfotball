@@ -1,13 +1,14 @@
 import { Suspense } from 'react';
 import Link from 'next/link';
+import { unstable_cache } from 'next/cache';
+import { createClient as createServerSupabase } from '@supabase/supabase-js';
 import { FeedTabs } from '@/components/feed/FeedTabs';
 import type { FeedTab } from '@/components/feed/FeedTabs';
 import { PostComposer } from '@/components/feed/PostComposer';
 import { NewPostsBanner } from '@/components/feed/NewPostsBanner';
 import { FeedListClient } from '@/components/feed/FeedListClient';
 import { CollectionPageJsonLd } from '@/components/seo/JsonLd';
-
-export const revalidate = 30; // revalidate feed every 30 seconds
+import { FEED_POST_SELECT, FEED_REPOST_SELECT } from '@/lib/queries/feed';
 
 export const metadata = {
   title: 'College Football Fan Opinions & Takes | The Feed',
@@ -31,22 +32,25 @@ export const metadata = {
 
 function FeedSkeleton() {
   return (
-    <div className="space-y-4">
-      {Array.from({ length: 5 }).map((_, i) => (
-        <div key={i} className="content-card" style={{ opacity: 0.5 }}>
-          <div className="post-user-row">
-            <div className="skeleton" style={{ width: 38, height: 38, borderRadius: '50%' }} />
-            <div style={{ flex: 1 }}>
-              <div className="skeleton" style={{ width: 120, height: 14, marginBottom: 6 }} />
-              <div className="skeleton" style={{ width: 80, height: 10 }} />
-            </div>
-          </div>
-          <div style={{ marginTop: 12 }}>
-            <div className="skeleton" style={{ width: '100%', height: 14, marginBottom: 8 }} />
-            <div className="skeleton" style={{ width: '75%', height: 14 }} />
-          </div>
-        </div>
-      ))}
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '80px 0 48px' }}>
+      <img
+        src="/logo.png"
+        alt="CFB Social"
+        width={120}
+        height={120}
+        style={{ opacity: 0.5, marginBottom: 24 }}
+      />
+      <div className="feed-loading-bar" />
+      <p style={{
+        fontFamily: 'var(--mono)',
+        fontSize: '0.8rem',
+        color: 'var(--faded-ink)',
+        letterSpacing: '1.5px',
+        textTransform: 'uppercase',
+        marginTop: 16,
+      }}>
+        Loading the feed...
+      </p>
     </div>
   );
 }
@@ -54,6 +58,101 @@ function FeedSkeleton() {
 interface FeedPageProps {
   searchParams: Promise<{ tab?: string }>;
 }
+
+/* ── Anon Supabase client (no cookies, safe for unstable_cache) ── */
+
+function getAnonSupabase() {
+  return createServerSupabase(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  );
+}
+
+/* ── Cached feed queries for public tabs (30s TTL) ─────────────── */
+
+const getCachedLatestFeed = unstable_cache(
+  async () => {
+    const sb = getAnonSupabase();
+    const [postsResult, repostsResult] = await Promise.all([
+      sb
+        .from('posts')
+        .select(FEED_POST_SELECT)
+        .in('status', ['PUBLISHED', 'FLAGGED'])
+        .is('parent_id', null)
+        .order('created_at', { ascending: false })
+        .limit(20),
+      sb
+        .from('reposts')
+        .select(FEED_REPOST_SELECT)
+        .order('created_at', { ascending: false })
+        .limit(10),
+    ]);
+    return { posts: postsResult.data, postsError: postsResult.error?.message ?? null, reposts: repostsResult.data };
+  },
+  ['feed-latest'],
+  { revalidate: 30, tags: ['feed'] },
+);
+
+const getCachedTopFeed = unstable_cache(
+  async () => {
+    const sb = getAnonSupabase();
+    const [postsResult, repostsResult] = await Promise.all([
+      sb
+        .from('posts')
+        .select(FEED_POST_SELECT)
+        .in('status', ['PUBLISHED', 'FLAGGED'])
+        .is('parent_id', null)
+        .order('touchdown_count', { ascending: false })
+        .limit(20),
+      sb
+        .from('reposts')
+        .select(FEED_REPOST_SELECT)
+        .order('created_at', { ascending: false })
+        .limit(10),
+    ]);
+    return { posts: postsResult.data, postsError: postsResult.error?.message ?? null, reposts: repostsResult.data };
+  },
+  ['feed-top'],
+  { revalidate: 30, tags: ['feed'] },
+);
+
+const getCachedReceiptsFeed = unstable_cache(
+  async () => {
+    const sb = getAnonSupabase();
+
+    // First get aging take post IDs
+    const { data: agingTakePosts } = await sb
+      .from('aging_takes')
+      .select('post_id')
+      .order('created_at', { ascending: false })
+      .limit(200);
+    const receiptPostIds = agingTakePosts?.map((a) => a.post_id) ?? [];
+
+    let query = sb
+      .from('posts')
+      .select(FEED_POST_SELECT)
+      .in('status', ['PUBLISHED', 'FLAGGED'])
+      .is('parent_id', null);
+
+    if (receiptPostIds.length > 0) {
+      query = query.or(`post_type.eq.RECEIPT,id.in.(${receiptPostIds.join(',')})`);
+    } else {
+      query = query.eq('post_type', 'RECEIPT');
+    }
+
+    const [postsResult, repostsResult] = await Promise.all([
+      query.order('created_at', { ascending: false }).limit(20),
+      sb
+        .from('reposts')
+        .select(FEED_REPOST_SELECT)
+        .order('created_at', { ascending: false })
+        .limit(10),
+    ]);
+    return { posts: postsResult.data, postsError: postsResult.error?.message ?? null, reposts: repostsResult.data };
+  },
+  ['feed-receipts'],
+  { revalidate: 30, tags: ['feed'] },
+);
 
 export default async function FeedPage({ searchParams }: FeedPageProps) {
   const params = await searchParams;
@@ -85,18 +184,34 @@ export default async function FeedPage({ searchParams }: FeedPageProps) {
 }
 
 async function FeedList({ tab }: { tab: FeedTab }) {
+  // Public tabs use cached queries (no auth needed)
+  if (tab === 'latest' || tab === 'top' || tab === 'receipts') {
+    const cached =
+      tab === 'latest' ? await getCachedLatestFeed()
+      : tab === 'top' ? await getCachedTopFeed()
+      : await getCachedReceiptsFeed();
+
+    if (cached.postsError) {
+      console.error('[FeedList] Cache query error:', cached.postsError);
+      return (
+        <div className="content-card" style={{ textAlign: 'center', padding: 24 }}>
+          <p style={{ color: 'var(--faded-ink)' }}>Unable to load posts right now. Please try again later.</p>
+        </div>
+      );
+    }
+
+    return renderFeedItems(cached.posts, cached.reposts, tab, null);
+  }
+
+  // Auth-dependent tabs: following, my-school
   const { createClient } = await import('@/lib/supabase/server');
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
 
-  // Only fetch user for tabs that need it — skip auth round-trip on public tabs
-  const needsAuth = tab === 'my-school' || tab === 'following';
-  const user = needsAuth
-    ? (await supabase.auth.getUser()).data.user
-    : null;
   let userSchoolId: string | null = null;
   let followingIds: string[] = [];
 
-  if (user && needsAuth) {
+  if (user) {
     const [profileRes, followsRes] = await Promise.all([
       tab === 'my-school'
         ? supabase.from('profiles').select('school_id').eq('id', user.id).single()
@@ -109,176 +224,90 @@ async function FeedList({ tab }: { tab: FeedTab }) {
     followingIds = (followsRes.data as Array<{ following_id: string }> | null)?.map((f) => f.following_id) ?? [];
   }
 
-  // Build query based on active tab
+  // Handle unauthenticated or missing data for auth tabs
+  if (tab === 'following') {
+    if (!user) {
+      return (
+        <div className="content-card" style={{ textAlign: 'center', padding: 32 }}>
+          <p className="post-body" style={{ fontSize: '1.1rem' }}>
+            Sign in to see posts from people you follow.
+          </p>
+          <p style={{ marginTop: 12 }}>
+            <Link href="/login" style={{ fontFamily: 'var(--mono)', fontSize: '0.85rem', color: 'var(--crimson)' }}>
+              Log in
+            </Link>
+            {' or '}
+            <Link href="/register" style={{ fontFamily: 'var(--mono)', fontSize: '0.85rem', color: 'var(--crimson)' }}>
+              create an account
+            </Link>
+          </p>
+        </div>
+      );
+    }
+    if (followingIds.length === 0) {
+      return (
+        <div className="content-card" style={{ textAlign: 'center', padding: 32 }}>
+          <p className="post-body" style={{ fontSize: '1.1rem' }}>
+            You&apos;re not following anyone yet.
+          </p>
+          <p style={{ color: 'var(--faded-ink)', fontSize: '0.85rem', marginTop: 8 }}>
+            Follow other users to see their posts here.
+          </p>
+        </div>
+      );
+    }
+  }
+
+  if (tab === 'my-school') {
+    if (!user) {
+      return (
+        <div className="content-card" style={{ textAlign: 'center', padding: 32 }}>
+          <p className="post-body" style={{ fontSize: '1.1rem' }}>
+            Sign in to see your school&apos;s feed.
+          </p>
+          <p style={{ marginTop: 12 }}>
+            <Link href="/login" style={{ fontFamily: 'var(--mono)', fontSize: '0.85rem', color: 'var(--crimson)' }}>
+              Log in
+            </Link>
+            {' or '}
+            <Link href="/register" style={{ fontFamily: 'var(--mono)', fontSize: '0.85rem', color: 'var(--crimson)' }}>
+              create an account
+            </Link>
+          </p>
+        </div>
+      );
+    }
+    if (!userSchoolId) {
+      return (
+        <div className="content-card" style={{ textAlign: 'center', padding: 32 }}>
+          <p className="post-body" style={{ fontSize: '1.1rem' }}>
+            No school selected.
+          </p>
+          <p style={{ color: 'var(--faded-ink)', fontSize: '0.85rem', marginTop: 8 }}>
+            Pick your school in Settings to see your school&apos;s feed.
+          </p>
+        </div>
+      );
+    }
+  }
+
+  // Build query for auth-dependent tabs
   let query = supabase
     .from('posts')
-    .select(`
-      *,
-      author:profiles!posts_author_id_fkey(
-        id,
-        username,
-        display_name,
-        avatar_url,
-        school_id,
-        dynasty_tier
-      ),
-      school:schools!posts_school_id_fkey(
-        id,
-        name,
-        abbreviation,
-        primary_color,
-        secondary_color,
-        logo_url,
-        slug
-      ),
-      aging_takes(
-        id,
-        user_id,
-        revisit_date,
-        is_surfaced,
-        community_verdict
-      )
-    `)
+    .select(FEED_POST_SELECT)
     .in('status', ['PUBLISHED', 'FLAGGED'])
     .is('parent_id', null);
 
-  // Apply tab-specific filters
-  switch (tab) {
-    case 'top':
-      query = query.order('touchdown_count', { ascending: false });
-      break;
-    case 'receipts': {
-      // Show RECEIPT-type posts AND any post that has a receipt filed (aging_takes)
-      // Limit to recent aging takes to avoid unbounded query
-      const { data: agingTakePosts } = await supabase
-        .from('aging_takes')
-        .select('post_id')
-        .order('created_at', { ascending: false })
-        .limit(200);
-      const receiptPostIds = agingTakePosts?.map((a) => a.post_id) ?? [];
-      if (receiptPostIds.length > 0) {
-        query = query.or(`post_type.eq.RECEIPT,id.in.(${receiptPostIds.join(',')})`);
-      } else {
-        query = query.eq('post_type', 'RECEIPT');
-      }
-      query = query.order('created_at', { ascending: false });
-      break;
-    }
-    case 'following':
-      if (!user) {
-        return (
-          <div className="content-card" style={{ textAlign: 'center', padding: 32 }}>
-            <p className="post-body" style={{ fontSize: '1.1rem' }}>
-              Sign in to see posts from people you follow.
-            </p>
-            <p style={{ marginTop: 12 }}>
-              <Link href="/login" style={{ fontFamily: 'var(--mono)', fontSize: '0.85rem', color: 'var(--crimson)' }}>
-                Log in
-              </Link>
-              {' or '}
-              <Link href="/register" style={{ fontFamily: 'var(--mono)', fontSize: '0.85rem', color: 'var(--crimson)' }}>
-                create an account
-              </Link>
-            </p>
-          </div>
-        );
-      }
-      if (followingIds.length > 0) {
-        query = query.in('author_id', followingIds);
-      } else {
-        return (
-          <div className="content-card" style={{ textAlign: 'center', padding: 32 }}>
-            <p className="post-body" style={{ fontSize: '1.1rem' }}>
-              You&apos;re not following anyone yet.
-            </p>
-            <p style={{ color: 'var(--faded-ink)', fontSize: '0.85rem', marginTop: 8 }}>
-              Follow other users to see their posts here.
-            </p>
-          </div>
-        );
-      }
-      query = query.order('created_at', { ascending: false });
-      break;
-    case 'my-school':
-      if (!user) {
-        return (
-          <div className="content-card" style={{ textAlign: 'center', padding: 32 }}>
-            <p className="post-body" style={{ fontSize: '1.1rem' }}>
-              Sign in to see your school&apos;s feed.
-            </p>
-            <p style={{ marginTop: 12 }}>
-              <Link href="/login" style={{ fontFamily: 'var(--mono)', fontSize: '0.85rem', color: 'var(--crimson)' }}>
-                Log in
-              </Link>
-              {' or '}
-              <Link href="/register" style={{ fontFamily: 'var(--mono)', fontSize: '0.85rem', color: 'var(--crimson)' }}>
-                create an account
-              </Link>
-            </p>
-          </div>
-        );
-      }
-      if (userSchoolId) {
-        query = query.eq('school_id', userSchoolId);
-      } else {
-        return (
-          <div className="content-card" style={{ textAlign: 'center', padding: 32 }}>
-            <p className="post-body" style={{ fontSize: '1.1rem' }}>
-              No school selected.
-            </p>
-            <p style={{ color: 'var(--faded-ink)', fontSize: '0.85rem', marginTop: 8 }}>
-              Pick your school in Settings to see your school&apos;s feed.
-            </p>
-          </div>
-        );
-      }
-      query = query.order('created_at', { ascending: false });
-      break;
-    default: // 'latest'
-      query = query.order('created_at', { ascending: false });
-      break;
+  if (tab === 'following') {
+    query = query.in('author_id', followingIds);
+  } else if (tab === 'my-school' && userSchoolId) {
+    query = query.eq('school_id', userSchoolId);
   }
+  query = query.order('created_at', { ascending: false });
 
-  // Fetch posts and reposts in PARALLEL (not sequential)
   let repostQuery = supabase
     .from('reposts')
-    .select(`
-      id,
-      created_at,
-      user_id,
-      post_id,
-      reposter:profiles!reposts_user_id_fkey(
-        username,
-        display_name
-      ),
-      post:posts!reposts_post_id_fkey(
-        *,
-        author:profiles!posts_author_id_fkey(
-          id,
-          username,
-          display_name,
-          avatar_url,
-          school_id,
-          dynasty_tier
-        ),
-        school:schools!posts_school_id_fkey(
-          id,
-          name,
-          abbreviation,
-          primary_color,
-          secondary_color,
-          logo_url,
-          slug
-        ),
-        aging_takes(
-          id,
-          user_id,
-          revisit_date,
-          is_surfaced,
-          community_verdict
-        )
-      )
-    `)
+    .select(FEED_REPOST_SELECT)
     .order('created_at', { ascending: false })
     .limit(10);
 
@@ -291,10 +320,8 @@ async function FeedList({ tab }: { tab: FeedTab }) {
     repostQuery,
   ]);
 
-  const { data: posts, error } = postsResult;
-
-  if (error) {
-    console.error('[FeedList] Query error:', error.message, error.code, error.details, error.hint);
+  if (postsResult.error) {
+    console.error('[FeedList] Query error:', postsResult.error.message);
     return (
       <div className="content-card" style={{ textAlign: 'center', padding: 24 }}>
         <p style={{ color: 'var(--faded-ink)' }}>Unable to load posts right now. Please try again later.</p>
@@ -302,6 +329,15 @@ async function FeedList({ tab }: { tab: FeedTab }) {
     );
   }
 
+  return renderFeedItems(postsResult.data, repostsResult.data, tab, userSchoolId);
+}
+
+async function renderFeedItems(
+  posts: Record<string, unknown>[] | null,
+  reposts: Record<string, unknown>[] | null,
+  tab: FeedTab,
+  userSchoolId: string | null,
+) {
   if (!posts || posts.length === 0) {
     return (
       <div className="content-card" style={{ textAlign: 'center', padding: 32 }}>
@@ -316,9 +352,8 @@ async function FeedList({ tab }: { tab: FeedTab }) {
   }
 
   let repostItems: Array<Record<string, unknown>> = [];
-  const reposts = repostsResult.data;
   if (reposts) {
-    repostItems = reposts
+    repostItems = (reposts as Array<Record<string, unknown>>)
       .filter((r) => {
         const post = (Array.isArray(r.post) ? r.post[0] : r.post) as Record<string, unknown> | null;
         return post && (post.status === 'PUBLISHED' || post.status === 'FLAGGED') && !post.parent_id;
@@ -336,7 +371,6 @@ async function FeedList({ tab }: { tab: FeedTab }) {
       });
   }
 
-  // Merge posts and reposts into a single timeline
   const postItems = posts.map((p) => ({
     ...p,
     _feedKey: `post-${p.id}`,
@@ -344,15 +378,12 @@ async function FeedList({ tab }: { tab: FeedTab }) {
     _repostedBy: null as { username: string; display_name: string | null } | null,
   }));
 
-  // Merge and sort by feed time (descending)
-  // Reposts appear at the time they were reposted, originals at their created_at
   const merged = [...postItems, ...repostItems]
     .sort((a, b) => new Date(b._feedTime as string).getTime() - new Date(a._feedTime as string).getTime())
     .slice(0, 25);
 
   const { PostCard } = await import('@/components/feed/PostCard');
 
-  // Get last item's feed time for cursor pagination
   const lastItem = merged[merged.length - 1];
   const nextCursor = lastItem?._feedTime ?? null;
   const hasMore = posts.length === 20;

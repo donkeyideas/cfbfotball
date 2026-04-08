@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { createClient } from '@/lib/supabase/client';
 import { ChaosMeter } from './ChaosMeter';
 import { NewsModal } from './NewsModal';
 
@@ -59,6 +58,13 @@ interface LeaderboardEntry {
   school: { abbreviation: string } | null;
 }
 
+interface ChaosStats {
+  posts24h: number;
+  challenges24h: number;
+  flagged24h: number;
+  portalMoves: number;
+}
+
 // Historical CFB moments for The Vault
 const vaultMoments = [
   { year: '2007', text: 'Appalachian State stuns #5 Michigan 34-32 at the Big House — the greatest upset in college football history.' },
@@ -92,10 +98,9 @@ export function PressBoxSidebar() {
   const [leaders, setLeaders] = useState<LeaderboardEntry[]>([]);
   const [recruits, setRecruits] = useState<CFBDRecruit[]>([]);
   const [transfers, setTransfers] = useState<CFBDTransfer[]>([]);
+  const [chaosStats, setChaosStats] = useState<ChaosStats | null>(null);
 
   useEffect(() => {
-    const supabase = createClient();
-
     // Load ESPN news (with 5s timeout)
     async function loadNews() {
       try {
@@ -137,38 +142,22 @@ export function PressBoxSidebar() {
       }
     }
 
-    // Load portal players for ticker
-    async function loadPortal() {
-      const { data } = await supabase
-        .from('portal_players')
-        .select('name, position, school:schools!portal_players_previous_school_id_fkey(abbreviation)')
-        .order('created_at', { ascending: false })
-        .limit(8);
-      if (data && data.length > 0) {
-        setPortalPlayers(data as unknown as PortalPlayer[]);
+    // Load consolidated sidebar data (portal, claims, leaders, chaos) in ONE call
+    async function loadSidebarData() {
+      try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 5000);
+        const res = await fetch('/api/sidebar', { signal: controller.signal });
+        clearTimeout(timeout);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.portalPlayers?.length > 0) setPortalPlayers(data.portalPlayers);
+        if (data.claims?.length > 0) setClaims(data.claims);
+        if (data.leaders) setLeaders(data.leaders);
+        if (data.chaos) setChaosStats(data.chaos);
+      } catch {
+        // Sidebar data unavailable
       }
-    }
-
-    // Load recent roster claims for recruiting wire
-    async function loadClaims() {
-      const { data } = await supabase
-        .from('roster_claims')
-        .select('created_at, school:schools!roster_claims_school_id_fkey(abbreviation), player:portal_players!roster_claims_player_id_fkey(name, star_rating)')
-        .order('created_at', { ascending: false })
-        .limit(5);
-      if (data && data.length > 0) {
-        setClaims(data as unknown as RecruitingClaim[]);
-      }
-    }
-
-    // Load leaderboard
-    async function loadLeaders() {
-      const { data } = await supabase
-        .from('profiles')
-        .select('username, xp, dynasty_tier, school:schools!profiles_school_id_fkey(abbreviation)')
-        .order('xp', { ascending: false })
-        .limit(5);
-      if (data) setLeaders(data as unknown as LeaderboardEntry[]);
     }
 
     // Load CFBD recruiting commits (with 5s timeout)
@@ -208,12 +197,14 @@ export function PressBoxSidebar() {
       } catch { /* CFBD unavailable */ }
     }
 
-    // Fire all data loads in parallel — allSettled so one failure doesn't block others
+    // Fire all data loads in parallel — 4 calls (was 10)
+    // 1. ESPN news (external)
+    // 2. /api/sidebar (portal + claims + leaders + chaos — consolidated)
+    // 3. /api/cfbd?type=recruiting (already cached)
+    // 4. /api/cfbd?type=portal (already cached)
     Promise.allSettled([
       loadNews(),
-      loadPortal(),
-      loadClaims(),
-      loadLeaders(),
+      loadSidebarData(),
       loadRecruits(),
       loadTransfers(),
     ]);
@@ -231,7 +222,7 @@ export function PressBoxSidebar() {
   return (
     <div>
       {/* Section 0: Chaos Meter */}
-      <ChaosMeter />
+      <ChaosMeter chaos={chaosStats} />
 
       {/* Section 1: Recruiting Wire */}
       <div className="sidebar-section">

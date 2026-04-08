@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { PostCard } from './PostCard';
 import type { FeedTab } from './FeedTabs';
+import { FEED_POST_SELECT, FEED_REPOST_SELECT } from '@/lib/queries/feed';
 
 interface FeedListClientProps {
   tab: FeedTab;
@@ -28,33 +29,7 @@ export function FeedListClient({ tab, cursor: initialCursor, userSchoolId }: Fee
 
     let query = supabase
       .from('posts')
-      .select(`
-        *,
-        author:profiles!posts_author_id_fkey(
-          id,
-          username,
-          display_name,
-          avatar_url,
-          school_id,
-          dynasty_tier
-        ),
-        school:schools!posts_school_id_fkey(
-          id,
-          name,
-          abbreviation,
-          primary_color,
-          secondary_color,
-          logo_url,
-          slug
-        ),
-        aging_takes(
-          id,
-          user_id,
-          revisit_date,
-          is_surfaced,
-          community_verdict
-        )
-      `)
+      .select(FEED_POST_SELECT)
       .in('status', ['PUBLISHED', 'FLAGGED'])
       .is('parent_id', null);
 
@@ -106,43 +81,7 @@ export function FeedListClient({ tab, cursor: initialCursor, userSchoolId }: Fee
       query.limit(20),
       supabase
         .from('reposts')
-        .select(`
-          id,
-          created_at,
-          user_id,
-          post_id,
-          reposter:profiles!reposts_user_id_fkey(
-            username,
-            display_name
-          ),
-          post:posts!reposts_post_id_fkey(
-            *,
-            author:profiles!posts_author_id_fkey(
-              id,
-              username,
-              display_name,
-              avatar_url,
-              school_id,
-              dynasty_tier
-            ),
-            school:schools!posts_school_id_fkey(
-              id,
-              name,
-              abbreviation,
-              primary_color,
-              secondary_color,
-              logo_url,
-              slug
-            ),
-            aging_takes(
-              id,
-              user_id,
-              revisit_date,
-              is_surfaced,
-              community_verdict
-            )
-          )
-        `)
+        .select(FEED_REPOST_SELECT)
         .lt('created_at', cursor)
         .order('created_at', { ascending: false })
         .limit(10),
