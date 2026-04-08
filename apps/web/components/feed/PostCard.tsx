@@ -150,7 +150,7 @@ function PostUserRow({ post }: { post: Post }) {
         )}
       </div>
       {tierLabel && <span className="post-badge">{tierLabel}</span>}
-      <span className="post-time">{timeAgo}</span>
+      <span className="post-time" suppressHydrationWarning>{timeAgo}</span>
     </div>
   );
 }
@@ -210,7 +210,7 @@ const ClassicPost = memo(function ClassicPost({ post }: { post: Post }) {
         <Link href={`/post/${post.id}`} className="post-body-link">
           <div className="post-body">{post.content}</div>
         </Link>
-        <div className="receipt-stamp">RECEIPT FILED &mdash; Review {receiptDate}</div>
+        <div className="receipt-stamp" suppressHydrationWarning>RECEIPT FILED &mdash; Review {receiptDate}</div>
         <PostBottom post={post} />
       </article>
     );
@@ -303,7 +303,7 @@ const PressBoxPost = memo(function PressBoxPost({ post }: { post: Post }) {
       {post._repostedBy && <RepostStamp repostedBy={post._repostedBy} />}
       <div className="pressbox-header">
         <span className="pressbox-title">Sideline Report</span>
-        <span className="pressbox-time">{headerTime}</span>
+        <span className="pressbox-time" suppressHydrationWarning>{headerTime}</span>
       </div>
       {post.sideline_game && (
         <div className="pressbox-meta">
@@ -405,7 +405,7 @@ const AgingTakePost = memo(function AgingTakePost({ post }: { post: Post }) {
       {post._repostedBy && <RepostStamp repostedBy={post._repostedBy} />}
       <div className="aging-header">
         <span className="aging-label">Aging Take</span>
-        <span className="aging-date">Filed {dateStr}</span>
+        <span className="aging-date" suppressHydrationWarning>Filed {dateStr}</span>
       </div>
       <div className="aging-body">
         <PostUserRow post={post} />

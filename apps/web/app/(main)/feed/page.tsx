@@ -5,7 +5,7 @@ import { createClient as createServerSupabase } from '@supabase/supabase-js';
 import { FeedTabs } from '@/components/feed/FeedTabs';
 import type { FeedTab } from '@/components/feed/FeedTabs';
 import { PostComposer } from '@/components/feed/PostComposer';
-import { NewPostsBanner } from '@/components/feed/NewPostsBanner';
+import { NewPostsBannerLazy } from '@/components/feed/NewPostsBannerLazy';
 import { FeedListClient } from '@/components/feed/FeedListClient';
 import { CollectionPageJsonLd } from '@/components/seo/JsonLd';
 import { FEED_POST_SELECT, FEED_REPOST_SELECT } from '@/lib/queries/feed';
@@ -174,7 +174,7 @@ export default async function FeedPage({ searchParams }: FeedPageProps) {
 
       <PostComposer />
 
-      <NewPostsBanner />
+      <NewPostsBannerLazy />
 
       <Suspense fallback={<FeedSkeleton />}>
         <FeedList tab={tab} />
