@@ -43,11 +43,7 @@
       "expo-secure-store",
       "expo-font",
       "expo-apple-authentication",
-      "expo-image-picker",
-      ["expo-notifications", {
-        "icon": "./assets/notification-icon.png",
-        "color": "#8b1a1a"
-      }]
+      "expo-image-picker"
     ],
     "experiments": {
       "typedRoutes": false
