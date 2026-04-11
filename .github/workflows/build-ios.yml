@@ -16,13 +16,14 @@ jobs:
       - name: List available Xcode versions
         run: ls -d /Applications/Xcode*.app 2>/dev/null || true
 
-      - name: Select latest Xcode
+      - name: Select Xcode 16.3 (Swift 6.1)
         run: |
-          # Use Xcode 16.3+ (Swift 6.1) which fixes strict concurrency errors in expo-modules-core
-          # Fall back through versions until we find one that exists
-          for ver in 26.0 17.4 17.3 17.2 17.1 17.0 16.4 16.3; do
+          # Xcode 16.3 = Swift 6.1 which fixes strict concurrency errors in expo-modules-core
+          # Do NOT use Xcode 17+/26+ — React Native 0.83 is not compatible (RCTConvert missing)
+          # Do NOT use Xcode 16.2 or earlier — Swift 6.0 has hard concurrency errors
+          for ver in 16.3 16.4; do
             if [ -d "/Applications/Xcode_${ver}.app" ]; then
-              echo "Found Xcode ${ver}"
+              echo "Using Xcode ${ver}"
               sudo xcode-select -s "/Applications/Xcode_${ver}.app/Contents/Developer"
               break
             fi
