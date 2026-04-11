@@ -70,10 +70,26 @@ jobs:
           echo "${{ secrets.APPLE_API_KEY_BASE64 }}" | base64 --decode > ~/private_keys/AuthKey_${{ secrets.APPLE_API_KEY_ID }}.p8
         working-directory: .
 
-      - name: Submit to App Store
+      - name: Configure EAS submit with API key
         if: success()
         env:
-          EXPO_APPLE_APP_STORE_CONNECT_API_KEY_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
-          EXPO_APPLE_APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APPLE_API_ISSUER_ID }}
-          EXPO_APPLE_APP_STORE_CONNECT_API_KEY_PATH: ~/private_keys/AuthKey_${{ secrets.APPLE_API_KEY_ID }}.p8
-        run: eas submit --platform ios --path ${{ github.workspace }}/cfb-social.ipa
+          APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
+          APPLE_API_ISSUER_ID: ${{ secrets.APPLE_API_ISSUER_ID }}
+        run: |
+          node -e "
+            const fs = require('fs');
+            const eas = JSON.parse(fs.readFileSync('eas.json', 'utf8'));
+            eas.submit = eas.submit || {};
+            eas.submit.production = eas.submit.production || {};
+            eas.submit.production.ios = {
+              ascApiKeyId: process.env.APPLE_API_KEY_ID,
+              ascApiKeyIssuerId: process.env.APPLE_API_ISSUER_ID,
+              ascApiKeyPath: process.env.HOME + '/private_keys/AuthKey_' + process.env.APPLE_API_KEY_ID + '.p8'
+            };
+            fs.writeFileSync('eas.json', JSON.stringify(eas, null, 2));
+            console.log('Updated eas.json submit config:', JSON.stringify(eas.submit, null, 2));
+          "
+
+      - name: Submit to App Store
+        if: success()
+        run: eas submit --platform ios --path ${{ github.workspace }}/cfb-social.ipa --non-interactive
