@@ -7,53 +7,114 @@
  * the real path (/private/var/...). path.relative() between these two prefixes
  * produces broken ../../ chains instead of a simple relative path.
  *
- * This plugin prepends a line to the "Bundle React Native code and images"
- * Xcode build phase that normalizes PROJECT_DIR using `pwd -P` (physical
- * path with symlinks resolved), so all downstream paths are consistent.
+ * This plugin uses withDangerousMod to directly edit the .pbxproj file as raw
+ * text AFTER all other base mods have run. This avoids the xcode npm parser
+ * which chokes on $ characters in shell scripts.
+ *
+ * It prepends a line to the "Bundle React Native code and images" build phase
+ * that normalizes PROJECT_DIR using `pwd -P` (physical path with symlinks
+ * resolved), so all downstream paths are consistent.
  */
-const { withXcodeProject } = require('@expo/config-plugins');
+const { withDangerousMod } = require('@expo/config-plugins');
+const fs = require('fs');
+const path = require('path');
 
-const PATCH_COMMENT = '# [CFB Social] Resolve /var symlink for Metro bundler';
-const PATCH_LINE = 'export PROJECT_DIR="$(cd "$PROJECT_DIR" && pwd -P)"';
+const PATCH_MARKER = '# [CFB Social] Resolve /var symlink for Metro bundler';
 
 module.exports = function withRealpathFix(config) {
-  return withXcodeProject(config, async (config) => {
-    const project = config.modResults;
-    const nativeTargets = project.pbxNativeTargetSection();
+  return withDangerousMod(config, [
+    'ios',
+    async (config) => {
+      const iosRoot = config.modRequest.platformProjectRoot;
 
-    for (const uuid in nativeTargets) {
-      const target = nativeTargets[uuid];
-      if (typeof target !== 'object' || target.isa !== 'PBXNativeTarget') continue;
+      // Find the .xcodeproj directory
+      const entries = fs.readdirSync(iosRoot);
+      const xcodeprojDir = entries.find((e) => e.endsWith('.xcodeproj'));
 
-      const buildPhases = target.buildPhases || [];
-      for (const phase of buildPhases) {
-        const phaseObj = project.hash.project.objects.PBXShellScriptBuildPhase?.[phase.value];
-        if (!phaseObj) continue;
+      if (!xcodeprojDir) {
+        console.log('[withRealpathFix] No .xcodeproj directory found, skipping');
+        return config;
+      }
 
-        const name = phaseObj.name || '';
-        if (!name.includes('Bundle React Native code and images')) continue;
+      const pbxprojPath = path.join(iosRoot, xcodeprojDir, 'project.pbxproj');
 
-        let script = phaseObj.shellScript || '';
-        // Remove outer quotes if present
-        if (script.startsWith('"') && script.endsWith('"')) {
-          script = script.slice(1, -1);
-        }
+      if (!fs.existsSync(pbxprojPath)) {
+        console.log('[withRealpathFix] No project.pbxproj found, skipping');
+        return config;
+      }
 
-        // Don't patch twice
-        if (script.includes(PATCH_COMMENT)) {
-          console.log('[withRealpathFix] Already patched, skipping');
+      let contents = fs.readFileSync(pbxprojPath, 'utf8');
+
+      // Check if already patched
+      if (contents.includes(PATCH_MARKER)) {
+        console.log('[withRealpathFix] Already patched, skipping');
+        return config;
+      }
+
+      // In .pbxproj, shell scripts are stored as quoted strings with \n for
+      // newlines and \" for quotes. The "Bundle React Native code and images"
+      // phase has a shellScript = "..." field.
+      //
+      // We need to find this specific shellScript and prepend our fix.
+      // The block looks like:
+      //   HASH /* Bundle React Native code and images */ = {
+      //     ...
+      //     shellScript = "...existing script...";
+      //     ...
+      //   };
+
+      const lines = contents.split('\n');
+      let inBundlePhase = false;
+      let modified = false;
+
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+
+        // Detect the Bundle React Native build phase block
+        if (line.includes('Bundle React Native code and images')) {
+          inBundlePhase = true;
           continue;
         }
 
-        // Prepend the symlink fix
-        const patch = `${PATCH_COMMENT}\\n${PATCH_LINE}\\n`;
-        script = patch + script;
+        if (inBundlePhase && line.includes('shellScript = "')) {
+          // Found the shellScript line - prepend our fix
+          // In pbxproj format: \n = newline, \" = quote, $ is literal
+          // In pbxproj: \n = newline, \" = literal quote, $ is literal
+          // Shell assignment doesn't need outer quotes (no word splitting)
+          const patchPrefix =
+            PATCH_MARKER +
+            '\\n' +
+            'export PROJECT_DIR=$(cd \\"$PROJECT_DIR\\" && pwd -P)' +
+            '\\n';
 
-        phaseObj.shellScript = `"${script}"`;
-        console.log('[withRealpathFix] Patched "Bundle React Native code and images" build phase');
+          lines[i] = line.replace(
+            'shellScript = "',
+            'shellScript = "' + patchPrefix
+          );
+          inBundlePhase = false;
+          modified = true;
+          console.log(
+            `[withRealpathFix] Patched shellScript at line ${i + 1}`
+          );
+          break;
+        }
+
+        // Reset if we hit end of block without finding shellScript
+        if (inBundlePhase && line.trim() === '};') {
+          inBundlePhase = false;
+        }
       }
-    }
 
-    return config;
-  });
+      if (modified) {
+        fs.writeFileSync(pbxprojPath, lines.join('\n'));
+        console.log('[withRealpathFix] Successfully wrote patched .pbxproj');
+      } else {
+        console.log(
+          '[withRealpathFix] WARNING: Could not find "Bundle React Native code and images" shellScript to patch'
+        );
+      }
+
+      return config;
+    },
+  ]);
 };
