@@ -39,12 +39,18 @@ export function ThemeProvider({ children }: PropsWithChildren) {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    AsyncStorage.getItem(STORAGE_KEY).then((stored) => {
-      if (stored === 'dark' || stored === 'light') {
-        setColorModeState(stored);
-      }
-      setReady(true);
-    });
+    AsyncStorage.getItem(STORAGE_KEY)
+      .then((stored) => {
+        if (stored === 'dark' || stored === 'light') {
+          setColorModeState(stored);
+        }
+      })
+      .catch((err) => {
+        console.warn('ThemeProvider: failed to read color mode:', err);
+      })
+      .finally(() => {
+        setReady(true);
+      });
   }, []);
 
   const setColorMode = useCallback((mode: ColorMode) => {

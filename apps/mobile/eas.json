@@ -12,7 +12,17 @@
       "distribution": "internal"
     },
     "production": {
-      "autoIncrement": true
+      "autoIncrement": true,
+      "env": {
+        "EXPO_PUBLIC_SUPABASE_URL": "https://lazwferoamyntvrgsqcu.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxhendmZXJvYW15bnR2cmdzcWN1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1NjIyNTUsImV4cCI6MjA5MDEzODI1NX0.5n-v6-AmzjerlgMmOAXK3D2YNEmW87JP4O3wvJw-bTY"
+      }
+    },
+    "production-new": {
+      "autoIncrement": true,
+      "env": {
+        "ANDROID_PACKAGE": "com.cfbsocial.android"
+      }
     }
   },
   "submit": {

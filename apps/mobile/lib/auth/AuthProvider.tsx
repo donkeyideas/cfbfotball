@@ -72,49 +72,62 @@ export function AuthProvider({ children }: PropsWithChildren) {
   const userIdRef = useRef<string | null>(null);
 
   const fetchProfiles = useCallback(async (uid: string) => {
-    const { data } = await supabase
-      .from('profiles')
-      .select(
-        'id, username, display_name, avatar_url, banner_url, bio, school_id, dynasty_tier, xp, level, post_count, correct_predictions, prediction_count, follower_count, following_count, touchdown_count, fumble_count, owner_id'
-      )
-      .eq('owner_id', uid)
-      .order('created_at', { ascending: true });
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select(
+          'id, username, display_name, avatar_url, banner_url, bio, school_id, dynasty_tier, xp, level, post_count, correct_predictions, prediction_count, follower_count, following_count, touchdown_count, fumble_count, owner_id'
+        )
+        .eq('owner_id', uid)
+        .order('created_at', { ascending: true });
 
-    if (data && data.length > 0) {
-      const mapped: AuthProfile[] = data.map((d: Record<string, unknown>) => ({
-        id: d.id as string,
-        username: (d.username as string) ?? null,
-        display_name: (d.display_name as string) ?? null,
-        avatar_url: (d.avatar_url as string) ?? null,
-        banner_url: (d.banner_url as string) ?? null,
-        bio: (d.bio as string) ?? null,
-        school_id: (d.school_id as string) ?? null,
-        dynasty_tier: (d.dynasty_tier as string) ?? null,
-        xp: (d.xp as number) ?? 0,
-        level: (d.level as number) ?? 1,
-        post_count: (d.post_count as number) ?? 0,
-        correct_predictions: (d.correct_predictions as number) ?? 0,
-        prediction_count: (d.prediction_count as number) ?? 0,
-        follower_count: (d.follower_count as number) ?? 0,
-        following_count: (d.following_count as number) ?? 0,
-        touchdown_count: (d.touchdown_count as number) ?? 0,
-        fumble_count: (d.fumble_count as number) ?? 0,
-        owner_id: (d.owner_id as string) ?? uid,
-      }));
-
-      setProfiles(mapped);
-
-      // Determine active profile
-      const stored = await AsyncStorage.getItem(ACTIVE_PROFILE_KEY);
-      const match = stored ? mapped.find((p) => p.id === stored) : null;
-      if (match) {
-        setActiveId(match.id);
-      } else {
-        // Default to primary profile (id === owner_id)
-        const primary = mapped.find((p) => p.id === p.owner_id) ?? mapped[0];
-        setActiveId(primary.id);
-        AsyncStorage.setItem(ACTIVE_PROFILE_KEY, primary.id);
+      if (error) {
+        console.warn('AuthProvider: failed to fetch profiles:', error.message);
+        return;
       }
+
+      if (data && data.length > 0) {
+        const mapped: AuthProfile[] = data.map((d: Record<string, unknown>) => ({
+          id: d.id as string,
+          username: (d.username as string) ?? null,
+          display_name: (d.display_name as string) ?? null,
+          avatar_url: (d.avatar_url as string) ?? null,
+          banner_url: (d.banner_url as string) ?? null,
+          bio: (d.bio as string) ?? null,
+          school_id: (d.school_id as string) ?? null,
+          dynasty_tier: (d.dynasty_tier as string) ?? null,
+          xp: (d.xp as number) ?? 0,
+          level: (d.level as number) ?? 1,
+          post_count: (d.post_count as number) ?? 0,
+          correct_predictions: (d.correct_predictions as number) ?? 0,
+          prediction_count: (d.prediction_count as number) ?? 0,
+          follower_count: (d.follower_count as number) ?? 0,
+          following_count: (d.following_count as number) ?? 0,
+          touchdown_count: (d.touchdown_count as number) ?? 0,
+          fumble_count: (d.fumble_count as number) ?? 0,
+          owner_id: (d.owner_id as string) ?? uid,
+        }));
+
+        setProfiles(mapped);
+
+        // Determine active profile
+        try {
+          const stored = await AsyncStorage.getItem(ACTIVE_PROFILE_KEY);
+          const match = stored ? mapped.find((p) => p.id === stored) : null;
+          if (match) {
+            setActiveId(match.id);
+          } else {
+            const primary = mapped.find((p) => p.id === p.owner_id) ?? mapped[0];
+            setActiveId(primary.id);
+            AsyncStorage.setItem(ACTIVE_PROFILE_KEY, primary.id).catch(() => {});
+          }
+        } catch {
+          const primary = mapped.find((p) => p.id === p.owner_id) ?? mapped[0];
+          setActiveId(primary.id);
+        }
+      }
+    } catch (err) {
+      console.warn('AuthProvider: unexpected error fetching profiles:', err);
     }
   }, []);
 
@@ -122,7 +135,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
     supabase.auth.getSession().then(async ({ data: { session: initialSession }, error }) => {
       if (error) {
         console.warn('Auth session error, signing out:', error.message);
-        await supabase.auth.signOut();
+        try { await supabase.auth.signOut(); } catch {}
         setSession(null);
         setProfiles([]);
         setActiveId(null);
@@ -135,6 +148,9 @@ export function AuthProvider({ children }: PropsWithChildren) {
         userIdRef.current = initialSession.user.id;
         await fetchProfiles(initialSession.user.id);
       }
+      setLoading(false);
+    }).catch((err) => {
+      console.warn('Auth getSession failed:', err);
       setLoading(false);
     });
 
