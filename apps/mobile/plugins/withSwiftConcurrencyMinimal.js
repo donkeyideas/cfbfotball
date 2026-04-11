@@ -1,15 +1,14 @@
 /**
- * Expo config plugin that disables Swift strict concurrency checking
- * for all CocoaPods targets AND the project itself.
+ * Expo config plugin that ensures Xcode 26 compatibility for CocoaPods.
+ *
+ * Xcode 26 enables SWIFT_ENABLE_EXPLICIT_MODULES by default, which breaks
+ * pods that rely on implicit module imports (e.g., @expo/dom-webview uses
+ * RCTConvert without explicitly importing React). This plugin disables
+ * explicit modules for all pod targets to restore the previous behavior.
  *
  * Key fix: injects settings AFTER the react_native_post_install() call
  * (including its closing parenthesis) so the code lives outside the
  * function call and doesn't cause Ruby syntax errors.
- *
- * NOTE: We do NOT override SWIFT_VERSION — expo-modules-core SDK 55
- * uses Swift 6 syntax (@MainActor on protocol conformances) which
- * requires the default Swift version from Xcode. We only set
- * SWIFT_STRICT_CONCURRENCY to 'minimal' to suppress concurrency warnings.
  */
 const { withDangerousMod } = require('@expo/config-plugins');
 const fs = require('fs');
@@ -28,13 +27,13 @@ module.exports = function withSwiftConcurrencyMinimal(config) {
 
       const makeSnippet = (varName) => [
         '',
-        '    # [CFB Social] Disable strict concurrency checking (Xcode 16+)',
+        '    # [CFB Social] Xcode 26 compatibility — disable explicit modules',
         `    ${varName}.pods_project.build_configurations.each do |bc|`,
-        `      bc.build_settings['SWIFT_STRICT_CONCURRENCY'] = 'minimal'`,
+        `      bc.build_settings['SWIFT_ENABLE_EXPLICIT_MODULES'] = 'NO'`,
         '    end',
         `    ${varName}.pods_project.targets.each do |target|`,
         '      target.build_configurations.each do |bc|',
-        `        bc.build_settings['SWIFT_STRICT_CONCURRENCY'] = 'minimal'`,
+        `        bc.build_settings['SWIFT_ENABLE_EXPLICIT_MODULES'] = 'NO'`,
         '      end',
         '    end',
       ].join('\n');
@@ -69,7 +68,7 @@ module.exports = function withSwiftConcurrencyMinimal(config) {
         contents = lines.join('\n');
 
         console.log(
-          `[withSwiftConcurrencyMinimal] Injected SWIFT_STRICT_CONCURRENCY=minimal AFTER react_native_post_install (closing paren at line ${closingIdx + 1})`
+          `[withSwiftConcurrencyMinimal] Injected SWIFT_ENABLE_EXPLICIT_MODULES=NO AFTER react_native_post_install (closing paren at line ${closingIdx + 1})`
         );
       } else if (postInstallMatch) {
         // Strategy 2: No react_native_post_install found, inject at start of post_install
@@ -84,7 +83,7 @@ module.exports = function withSwiftConcurrencyMinimal(config) {
         // Strategy 3: No post_install at all — append one
         contents += [
           '',
-          '# [CFB Social] Disable strict concurrency (Xcode 16+)',
+          '# [CFB Social] Xcode 26 compatibility',
           'post_install do |installer|',
           makeSnippet('installer'),
           'end',
