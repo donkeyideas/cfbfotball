@@ -29,6 +29,13 @@ jobs:
           xcodebuild -version
           swift --version
 
+      - name: Resolve TMPDIR symlink (fix /var vs /private/var mismatch)
+        run: |
+          REAL_TMPDIR=$(python3 -c "import os, tempfile; print(os.path.realpath(tempfile.gettempdir()))")
+          echo "TMPDIR=$REAL_TMPDIR" >> $GITHUB_ENV
+          echo "Resolved TMPDIR: $REAL_TMPDIR"
+        working-directory: .
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:

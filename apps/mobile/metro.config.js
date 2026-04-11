@@ -2,7 +2,11 @@ const { getDefaultConfig } = require('expo/metro-config');
 const path = require('path');
 const fs = require('fs');
 
-const projectRoot = __dirname;
+// Resolve symlinks so Metro and the bundler agree on paths.
+// On macOS /var -> /private/var; without this, path.relative() in Metro
+// produces broken ../../ chains when the project root and entry file
+// disagree on the /var vs /private/var prefix (EAS local builds).
+const projectRoot = fs.realpathSync(__dirname);
 const monorepoRoot = path.resolve(projectRoot, '../..');
 
 const config = getDefaultConfig(projectRoot);
@@ -11,11 +15,11 @@ const config = getDefaultConfig(projectRoot);
 const isMonorepo = fs.existsSync(path.join(monorepoRoot, 'pnpm-workspace.yaml'));
 
 if (isMonorepo) {
-  // Dev / CI checkout: watch the whole monorepo and resolve from both node_modules
-  config.watchFolders = [monorepoRoot];
+  const realMonorepoRoot = fs.realpathSync(monorepoRoot);
+  config.watchFolders = [realMonorepoRoot];
   config.resolver.nodeModulesPaths = [
     path.resolve(projectRoot, 'node_modules'),
-    path.resolve(monorepoRoot, 'node_modules'),
+    path.resolve(realMonorepoRoot, 'node_modules'),
   ];
   config.resolver.disableHierarchicalLookup = true;
 }
