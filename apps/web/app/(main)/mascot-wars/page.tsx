@@ -15,7 +15,7 @@ export const metadata = {
     description: '64 mascots enter. One survives. Vote in the college football mascot tournament.',
   },
   alternates: {
-    canonical: 'https://cfbsocial.com/mascot-wars',
+    canonical: 'https://www.cfbsocial.com/mascot-wars',
   },
 };
 

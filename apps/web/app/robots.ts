@@ -9,6 +9,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ['/settings', '/notifications', '/api/', '/auth/'],
       },
     ],
-    sitemap: 'https://cfbsocial.com/sitemap.xml',
+    sitemap: 'https://www.cfbsocial.com/sitemap.xml',
   };
 }

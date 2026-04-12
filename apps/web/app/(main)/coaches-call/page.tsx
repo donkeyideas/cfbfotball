@@ -8,7 +8,7 @@ export const metadata = {
     description: "Community polls and hot-seat debates. Cast your vote on the biggest decisions in CFB.",
   },
   alternates: {
-    canonical: 'https://cfbsocial.com/coaches-call',
+    canonical: 'https://www.cfbsocial.com/coaches-call',
   },
 };
 

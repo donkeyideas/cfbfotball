@@ -33,7 +33,7 @@ export async function generateMetadata({ params }: SchoolPageProps) {
       description,
     },
     alternates: {
-      canonical: `https://cfbsocial.com/school/${slug}`,
+      canonical: `https://www.cfbsocial.com/school/${slug}`,
     },
   };
 }
@@ -102,13 +102,13 @@ export default async function SchoolPage({ params }: SchoolPageProps) {
         name={school.name}
         conference={school.conference}
         mascot={school.mascot}
-        url={`https://cfbsocial.com/school/${slug}`}
+        url={`https://www.cfbsocial.com/school/${slug}`}
       />
       <BreadcrumbJsonLd
         items={[
-          { name: 'Home', url: 'https://cfbsocial.com' },
-          { name: 'Schools', url: 'https://cfbsocial.com/schools' },
-          { name: school.name, url: `https://cfbsocial.com/school/${slug}` },
+          { name: 'Home', url: 'https://www.cfbsocial.com' },
+          { name: 'Schools', url: 'https://www.cfbsocial.com/schools' },
+          { name: school.name, url: `https://www.cfbsocial.com/school/${slug}` },
         ]}
       />
       <h1

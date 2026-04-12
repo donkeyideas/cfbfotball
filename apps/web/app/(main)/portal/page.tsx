@@ -17,7 +17,7 @@ export const metadata = {
     description: 'Track every CFB transfer portal entry. Filter by position, stars, and status. Fan reactions included.',
   },
   alternates: {
-    canonical: 'https://cfbsocial.com/portal',
+    canonical: 'https://www.cfbsocial.com/portal',
   },
 };
 

@@ -19,7 +19,7 @@ export const metadata = {
     description: 'File college football predictions and track your record. Receipts or busts, history will judge.',
   },
   alternates: {
-    canonical: 'https://cfbsocial.com/predictions',
+    canonical: 'https://www.cfbsocial.com/predictions',
   },
 };
 
@@ -36,7 +36,7 @@ export default async function PredictionsPage({ searchParams }: PredictionsPageP
       <CollectionPageJsonLd
         name="College Football Predictions — File Takes & Track Your Record"
         description="Make college football predictions and put your takes on record. Track prediction accuracy and collect receipts."
-        url="https://cfbsocial.com/predictions"
+        url="https://www.cfbsocial.com/predictions"
       />
       {/* Header */}
       <div style={{ marginBottom: 16 }}>

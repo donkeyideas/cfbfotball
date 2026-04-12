@@ -13,7 +13,7 @@ export const metadata = {
     description: 'Live college football scores and game-day threads. Real-time chat, hot takes, and fan debates.',
   },
   alternates: {
-    canonical: 'https://cfbsocial.com/war-room',
+    canonical: 'https://www.cfbsocial.com/war-room',
   },
 };
 

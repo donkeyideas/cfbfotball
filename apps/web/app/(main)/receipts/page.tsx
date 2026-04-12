@@ -7,7 +7,7 @@ export const metadata = {
   title: 'My Receipts | CFB Social',
   description: 'Posts you filed receipts on. Track your predictions and revisit them when the time comes.',
   alternates: {
-    canonical: 'https://cfbsocial.com/receipts',
+    canonical: 'https://www.cfbsocial.com/receipts',
   },
 };
 

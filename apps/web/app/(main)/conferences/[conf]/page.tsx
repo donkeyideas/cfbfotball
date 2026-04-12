@@ -91,7 +91,7 @@ export async function generateMetadata({ params }: ConferencePageProps) {
     description,
     openGraph: { title, description },
     alternates: {
-      canonical: `https://cfbsocial.com/conferences/${conf}`,
+      canonical: `https://www.cfbsocial.com/conferences/${conf}`,
     },
   };
 }
@@ -131,13 +131,13 @@ export default async function ConferencePage({ params }: ConferencePageProps) {
       <CollectionPageJsonLd
         name={`${entry.display} Football Schools`}
         description={`All ${entry.display} college football schools on CFB Social. Fan community, takes, predictions, and transfer portal tracking.`}
-        url={`https://cfbsocial.com/conferences/${conf}`}
+        url={`https://www.cfbsocial.com/conferences/${conf}`}
       />
       <BreadcrumbJsonLd
         items={[
-          { name: 'Home', url: 'https://cfbsocial.com' },
-          { name: 'Schools', url: 'https://cfbsocial.com/schools' },
-          { name: entry.display, url: `https://cfbsocial.com/conferences/${conf}` },
+          { name: 'Home', url: 'https://www.cfbsocial.com' },
+          { name: 'Schools', url: 'https://www.cfbsocial.com/schools' },
+          { name: entry.display, url: `https://www.cfbsocial.com/conferences/${conf}` },
         ]}
       />
 

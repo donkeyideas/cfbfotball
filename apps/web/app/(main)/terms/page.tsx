@@ -11,7 +11,7 @@ export const metadata = {
     description: 'Terms of Service for CFB Social (CFB Social), operated by Donkey Ideas.',
   },
   alternates: {
-    canonical: 'https://cfbsocial.com/terms',
+    canonical: 'https://www.cfbsocial.com/terms',
   },
 };
 

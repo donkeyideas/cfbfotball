@@ -43,7 +43,7 @@ export async function generateMetadata({ params }: PostPageProps) {
       description,
     },
     alternates: {
-      canonical: `https://cfbsocial.com/post/${id}`,
+      canonical: `https://www.cfbsocial.com/post/${id}`,
     },
   };
 }
@@ -160,7 +160,7 @@ async function PostDetail({ postId }: { postId: string }) {
         author={postAuthor?.username ?? 'unknown'}
         datePublished={post.created_at}
         text={post.content}
-        url={`https://cfbsocial.com/post/${postId}`}
+        url={`https://www.cfbsocial.com/post/${postId}`}
         interactionCount={(post.touchdown_count ?? 0) + (post.fumble_count ?? 0)}
       />
       {/* Main post */}

@@ -19,14 +19,14 @@ export function WebsiteJsonLd() {
         '@type': 'WebSite',
         name: 'CFB Social',
         alternateName: 'CFB Social - College Football Community',
-        url: 'https://cfbsocial.com',
+        url: 'https://www.cfbsocial.com',
         description:
           "College football's social home. Stake claims, debate rivalries, track the transfer portal, and build your dynasty.",
         potentialAction: {
           '@type': 'SearchAction',
           target: {
             '@type': 'EntryPoint',
-            urlTemplate: 'https://cfbsocial.com/feed?q={search_term_string}',
+            urlTemplate: 'https://www.cfbsocial.com/feed?q={search_term_string}',
           },
           'query-input': 'required name=search_term_string',
         },
@@ -43,7 +43,7 @@ export function OrganizationJsonLd() {
         '@type': 'Organization',
         name: 'CFB Social',
         alternateName: 'CFB Social - College Football Community',
-        url: 'https://cfbsocial.com',
+        url: 'https://www.cfbsocial.com',
         description:
           'The college football fan community. Debates, predictions, transfer portal tracking, and dynasty building across 653 schools.',
         foundingDate: '2026',
@@ -51,7 +51,7 @@ export function OrganizationJsonLd() {
         contactPoint: {
           '@type': 'ContactPoint',
           contactType: 'customer support',
-          url: 'https://cfbsocial.com/contact',
+          url: 'https://www.cfbsocial.com/contact',
         },
       }}
     />
@@ -166,7 +166,7 @@ export function CollectionPageJsonLd({
         isPartOf: {
           '@type': 'WebSite',
           name: 'CFB Social',
-          url: 'https://cfbsocial.com',
+          url: 'https://www.cfbsocial.com',
         },
       }}
     />
@@ -193,7 +193,7 @@ export function ProfilePageJsonLd({
         isPartOf: {
           '@type': 'WebSite',
           name: 'CFB Social',
-          url: 'https://cfbsocial.com',
+          url: 'https://www.cfbsocial.com',
         },
       }}
     />

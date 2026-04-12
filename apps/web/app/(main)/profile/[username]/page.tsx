@@ -22,7 +22,7 @@ export async function generateMetadata({
       description: `@${username}'s college football takes and dynasty stats.`,
     },
     alternates: {
-      canonical: `https://cfbsocial.com/profile/${username}`,
+      canonical: `https://www.cfbsocial.com/profile/${username}`,
     },
   };
 }
@@ -66,7 +66,7 @@ export default async function ProfilePage({
     <>
       <ProfilePageJsonLd
         name={`@${username} on CFB Social`}
-        url={`https://cfbsocial.com/profile/${username}`}
+        url={`https://www.cfbsocial.com/profile/${username}`}
         description={`${username}'s college football takes, predictions, and dynasty stats.`}
       />
       <Suspense fallback={<ProfileSkeleton />}>

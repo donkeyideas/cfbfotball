@@ -15,7 +15,7 @@ export const metadata = {
     description: 'Transfer portal activity, recruiting intelligence, and fan reactions across all FBS programs.',
   },
   alternates: {
-    canonical: 'https://cfbsocial.com/recruiting',
+    canonical: 'https://www.cfbsocial.com/recruiting',
   },
 };
 

@@ -8,7 +8,7 @@ export const metadata = {
     description: 'Get in touch with CFB Social. Report bugs, request features, ask questions, or explore partnership opportunities.',
   },
   alternates: {
-    canonical: 'https://cfbsocial.com/contact',
+    canonical: 'https://www.cfbsocial.com/contact',
   },
 };
 

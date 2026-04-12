@@ -13,7 +13,7 @@ export const metadata = {
       'Browse every FBS and FCS college football school on CFB Social. Find your team, join the fan community, debate rivals, and track the transfer portal.',
   },
   alternates: {
-    canonical: 'https://cfbsocial.com/schools',
+    canonical: 'https://www.cfbsocial.com/schools',
   },
 };
 
@@ -104,12 +104,12 @@ export default async function SchoolsPage() {
       <CollectionPageJsonLd
         name="All College Football Schools"
         description={`Browse all ${totalSchools} college football schools on CFB Social. Find your team, debate rivals, and track the transfer portal.`}
-        url="https://cfbsocial.com/schools"
+        url="https://www.cfbsocial.com/schools"
       />
       <BreadcrumbJsonLd
         items={[
-          { name: 'Home', url: 'https://cfbsocial.com' },
-          { name: 'Schools', url: 'https://cfbsocial.com/schools' },
+          { name: 'Home', url: 'https://www.cfbsocial.com' },
+          { name: 'Schools', url: 'https://www.cfbsocial.com/schools' },
         ]}
       />
 

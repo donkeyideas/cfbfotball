@@ -5,7 +5,7 @@ export const metadata = {
   title: 'The Vault | Saved College Football Posts & Bookmarks',
   description: 'Your saved college football posts and bookmarks on CFB Social. Save the best takes, predictions, and debates to revisit later.',
   alternates: {
-    canonical: 'https://cfbsocial.com/vault',
+    canonical: 'https://www.cfbsocial.com/vault',
   },
 };
 

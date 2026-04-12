@@ -12,7 +12,7 @@ export const metadata = {
     description: 'The all-time greats of CFB Social. Dynasty leaders, touchdown leaders, and prediction oracles.',
   },
   alternates: {
-    canonical: 'https://cfbsocial.com/hall-of-fame',
+    canonical: 'https://www.cfbsocial.com/hall-of-fame',
   },
 };
 
@@ -22,7 +22,7 @@ export default function HallOfFamePage() {
       <CollectionPageJsonLd
         name="Hall of Fame — Top College Football Fans"
         description="The all-time greats of CFB Social. Dynasty leaders, touchdown leaders, and prediction oracles."
-        url="https://cfbsocial.com/hall-of-fame"
+        url="https://www.cfbsocial.com/hall-of-fame"
       />
       <div className="feed-header">
         <h1 className="feed-title">Hall of Fame</h1>

@@ -20,7 +20,7 @@ export const metadata = {
     description: 'Debate college football rivalries. Pick sides. Issue challenges. Let the community judge.',
   },
   alternates: {
-    canonical: 'https://cfbsocial.com/rivalry',
+    canonical: 'https://www.cfbsocial.com/rivalry',
   },
 };
 
@@ -58,7 +58,7 @@ export default async function RivalryPage({ searchParams }: RivalryPageProps) {
       <CollectionPageJsonLd
         name="Rivalry Ring — College Football Fan Debates"
         description="Debate college football rivalries and settle fan arguments. Pick sides in school-vs-school matchups and issue challenges."
-        url="https://cfbsocial.com/rivalry"
+        url="https://www.cfbsocial.com/rivalry"
       />
       <div className="feed-header">
         <h1 className="feed-title">Rivalry Ring</h1>

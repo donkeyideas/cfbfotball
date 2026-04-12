@@ -17,16 +17,16 @@ export const metadata = {
     title: 'CFB Social -- College Football Fan Debates, Takes & Predictions',
     description: 'The #1 community for college football fans. Post takes, debate rivals, file predictions, and track the transfer portal across all 653 CFB schools.',
     type: 'website',
-    images: [{ url: 'https://cfbsocial.com/logo.png', width: 256, height: 256, alt: 'CFB Social Logo' }],
+    images: [{ url: 'https://www.cfbsocial.com/logo.png', width: 256, height: 256, alt: 'CFB Social Logo' }],
   },
   twitter: {
     card: 'summary' as const,
     title: 'CFB Social -- College Football Fan Debates, Takes & Predictions',
     description: 'The #1 community for college football fans. Post takes, debate rivals, file predictions, and track the transfer portal across all 653 CFB schools.',
-    images: ['https://cfbsocial.com/logo.png'],
+    images: ['https://www.cfbsocial.com/logo.png'],
   },
   alternates: {
-    canonical: 'https://cfbsocial.com/feed',
+    canonical: 'https://www.cfbsocial.com/feed',
   },
 };
 
@@ -172,7 +172,7 @@ export default async function FeedPage({ searchParams }: FeedPageProps) {
       <CollectionPageJsonLd
         name="The Feed — College Football Fan Opinions & Takes"
         description="Read the latest college football fan opinions, hot takes, predictions, and rivalry debates from fans across 653 schools."
-        url="https://cfbsocial.com/feed"
+        url="https://www.cfbsocial.com/feed"
       />
       <div className="feed-header">
         <h1 className="feed-title">The Feed</h1>

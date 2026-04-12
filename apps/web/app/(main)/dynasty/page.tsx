@@ -13,7 +13,7 @@ export const metadata = {
     description: 'Build your college football dynasty. Earn XP, unlock achievements, and climb the leaderboard.',
   },
   alternates: {
-    canonical: 'https://cfbsocial.com/dynasty',
+    canonical: 'https://www.cfbsocial.com/dynasty',
   },
 };
 
