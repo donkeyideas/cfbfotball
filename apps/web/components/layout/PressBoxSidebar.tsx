@@ -4,15 +4,16 @@ import { useEffect, useState } from 'react';
 import { ChaosMeter } from './ChaosMeter';
 import { NewsModal } from './NewsModal';
 
-interface ESPNArticle {
-  id: number;
+interface NewsArticle {
+  id: string;
   headline: string;
   description: string;
   imageUrl: string | null;
   articleUrl: string;
   byline: string;
   published: string;
-  clicks: number;
+  source: string;
+  category: 'recruiting' | 'portal' | 'trending';
 }
 
 interface PortalPlayer {
@@ -84,15 +85,17 @@ function getClickCounts(): Record<string, number> {
   }
 }
 
-function trackClick(articleId: number) {
+function trackClick(articleId: string) {
   const counts = getClickCounts();
-  counts[String(articleId)] = (counts[String(articleId)] ?? 0) + 1;
+  counts[articleId] = (counts[articleId] ?? 0) + 1;
   localStorage.setItem('cfb-news-clicks', JSON.stringify(counts));
 }
 
 export function PressBoxSidebar() {
-  const [articles, setArticles] = useState<ESPNArticle[]>([]);
-  const [selectedArticle, setSelectedArticle] = useState<ESPNArticle | null>(null);
+  const [trendingArticles, setTrendingArticles] = useState<NewsArticle[]>([]);
+  const [recruitingNews, setRecruitingNews] = useState<NewsArticle[]>([]);
+  const [portalNews, setPortalNews] = useState<NewsArticle[]>([]);
+  const [selectedArticle, setSelectedArticle] = useState<NewsArticle | null>(null);
   const [portalPlayers, setPortalPlayers] = useState<PortalPlayer[]>([]);
   const [claims, setClaims] = useState<RecruitingClaim[]>([]);
   const [leaders, setLeaders] = useState<LeaderboardEntry[]>([]);
@@ -101,44 +104,33 @@ export function PressBoxSidebar() {
   const [chaosStats, setChaosStats] = useState<ChaosStats | null>(null);
 
   useEffect(() => {
-    // Load ESPN news (with 5s timeout)
+    // Load multi-source CFB news (ESPN, CBS, Yahoo, 247Sports)
     async function loadNews() {
       try {
         const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 5000);
-        const res = await fetch(
-          'https://site.api.espn.com/apis/site/v2/sports/football/college-football/news?limit=5',
-          { signal: controller.signal }
-        );
+        const timeout = setTimeout(() => controller.abort(), 8000);
+        const res = await fetch('/api/news-feeds', { signal: controller.signal });
         clearTimeout(timeout);
-        if (!res.ok) throw new Error('ESPN fetch failed');
+        if (!res.ok) throw new Error('News feeds fetch failed');
         const data = await res.json();
         const clickCounts = getClickCounts();
 
-        const mapped: ESPNArticle[] = (data.articles ?? []).map((a: Record<string, unknown>) => {
-          const images = a.images as Array<{ url: string }> | undefined;
-          const links = a.links as { web?: { href?: string } } | undefined;
-          return {
-            id: a.id as number,
-            headline: a.headline as string,
-            description: (a.description as string) ?? '',
-            imageUrl: images?.[0]?.url ?? null,
-            articleUrl: links?.web?.href ?? '#',
-            byline: (a.byline as string) ?? '',
-            published: (a.published as string) ?? '',
-            clicks: clickCounts[String(a.id)] ?? 0,
-          };
-        });
-
-        // Sort: by clicks (desc), then recency
-        mapped.sort((a, b) => {
-          if (b.clicks !== a.clicks) return b.clicks - a.clicks;
-          return new Date(b.published).getTime() - new Date(a.published).getTime();
-        });
-
-        setArticles(mapped);
+        // Add click counts and sort trending by clicks then recency
+        if (data.trending?.length > 0) {
+          const withClicks = (data.trending as NewsArticle[]).map(a => ({
+            ...a,
+            _clicks: clickCounts[a.id] ?? 0,
+          }));
+          withClicks.sort((a, b) => {
+            if (b._clicks !== a._clicks) return b._clicks - a._clicks;
+            return new Date(b.published || 0).getTime() - new Date(a.published || 0).getTime();
+          });
+          setTrendingArticles(withClicks.slice(0, 5));
+        }
+        if (data.recruiting?.length > 0) setRecruitingNews(data.recruiting);
+        if (data.portal?.length > 0) setPortalNews(data.portal);
       } catch {
-        // ESPN unavailable — leave empty
+        // News feeds unavailable
       }
     }
 
@@ -197,8 +189,8 @@ export function PressBoxSidebar() {
       } catch { /* CFBD unavailable */ }
     }
 
-    // Fire all data loads in parallel — 4 calls (was 10)
-    // 1. ESPN news (external)
+    // Fire all data loads in parallel — 4 calls
+    // 1. /api/news-feeds (multi-source: ESPN, CBS, Yahoo, 247Sports)
     // 2. /api/sidebar (portal + claims + leaders + chaos — consolidated)
     // 3. /api/cfbd?type=recruiting (already cached)
     // 4. /api/cfbd?type=portal (already cached)
@@ -210,8 +202,14 @@ export function PressBoxSidebar() {
     ]);
   }, []);
 
-  function handleArticleClick(article: ESPNArticle) {
+  function handleArticleClick(article: NewsArticle) {
     trackClick(article.id);
+    // For non-ESPN articles, open directly in new tab (our proxy only works for ESPN)
+    const isESPN = article.articleUrl.includes('espn.com');
+    if (!isESPN && article.articleUrl) {
+      window.open(article.articleUrl, '_blank', 'noopener,noreferrer');
+      return;
+    }
     setSelectedArticle(article);
   }
 
@@ -272,8 +270,28 @@ export function PressBoxSidebar() {
           ))
         )}
 
+        {/* Recruiting news headlines from multiple sources */}
+        {recruitingNews.length > 0 && recruitingNews.slice(0, 3).map((article) => (
+          <div
+            key={article.id}
+            className="dispatch bulletin"
+            style={{ marginBottom: 6, cursor: 'pointer' }}
+            onClick={() => handleArticleClick(article)}
+          >
+            <div className="dispatch-label">{article.source}</div>
+            <div className="dispatch-text">
+              {article.headline.length > 90 ? article.headline.slice(0, 90) + '...' : article.headline}
+            </div>
+            <div className="dispatch-time">
+              {article.published
+                ? new Date(article.published).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                : ''}
+            </div>
+          </div>
+        ))}
+
         {/* Empty state */}
-        {recruits.length === 0 && transfers.length === 0 && claims.length === 0 && (
+        {recruits.length === 0 && transfers.length === 0 && claims.length === 0 && recruitingNews.length === 0 && (
           <div className="dispatch bulletin">
             <div className="dispatch-label">Bulletin</div>
             <div className="dispatch-text">
@@ -327,13 +345,33 @@ export function PressBoxSidebar() {
             )}
           </div>
         </div>
+
+        {/* Portal news headlines from multiple sources */}
+        {portalNews.length > 0 && portalNews.slice(0, 3).map((article) => (
+          <div
+            key={article.id}
+            className="dispatch bulletin"
+            style={{ marginTop: 8, marginBottom: 4, cursor: 'pointer' }}
+            onClick={() => handleArticleClick(article)}
+          >
+            <div className="dispatch-label">{article.source}</div>
+            <div className="dispatch-text">
+              {article.headline.length > 90 ? article.headline.slice(0, 90) + '...' : article.headline}
+            </div>
+            <div className="dispatch-time">
+              {article.published
+                ? new Date(article.published).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                : ''}
+            </div>
+          </div>
+        ))}
       </div>
 
-      {/* Section 3: Trending Stories (ESPN News) */}
+      {/* Section 3: Trending Stories (multi-source) */}
       <div className="sidebar-section">
         <div className="sidebar-title">Trending Stories</div>
-        {articles.length > 0 ? (
-          articles.map((article, i) => (
+        {trendingArticles.length > 0 ? (
+          trendingArticles.map((article, i) => (
             <div
               key={article.id}
               className="headline-item"
@@ -346,8 +384,9 @@ export function PressBoxSidebar() {
                   : article.headline}
               </span>
               <div className="headline-meta">
-                {article.byline ? `${article.byline} \u00B7 ` : ''}
-                {new Date(article.published).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                {article.source}
+                {article.byline ? ` \u00B7 ${article.byline}` : ''}
+                {article.published ? ` \u00B7 ${new Date(article.published).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}` : ''}
               </div>
             </div>
           ))

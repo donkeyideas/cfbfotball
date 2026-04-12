@@ -12,6 +12,7 @@ interface NewsModalProps {
     articleUrl: string;
     byline: string;
     published: string;
+    source?: string;
   };
   onClose: () => void;
 }
@@ -20,15 +21,24 @@ export function NewsModal({ article, onClose }: NewsModalProps) {
   const [paragraphs, setParagraphs] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const dateStr = new Date(article.published).toLocaleDateString('en-US', {
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric',
-  });
+  const dateStr = article.published
+    ? new Date(article.published).toLocaleDateString('en-US', {
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric',
+      })
+    : '';
 
-  // Fetch full article text from our API proxy
+  const isESPN = article.articleUrl?.includes('espn.com');
+
+  // Fetch full article text from our API proxy (ESPN only)
   useEffect(() => {
     async function fetchArticle() {
+      if (!isESPN) {
+        // Non-ESPN articles: show description only, link to source
+        setLoading(false);
+        return;
+      }
       try {
         const res = await fetch(`/api/espn-article?url=${encodeURIComponent(article.articleUrl)}`);
         if (res.ok) {
@@ -43,7 +53,7 @@ export function NewsModal({ article, onClose }: NewsModalProps) {
       setLoading(false);
     }
     fetchArticle();
-  }, [article.articleUrl]);
+  }, [article.articleUrl, isESPN]);
 
   return createPortal(
     <div className="news-modal-overlay" onClick={onClose}>
@@ -66,9 +76,11 @@ export function NewsModal({ article, onClose }: NewsModalProps) {
         <h2 className="news-modal-headline">{article.headline}</h2>
 
         <div className="news-modal-meta">
+          {article.source && <span>{article.source}</span>}
+          {article.source && (article.byline || dateStr) && <span> &middot; </span>}
           {article.byline && <span>{article.byline}</span>}
-          {article.byline && <span> &middot; </span>}
-          <span>{dateStr}</span>
+          {article.byline && dateStr && <span> &middot; </span>}
+          {dateStr && <span>{dateStr}</span>}
         </div>
 
         <div className="news-modal-body">
@@ -98,7 +110,7 @@ export function NewsModal({ article, onClose }: NewsModalProps) {
           rel="noopener noreferrer"
           className="news-modal-link"
         >
-          Read Full Story
+          Read Full Story{article.source ? ` on ${article.source}` : ''}
         </a>
       </div>
     </div>,
