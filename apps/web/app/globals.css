@@ -949,7 +949,7 @@ h1, h2, h3, h4, h5, h6,
 .masthead-subtitle {
   font-family: var(--sans);
   font-size: 0.78rem;
-  color: var(--school-secondary);
+  color: var(--faded-ink);
   letter-spacing: 3px;
   text-transform: uppercase;
   margin-top: 18px;

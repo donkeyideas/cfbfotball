@@ -4,9 +4,17 @@ import { useColors } from '@/lib/theme/ThemeProvider';
 import { useSchoolTheme } from '@/lib/theme/SchoolThemeProvider';
 import { typography } from '@/lib/theme/typography';
 import { WEB_API_URL } from '@/lib/constants';
+import { supabase } from '@/lib/supabase';
 import { NewsModal, type NewsArticle } from './NewsModal';
 
-type NewsTab = 'trending' | 'recruiting' | 'portal';
+type NewsTab = 'trending' | 'recruiting' | 'portal' | 'hallOfFame';
+
+interface LeaderEntry {
+  username: string;
+  xp: number;
+  dynasty_tier: string;
+  school: { abbreviation: string } | null;
+}
 
 export function NewsSection() {
   const colors = useColors();
@@ -15,20 +23,35 @@ export function NewsSection() {
   const [trending, setTrending] = useState<NewsArticle[]>([]);
   const [recruiting, setRecruiting] = useState<NewsArticle[]>([]);
   const [portal, setPortal] = useState<NewsArticle[]>([]);
+  const [leaders, setLeaders] = useState<LeaderEntry[]>([]);
   const [selectedArticle, setSelectedArticle] = useState<NewsArticle | null>(null);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     const controller = new AbortController();
-    fetch(`${WEB_API_URL}/api/news-feeds`, { signal: controller.signal })
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (data) {
-          if (data.trending?.length > 0) setTrending(data.trending);
-          if (data.recruiting?.length > 0) setRecruiting(data.recruiting);
-          if (data.portal?.length > 0) setPortal(data.portal);
-        }
-      })
+
+    // Fetch news feeds + Hall of Fame leaderboard in parallel
+    Promise.allSettled([
+      fetch(`${WEB_API_URL}/api/news-feeds`, { signal: controller.signal })
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          if (data) {
+            if (data.trending?.length > 0) setTrending(data.trending);
+            if (data.recruiting?.length > 0) setRecruiting(data.recruiting);
+            if (data.portal?.length > 0) setPortal(data.portal);
+          }
+        }),
+      supabase
+        .from('profiles')
+        .select('username, xp, dynasty_tier, school:schools!profiles_school_id_fkey(abbreviation)')
+        .order('xp', { ascending: false })
+        .limit(5)
+        .then(({ data }) => {
+          if (data && data.length > 0) {
+            setLeaders(data as unknown as LeaderEntry[]);
+          }
+        }),
+    ])
       .catch(() => {})
       .finally(() => setLoaded(true));
 
@@ -40,7 +63,9 @@ export function NewsSection() {
       ? trending
       : activeTab === 'recruiting'
         ? recruiting
-        : portal;
+        : activeTab === 'portal'
+          ? portal
+          : [];
 
   const handlePress = useCallback((article: NewsArticle) => {
     setSelectedArticle(article);
@@ -79,8 +104,8 @@ export function NewsSection() {
         },
         tabText: {
           fontFamily: typography.sansSemiBold,
-          fontSize: 12,
-          letterSpacing: 0.5,
+          fontSize: 11,
+          letterSpacing: 0.3,
         },
         tabActive: {
           borderBottomWidth: 2,
@@ -121,12 +146,43 @@ export function NewsSection() {
           textAlign: 'center',
           paddingVertical: 16,
         },
+        // Hall of Fame styles
+        leaderRow: {
+          flexDirection: 'row',
+          alignItems: 'center',
+          paddingVertical: 8,
+          borderBottomWidth: 1,
+          borderBottomColor: colors.border,
+        },
+        leaderRank: {
+          fontFamily: typography.serifBold,
+          fontSize: 16,
+          color: colors.crimson,
+          width: 24,
+        },
+        leaderName: {
+          fontFamily: typography.sansSemiBold,
+          fontSize: 14,
+          color: colors.ink,
+          flex: 1,
+        },
+        leaderSchool: {
+          fontFamily: typography.sans,
+          fontSize: 12,
+          color: colors.textMuted,
+          marginRight: 8,
+        },
+        leaderXp: {
+          fontFamily: typography.mono,
+          fontSize: 12,
+          color: colors.secondary,
+        },
       }),
     [colors]
   );
 
-  // Don't render if no news loaded
-  if (loaded && trending.length === 0 && recruiting.length === 0 && portal.length === 0) {
+  // Don't render if nothing loaded at all
+  if (loaded && trending.length === 0 && recruiting.length === 0 && portal.length === 0 && leaders.length === 0) {
     return null;
   }
 
@@ -134,6 +190,7 @@ export function NewsSection() {
     { key: 'trending', label: 'TRENDING' },
     { key: 'recruiting', label: 'RECRUITING' },
     { key: 'portal', label: 'PORTAL' },
+    { key: 'hallOfFame', label: 'HALL OF FAME' },
   ];
 
   return (
@@ -167,7 +224,32 @@ export function NewsSection() {
         </View>
 
         <View style={styles.body}>
-          {articles.length > 0 ? (
+          {activeTab === 'hallOfFame' ? (
+            leaders.length > 0 ? (
+              leaders.map((leader, i) => (
+                <View
+                  key={leader.username}
+                  style={[
+                    styles.leaderRow,
+                    i === leaders.length - 1 && styles.articleRowLast,
+                  ]}
+                >
+                  <Text style={styles.leaderRank}>{i + 1}</Text>
+                  <Text style={styles.leaderName}>@{leader.username}</Text>
+                  {leader.school && (
+                    <Text style={styles.leaderSchool}>
+                      {leader.school.abbreviation}
+                    </Text>
+                  )}
+                  <Text style={styles.leaderXp}>
+                    {leader.xp?.toLocaleString() ?? 0} XP
+                  </Text>
+                </View>
+              ))
+            ) : (
+              <Text style={styles.emptyText}>No leaders yet</Text>
+            )
+          ) : articles.length > 0 ? (
             articles.slice(0, 5).map((article, i) => {
               const dateLabel = article.published
                 ? new Date(article.published).toLocaleDateString('en-US', {
