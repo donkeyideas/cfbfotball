@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { after } from 'next/server';
 import { fireRivalryScenario, getActiveRivalryThreadCount } from '@/lib/admin/bots/rivalry-threads';
 
 export const runtime = 'nodejs';
@@ -10,8 +11,6 @@ export const maxDuration = 120;
  * Skips if there are already 2+ active rivalry threads.
  */
 export async function GET(request: NextRequest) {
-  const start = Date.now();
-
   // Auth: CRON_SECRET, Vercel cron header, or dev mode bypass
   const authHeader = request.headers.get('authorization');
   const vercelCron = request.headers.get('x-vercel-cron');
@@ -24,37 +23,24 @@ export async function GET(request: NextRequest) {
 
   console.log(`[BOT RIVALRY] Starting rivalry cycle at ${new Date().toISOString()} (auth: ${vercelCron ? 'vercel' : isDev ? 'dev' : 'secret'})`);
 
-  try {
-    // Check active thread count - skip if >= 2 active
-    const activeCount = await getActiveRivalryThreadCount();
-    if (activeCount >= 2) {
+  // Run the heavy work after responding so cron-job.org doesn't timeout
+  after(async () => {
+    const start = Date.now();
+    try {
+      const activeCount = await getActiveRivalryThreadCount();
+      if (activeCount >= 2) {
+        console.log(`[BOT RIVALRY] Skipped - ${activeCount} active threads already (max 2)`);
+        return;
+      }
+
+      const result = await fireRivalryScenario();
       const elapsed = Date.now() - start;
-      console.log(`[BOT RIVALRY] Skipped - ${activeCount} active threads already (max 2)`);
-      return NextResponse.json({
-        skipped: true,
-        reason: 'max_active_threads',
-        activeThreads: activeCount,
-        elapsedMs: elapsed,
-      });
+      console.log(`[BOT RIVALRY] Completed in ${elapsed}ms - success: ${result.success}, thread: ${result.threadId ?? 'none'}`);
+    } catch (error) {
+      const elapsed = Date.now() - start;
+      console.error(`[BOT RIVALRY] Failed after ${elapsed}ms:`, error);
     }
+  });
 
-    // Fire a rivalry scenario
-    const result = await fireRivalryScenario();
-
-    const elapsed = Date.now() - start;
-    console.log(`[BOT RIVALRY] Completed in ${elapsed}ms - success: ${result.success}, thread: ${result.threadId ?? 'none'}`);
-
-    return NextResponse.json({
-      ...result,
-      activeThreadsBefore: activeCount,
-      elapsedMs: elapsed,
-    });
-  } catch (error) {
-    const elapsed = Date.now() - start;
-    console.error(`[BOT RIVALRY] Failed after ${elapsed}ms:`, error);
-    return NextResponse.json(
-      { success: false, error: error instanceof Error ? error.message : 'Unknown error', elapsedMs: elapsed },
-      { status: 500 }
-    );
-  }
+  return NextResponse.json({ accepted: true, message: 'Rivalry cycle queued' });
 }

@@ -87,7 +87,10 @@ const getCachedLatestFeed = unstable_cache(
         .order('created_at', { ascending: false })
         .limit(10),
     ]);
-    return { posts: postsResult.data, postsError: postsResult.error?.message ?? null, reposts: repostsResult.data };
+    if (postsResult.error) {
+      throw new Error(postsResult.error.message);
+    }
+    return { posts: postsResult.data, reposts: repostsResult.data };
   },
   ['feed-latest'],
   { revalidate: 30, tags: ['feed'] },
@@ -110,7 +113,10 @@ const getCachedTopFeed = unstable_cache(
         .order('created_at', { ascending: false })
         .limit(10),
     ]);
-    return { posts: postsResult.data, postsError: postsResult.error?.message ?? null, reposts: repostsResult.data };
+    if (postsResult.error) {
+      throw new Error(postsResult.error.message);
+    }
+    return { posts: postsResult.data, reposts: repostsResult.data };
   },
   ['feed-top'],
   { revalidate: 30, tags: ['feed'] },
@@ -148,7 +154,10 @@ const getCachedReceiptsFeed = unstable_cache(
         .order('created_at', { ascending: false })
         .limit(10),
     ]);
-    return { posts: postsResult.data, postsError: postsResult.error?.message ?? null, reposts: repostsResult.data };
+    if (postsResult.error) {
+      throw new Error(postsResult.error.message);
+    }
+    return { posts: postsResult.data, reposts: repostsResult.data };
   },
   ['feed-receipts'],
   { revalidate: 30, tags: ['feed'] },
@@ -186,21 +195,21 @@ export default async function FeedPage({ searchParams }: FeedPageProps) {
 async function FeedList({ tab }: { tab: FeedTab }) {
   // Public tabs use cached queries (no auth needed)
   if (tab === 'latest' || tab === 'top' || tab === 'receipts') {
-    const cached =
-      tab === 'latest' ? await getCachedLatestFeed()
-      : tab === 'top' ? await getCachedTopFeed()
-      : await getCachedReceiptsFeed();
+    try {
+      const cached =
+        tab === 'latest' ? await getCachedLatestFeed()
+        : tab === 'top' ? await getCachedTopFeed()
+        : await getCachedReceiptsFeed();
 
-    if (cached.postsError) {
-      console.error('[FeedList] Cache query error:', cached.postsError);
+      return renderFeedItems(cached.posts, cached.reposts, tab, null);
+    } catch (err) {
+      console.error('[FeedList] Cache query error:', err);
       return (
         <div className="content-card" style={{ textAlign: 'center', padding: 24 }}>
           <p style={{ color: 'var(--faded-ink)' }}>Unable to load posts right now. Please try again later.</p>
         </div>
       );
     }
-
-    return renderFeedItems(cached.posts, cached.reposts, tab, null);
   }
 
   // Auth-dependent tabs: following, my-school
