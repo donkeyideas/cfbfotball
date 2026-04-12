@@ -20,6 +20,7 @@ interface NewsModalProps {
 export function NewsModal({ article, onClose }: NewsModalProps) {
   const [paragraphs, setParagraphs] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  const [resolvedImage, setResolvedImage] = useState<string | null>(article.imageUrl);
 
   const dateStr = article.published
     ? new Date(article.published).toLocaleDateString('en-US', {
@@ -29,13 +30,10 @@ export function NewsModal({ article, onClose }: NewsModalProps) {
       })
     : '';
 
-  const isESPN = article.articleUrl?.includes('espn.com');
-
-  // Fetch full article text from our API proxy (ESPN only)
+  // Fetch full article text from our API proxy (all whitelisted sources)
   useEffect(() => {
     async function fetchArticle() {
-      if (!isESPN) {
-        // Non-ESPN articles: show description only, link to source
+      if (!article.articleUrl) {
         setLoading(false);
         return;
       }
@@ -46,6 +44,10 @@ export function NewsModal({ article, onClose }: NewsModalProps) {
           if (data.paragraphs && data.paragraphs.length > 0) {
             setParagraphs(data.paragraphs);
           }
+          // Use og:image from scraper if RSS didn't have one
+          if (!resolvedImage && data.imageUrl) {
+            setResolvedImage(data.imageUrl);
+          }
         }
       } catch {
         // Fall back to description
@@ -53,7 +55,8 @@ export function NewsModal({ article, onClose }: NewsModalProps) {
       setLoading(false);
     }
     fetchArticle();
-  }, [article.articleUrl, isESPN]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [article.articleUrl]);
 
   return createPortal(
     <div className="news-modal-overlay" onClick={onClose}>
@@ -62,9 +65,9 @@ export function NewsModal({ article, onClose }: NewsModalProps) {
           X
         </button>
 
-        {article.imageUrl && (
+        {resolvedImage && (
           <Image
-            src={article.imageUrl}
+            src={resolvedImage}
             alt={article.headline}
             width={600}
             height={338}

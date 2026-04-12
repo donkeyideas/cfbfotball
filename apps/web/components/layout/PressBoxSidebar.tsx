@@ -204,12 +204,6 @@ export function PressBoxSidebar() {
 
   function handleArticleClick(article: NewsArticle) {
     trackClick(article.id);
-    // For non-ESPN articles, open directly in new tab (our proxy only works for ESPN)
-    const isESPN = article.articleUrl.includes('espn.com');
-    if (!isESPN && article.articleUrl) {
-      window.open(article.articleUrl, '_blank', 'noopener,noreferrer');
-      return;
-    }
     setSelectedArticle(article);
   }
 

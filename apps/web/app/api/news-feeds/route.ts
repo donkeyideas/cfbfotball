@@ -80,6 +80,20 @@ async function fetchESPN(): Promise<NewsArticle[]> {
   }
 }
 
+// ── HTML entity decoder ────────────────────────────────────────
+
+function decodeEntities(text: string): string {
+  return text
+    .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number(code)))
+    .replace(/&#x([0-9a-fA-F]+);/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)))
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&nbsp;/g, ' ');
+}
+
 // ── RSS feed parser ────────────────────────────────────────────
 
 function parseRSS(xml: string, source: string, limit = 10): NewsArticle[] {
@@ -92,16 +106,18 @@ function parseRSS(xml: string, source: string, limit = 10): NewsArticle[] {
     // Title
     const titleCdata = block.match(/<title><!\[CDATA\[(.+?)\]\]><\/title>/);
     const titlePlain = block.match(/<title>([^<]+)<\/title>/);
-    const headline = (titleCdata?.[1] || titlePlain?.[1] || '').trim();
+    const headline = decodeEntities((titleCdata?.[1] || titlePlain?.[1] || '').trim());
     if (!headline || headline.length < 10) continue;
 
     // Description
-    const descCdata = block.match(/<description><!\[CDATA\[(.+?)\]\]><\/description>/);
+    const descCdata = block.match(/<description><!\[CDATA\[(.+?)\]\]><\/description>/s);
     const descPlain = block.match(/<description>([^<]+)<\/description>/);
-    const description = (descCdata?.[1] || descPlain?.[1] || '')
-      .replace(/<[^>]+>/g, '')
-      .trim()
-      .substring(0, 300);
+    const description = decodeEntities(
+      (descCdata?.[1] || descPlain?.[1] || '')
+        .replace(/<[^>]+>/g, '')
+        .trim()
+        .substring(0, 500)
+    );
 
     // Link
     const linkMatch = block.match(/<link>([^<]+)<\/link>/) || block.match(/<link><!\[CDATA\[(.+?)\]\]><\/link>/);
@@ -115,12 +131,15 @@ function parseRSS(xml: string, source: string, limit = 10): NewsArticle[] {
     const creatorMatch = block.match(/<dc:creator><!\[CDATA\[(.+?)\]\]><\/dc:creator>/)
       || block.match(/<dc:creator>([^<]+)<\/dc:creator>/)
       || block.match(/<author>([^<]+)<\/author>/);
-    const byline = (creatorMatch?.[1] || '').trim();
+    const byline = decodeEntities((creatorMatch?.[1] || '').trim());
 
-    // Image from enclosure or media:content
+    // Image: try enclosure, media:content, media:thumbnail
     const enclosureMatch = block.match(/<enclosure[^>]+url="([^"]+)"/);
     const mediaMatch = block.match(/<media:content[^>]+url="([^"]+)"/);
-    const imageUrl = enclosureMatch?.[1] || mediaMatch?.[1] || null;
+    const thumbMatch = block.match(/<media:thumbnail[^>]+url="([^"]+)"/);
+    // Also try to extract image from description HTML (some feeds embed <img>)
+    const descImgMatch = (descCdata?.[1] || '').match(/<img[^>]+src="([^"]+)"/);
+    const imageUrl = enclosureMatch?.[1] || mediaMatch?.[1] || thumbMatch?.[1] || descImgMatch?.[1] || null;
 
     articles.push({
       id: `${source.toLowerCase().replace(/\s/g, '-')}-${articles.length}`,
