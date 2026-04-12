@@ -27,11 +27,11 @@ export const metadataBase = new URL('https://cfbsocial.com');
 
 export const metadata: Metadata = {
   title: {
-    default: 'CFB Social — College Football Fan Community | Debates, Predictions & Portal Tracker',
+    default: 'CFB Social -- College Football Fan Debates, Takes & Predictions',
     template: '%s | CFB Social',
   },
   description:
-    'CFB Social is the college football fan community. Debate rivalries, file predictions, track the transfer portal, and build your dynasty across 653 schools. The best college football forum for real fans.',
+    'The #1 community for college football fans. Post takes, debate rivals, file predictions, and track the transfer portal across all 653 CFB schools.',
   keywords: [
     'college football fan community', 'best college football forums', 'CFB fan debates',
     'college football predictions', 'college football forum', 'college football message boards',

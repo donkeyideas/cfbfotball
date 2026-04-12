@@ -57,7 +57,7 @@ export function SchoolHub({ school, fanCount, postCount, portalCount, posts, top
             {school.abbreviation}
           </div>
           <div className="school-info">
-            <h1 className="school-name">{school.name}</h1>
+            <div className="school-name">{school.name}</div>
             <div className="school-meta">
               {school.conference}
               {school.stadium && ` \u2014 ${school.stadium}`}

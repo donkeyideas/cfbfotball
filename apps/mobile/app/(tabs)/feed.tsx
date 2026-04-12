@@ -350,6 +350,7 @@ export default function FeedScreen() {
                   ...post,
                   _feedKey: `repost-${r.id}`,
                   _repostedBy: reposter,
+                  _repostTime: r.created_at,
                   created_at: r.created_at, // Use repost time for sorting
                 });
               }

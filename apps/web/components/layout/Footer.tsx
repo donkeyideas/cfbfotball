@@ -9,6 +9,7 @@ export function Footer() {
       </p>
       <div style={{ display: 'flex', justifyContent: 'center', gap: 16, marginTop: 10 }}>
         {[
+          { href: '/schools', label: 'All Schools' },
           { href: '/privacy', label: 'Privacy' },
           { href: '/terms', label: 'Terms' },
           { href: '/contact', label: 'Contact' },

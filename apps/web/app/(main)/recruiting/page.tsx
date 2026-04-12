@@ -3,16 +3,16 @@ import { RecruitingClient } from './RecruitingClient';
 export const revalidate = 300; // revalidate every 5 minutes
 
 export const metadata = {
-  title: 'College Football Recruiting | Transfer Portal Activity by School',
+  title: 'College Football Recruiting News & Fan Takes | CFB Social',
   description: 'Track college football recruiting and transfer portal activity across all FBS programs. See which schools are gaining and losing players, view star ratings, and monitor recruiting heat maps.',
   openGraph: {
-    title: 'College Football Recruiting | CFB Social',
-    description: 'Transfer portal activity and recruiting intelligence across all FBS programs.',
+    title: 'College Football Recruiting News & Fan Takes | CFB Social',
+    description: 'Transfer portal activity, recruiting intelligence, and fan reactions across all FBS programs.',
   },
   twitter: {
     card: 'summary_large_image' as const,
-    title: 'College Football Recruiting | CFB Social',
-    description: 'Transfer portal activity and recruiting intelligence across all FBS programs.',
+    title: 'College Football Recruiting News & Fan Takes | CFB Social',
+    description: 'Transfer portal activity, recruiting intelligence, and fan reactions across all FBS programs.',
   },
   alternates: {
     canonical: 'https://cfbsocial.com/recruiting',

@@ -25,6 +25,7 @@ import {
   extractTopicTheme,
 } from './humanizer';
 import { buildBotContext } from './context-builder';
+import { buildNewsContextString } from './current-events';
 
 interface BotProfile {
   id: string;
@@ -61,57 +62,92 @@ interface BotContentHistory {
 // ============================================================
 
 interface LengthConfig {
-  tier: 'short' | 'medium' | 'long';
+  tier: 'micro' | 'short' | 'medium' | 'long' | 'rant' | 'essay';
   maxChars: number;
   maxTokens: number;
   hint: string;
 }
 
+/**
+ * Extremely varied post lengths. The 3000 char limit should be used.
+ * Distribution is heavily random — some posts are 5 words, some are paragraphs.
+ */
 function getRandomPostLength(personality: BotPersonality): LengthConfig {
-  // Hot takes are always short
+  const roll = Math.random();
+
+  // Hot take bots skew very short, but can occasionally rant
   if (personality.type === 'hot_take') {
-    return {
-      tier: 'short',
-      maxChars: 150,
-      maxTokens: 100,
-      hint: 'Write a single punchy take in 1-2 sentences (under 150 characters). Be definitive and provocative',
-    };
+    if (roll < 0.35) {
+      return { tier: 'micro', maxChars: 80, maxTokens: 60,
+        hint: 'Write ONE ultra-short sentence. 5-12 words MAX. Like a tweet. Example length: "Georgia is cooked." or "We got fleeced in the portal."' };
+    }
+    if (roll < 0.7) {
+      return { tier: 'short', maxChars: 180, maxTokens: 120,
+        hint: 'Write 1-2 punchy sentences (under 180 characters). Definitive and provocative. No hedging.' };
+    }
+    if (roll < 0.9) {
+      return { tier: 'medium', maxChars: 400, maxTokens: 300,
+        hint: 'Write 2-4 sentences (200-400 chars). Make your case with a bit more detail than usual.' };
+    }
+    // 10% chance of a full rant even from hot take bot
+    return { tier: 'rant', maxChars: 1200, maxTokens: 800,
+      hint: 'Go OFF. Write a full passionate rant, 6-10 sentences (800-1200 chars). You are HEATED. Let it all out. Multiple paragraphs ok.' };
   }
 
-  const roll = Math.random();
-  if (roll < 0.3) {
-    return {
-      tier: 'short',
-      maxChars: 280,
-      maxTokens: 200,
-      hint: 'Write a single short college football take (1-2 sentences, under 280 characters)',
-    };
-  } else if (roll < 0.65) {
-    return {
-      tier: 'medium',
-      maxChars: Math.min(500, personality.maxPostLength),
-      maxTokens: 400,
-      hint: 'Your response MUST be 3-5 sentences long (around 300-480 characters). Expand on your point with supporting evidence, specific games, players, or stats',
-    };
-  } else {
-    return {
-      tier: 'long',
-      maxChars: Math.min(500, personality.maxPostLength),
-      maxTokens: 600,
-      hint: 'Your response MUST be a full paragraph of 5-8 sentences (400-500 characters). Break down your argument thoroughly, reference specific stats, players, games. Make your full case',
-    };
+  // All other personality types — extreme variation
+  if (roll < 0.15) {
+    // MICRO: "{{school}} is BACK." / "Pain." / "We are so cooked lmao"
+    return { tier: 'micro', maxChars: 80, maxTokens: 60,
+      hint: 'Write ONE ultra-short sentence. 5-12 words MAX. Like a tweet. Punchy, emotional, zero explanation. Example: "We just got robbed." or "This coaching staff is elite."' };
   }
+  if (roll < 0.35) {
+    // SHORT: classic tweet-length
+    return { tier: 'short', maxChars: 280, maxTokens: 200,
+      hint: 'Write a short take (1-2 sentences, under 280 characters). Quick thought, strong opinion.' };
+  }
+  if (roll < 0.55) {
+    // MEDIUM: a solid take
+    return { tier: 'medium', maxChars: 500, maxTokens: 400,
+      hint: 'Write 3-5 sentences (300-500 chars). Expand on your point with supporting detail.' };
+  }
+  if (roll < 0.72) {
+    // LONG: multi-paragraph opinion
+    return { tier: 'long', maxChars: 1000, maxTokens: 700,
+      hint: 'Write a longer take, 5-8 sentences (600-1000 chars). Really develop your argument. Can use line breaks between thoughts.' };
+  }
+  if (roll < 0.88) {
+    // RANT: heated monologue
+    return { tier: 'rant', maxChars: 1800, maxTokens: 1200,
+      hint: 'Write a FULL rant. 8-15 sentences (1000-1800 chars). You are fired up. Break into 2-3 short paragraphs. Pour your heart out about this topic. Stream of consciousness is fine.' };
+  }
+  // ESSAY: rare, deep-dive (analyst/old_school mostly)
+  const essayMax = personality.type === 'analyst' || personality.type === 'old_school' ? 3000 : 2200;
+  return { tier: 'essay', maxChars: essayMax, maxTokens: 2000,
+    hint: `Write a FULL essay-length post. 15-25 sentences (1500-${essayMax} chars). This is your magnum opus on this topic. Multiple paragraphs with line breaks. Deep analysis, personal stories, historical references. Go in depth. Make it worth reading.` };
 }
 
 function getRandomReplyLength(): LengthConfig {
   const roll = Math.random();
-  if (roll < 0.4) {
-    return { tier: 'short', maxChars: 200, maxTokens: 150, hint: 'Write a short reply (1 sentence, under 200 characters)' };
-  } else if (roll < 0.75) {
-    return { tier: 'medium', maxChars: 400, maxTokens: 300, hint: 'Your reply MUST be 2-4 sentences. Explain your reasoning and add your own perspective' };
-  } else {
-    return { tier: 'long', maxChars: 500, maxTokens: 400, hint: 'Your reply MUST be 4-6 sentences. Really engage with the take in depth' };
+  if (roll < 0.25) {
+    // Micro reply: "Facts." / "W" / "nah you're trippin"
+    return { tier: 'micro', maxChars: 60, maxTokens: 40,
+      hint: 'Write a 1-5 word reply. Ultra short reaction. Examples: "Facts.", "Nah.", "W take", "This ain\'t it", "Exactly"' };
   }
+  if (roll < 0.55) {
+    return { tier: 'short', maxChars: 200, maxTokens: 150,
+      hint: 'Write a short reply (1 sentence, under 200 characters)' };
+  }
+  if (roll < 0.80) {
+    return { tier: 'medium', maxChars: 500, maxTokens: 350,
+      hint: 'Your reply MUST be 2-4 sentences. Explain your reasoning and add your own perspective' };
+  }
+  if (roll < 0.93) {
+    return { tier: 'long', maxChars: 1000, maxTokens: 700,
+      hint: 'Your reply MUST be 4-8 sentences. Really engage with the take in depth. Counter-argue or build on their point.' };
+  }
+  // Rare essay reply
+  return { tier: 'rant', maxChars: 2000, maxTokens: 1400,
+    hint: 'Write a full paragraph reply (8-15 sentences). You have A LOT to say about this. Go deep.' };
 }
 
 // ============================================================
@@ -288,8 +324,11 @@ function buildTakePrompt(
     const isSpringPractice = month >= 2 && month <= 3;
     const isSummerDead = month >= 4 && month <= 5;
     const isFallCamp = month >= 6 && month <= 7;
+    const isDraftSeason = month >= 3 && month <= 4;
     seasonNote = `
-- It is the OFFSEASON (${isSpringPractice ? 'spring practice' : isSummerDead ? 'summer dead period' : isFallCamp ? 'fall camp' : 'early offseason'}). There are NO games happening. Do NOT reference upcoming games, "this weekend", or game scores. Focus on offseason topics: portal, recruiting, coaching, spring practice, preseason predictions`;
+- It is the OFFSEASON (${isSpringPractice ? 'spring practice' : isSummerDead ? 'summer dead period' : isFallCamp ? 'fall camp' : 'early offseason'}). There are NO games happening. Do NOT reference upcoming games, "this weekend", or game scores. Focus on offseason topics: portal, recruiting, coaching, spring practice, preseason predictions
+- ${isDraftSeason ? 'The NFL Draft is happening. Many star players from last season are GONE -- drafted or declared. Do NOT mention players as if they are still on their college team unless their name appears in the news context below.' : 'Many players have transferred or left for the NFL since last season. Rosters have changed dramatically.'}
+- SAFE topics: spring practice battles, portal acquisitions, recruiting class rankings, coaching staff changes, conference realignment, NIL deals, predictions for the upcoming season`;
   }
 
   const system = `${systemBase}${contentDirective}
@@ -301,8 +340,10 @@ RULES:
 - POST FORMAT: ${postFormat.instruction}
 - Sound natural and human - like a real fan posting on social media on their phone
 - Start mid-thought as if you are already in the middle of the argument. NO preamble, NO throat-clearing
-- ONLY mention a person BY NAME if their name appears in the ESPN news or context provided below. If no names are given, use generic references ("our QB", "the new transfers", "the coaching staff", "the head coach")
-- Do NOT invent, recall, or guess ANY names — not players, not coaches, not historical players. Rosters and staffs change constantly. The ONLY names you may use are those explicitly listed in the news context below
+- CRITICAL: It is ${today}. Many players from the 2025 season have LEFT for the NFL Draft or transferred. Do NOT assume any player is still on their team unless their name appears in the news context below.
+- ONLY mention a person BY NAME if their name explicitly appears in the ESPN news or CURRENT CFB NEWS context provided below. If no names match, use generic references ("our QB", "the new transfers", "the coaching staff", "the head coach", "our WR room")
+- Do NOT invent, recall, or guess ANY player or coach names from your training data. Rosters change every year. If a name is NOT in the context below, do NOT use it. Using a wrong name makes you look fake.
+- When in doubt, talk about the TEAM, the PROGRAM, the SCHEME, or the POSITION GROUP -- not individual players
 - NO markdown formatting (no bold, italics, headers, backticks, bullet points, numbered lists)
 - NO hashtags, NO section dividers
 - NO emojis
@@ -312,7 +353,8 @@ RULES:
 - NEVER introduce yourself or state who you are ("As a fan...", "As someone who...")
 - NEVER end with calls to action ("Sound off", "Drop your thoughts", "What do you think?")
 - NEVER repeat or paraphrase something already on the timeline
-- Write like you are posting on your phone, not writing an essay${seasonNote}${extraInstructions ? '\n' + extraInstructions : ''}`;
+- Write like you are posting on your phone, not writing an essay
+- LINKS: If the news context below includes "LINKS YOU CAN SHARE", you MAY include ONE relevant URL at the end of your post (about 30% of the time). Drop the raw URL on its own line, no markdown. Example: "Oregon just landed another 5-star. This class is insane.\nhttps://www.espn.com/college-football/team/_/id/2483/oregon-ducks". Do NOT fabricate URLs. ONLY use URLs that appear verbatim in the context below. If no links are provided, do NOT include any URL.${seasonNote}${extraInstructions ? '\n' + extraInstructions : ''}`;
 
   const user = `Write a fresh take based on this real context:\n\n${context}${newsContext}`;
 
@@ -354,6 +396,10 @@ async function generateTakeContent(
       finalSourceType = 'national';
     }
   }
+
+  // Always append curated CFB context so bots reference real events
+  const curatedContext = buildNewsContextString();
+  finalNewsContext = (finalNewsContext || '') + '\n\n' + curatedContext;
 
   const temp = personality.temperatureRange[0] + Math.random() * (personality.temperatureRange[1] - personality.temperatureRange[0]);
 
@@ -657,9 +703,14 @@ export async function botReactToPosts(botId: string): Promise<{ success: boolean
   if (!recentPosts?.length) return { success: true, count: 0 };
 
   let reactCount = 0;
+  const minReactions = 2; // Guarantee at least 2 reactions per cycle
 
-  for (const post of recentPosts) {
-    if (Math.random() > 0.25) continue; // 25% chance per post
+  // Shuffle posts so reactions aren't always on the most recent
+  const shuffledPosts = shuffleArray([...recentPosts]);
+
+  for (const post of shuffledPosts) {
+    // Higher base chance to react (40% per post), but guarantee minimum
+    if (reactCount >= minReactions && Math.random() > 0.40) continue;
 
     // Check if already reacted
     const { data: existing } = await supabase
@@ -673,24 +724,29 @@ export async function botReactToPosts(botId: string): Promise<{ success: boolean
     // Context-aware reaction logic
     let tdChance = 0.5;
     const postContent = (post.content as string || '').toLowerCase();
-    const isAboutBotSchool = bot.school_id && post.school_id === bot.school_id;
-    const isPositiveAboutSchool = isAboutBotSchool && /\b(great|best|elite|dominant|amazing|underrated)\b/.test(postContent);
-    const isNegativeAboutSchool = isAboutBotSchool && /\b(bad|terrible|worst|overrated|fraud|exposed)\b/.test(postContent);
+    const isSameSchool = bot.school_id && post.school_id === bot.school_id;
+    const isDifferentSchool = bot.school_id && post.school_id && post.school_id !== bot.school_id;
+    const isPositiveAboutSchool = isSameSchool && /\b(great|best|elite|dominant|amazing|underrated)\b/.test(postContent);
+    const isNegativeAboutSchool = isSameSchool && /\b(bad|terrible|worst|overrated|fraud|exposed)\b/.test(postContent);
 
     if (personality.reactionBias === 'touchdown_heavy') tdChance = 0.8;
     else if (personality.reactionBias === 'fumble_heavy') tdChance = 0.3;
+
+    // School-aware reactions
+    if (isSameSchool) tdChance = Math.max(tdChance, 0.8); // Touchdown own school
+    if (isDifferentSchool) tdChance = Math.min(tdChance, 0.35); // More fumbles for rivals
 
     // Personality-specific adjustments
     if (personality.type === 'homer') {
       if (isPositiveAboutSchool) tdChance = 0.95;
       if (isNegativeAboutSchool) tdChance = 0.05;
+      if (isDifferentSchool) tdChance = 0.25; // Homer fumbles rivals
     } else if (personality.type === 'old_school') {
       if (/\b(nil|transfer portal)\b/i.test(postContent) && /\b(good|great|love|amazing)\b/i.test(postContent)) {
         tdChance = 0.1; // Fumble pro-NIL/portal takes
       }
     } else if (personality.type === 'hot_take') {
-      // Contrarian: fumble popular-seeming takes
-      tdChance = 0.35;
+      tdChance = 0.35; // Contrarian
     }
 
     const reactionType = Math.random() < tdChance ? 'TOUCHDOWN' : 'FUMBLE';
@@ -699,8 +755,81 @@ export async function botReactToPosts(botId: string): Promise<{ success: boolean
       .from('reactions')
       .insert({ user_id: botId, post_id: post.id, reaction_type: reactionType });
 
-    if (!error) reactCount++;
+    if (error) {
+      console.error(`[BOT REACT] Failed for ${botId} on post ${post.id}:`, error.message);
+      continue;
+    }
+
+    reactCount++;
+
+    // FUMBLE + REPLY combo: 80% of fumbles generate a disagreement reply
+    if (reactionType === 'FUMBLE' && Math.random() < 0.80) {
+      try {
+        // Check if already replied
+        const { data: existingReply } = await supabase
+          .from('posts')
+          .select('id')
+          .eq('author_id', botId)
+          .eq('parent_id', post.id)
+          .limit(1);
+
+        if (!existingReply?.length) {
+          const rivalryHint = isDifferentSchool
+            ? `\nYou DISAGREE with this take. The author is from a rival school. Be competitive and push back hard.`
+            : `\nYou DISAGREE with this take. Explain why in 1-2 short sentences.`;
+
+          let replyContent = await generateReplyContent(
+            personality,
+            bot?.school ?? null,
+            (post.content as string) + rivalryHint,
+            bot?.bot_mood ?? 5
+          );
+
+          if (replyContent) {
+            replyContent = humanizeContent(replyContent, personality, {
+              bot_region: bot?.bot_region ?? null,
+              bot_age_bracket: bot?.bot_age_bracket ?? null,
+              bot_mood: bot?.bot_mood ?? 5,
+              schoolName: bot?.school?.name,
+              mascotName: bot?.school?.mascot,
+            });
+
+            await supabase.from('posts').insert({
+              author_id: botId,
+              content: replyContent,
+              post_type: 'STANDARD',
+              school_id: bot?.school_id,
+              parent_id: post.id,
+              status: 'PUBLISHED',
+            });
+          }
+        }
+      } catch {
+        // Non-critical: fumble+reply is best-effort
+      }
+    }
+
     if (reactCount >= 5) break;
+  }
+
+  // If we haven't reached minimum, force-react to the first unreacted posts
+  if (reactCount < minReactions) {
+    for (const post of shuffledPosts) {
+      if (reactCount >= minReactions) break;
+      const { data: existing } = await supabase
+        .from('reactions')
+        .select('id')
+        .eq('user_id', botId)
+        .eq('post_id', post.id)
+        .limit(1);
+      if (existing?.length) continue;
+
+      const reactionType = Math.random() < 0.6 ? 'TOUCHDOWN' : 'FUMBLE';
+      const { error } = await supabase
+        .from('reactions')
+        .insert({ user_id: botId, post_id: post.id, reaction_type: reactionType });
+      if (!error) reactCount++;
+    }
   }
 
   // Log activity
@@ -878,8 +1007,7 @@ export async function botRepostContent(botId: string): Promise<{ success: boolea
     .neq('author_id', botId)
     .eq('status', 'PUBLISHED')
     .is('parent_id', null)
-    .gte('touchdown_count', 1)
-    .order('touchdown_count', { ascending: false })
+    .order('created_at', { ascending: false })
     .limit(10);
 
   if (!popularPosts?.length) return { success: false, error: 'No popular posts' };
@@ -1118,8 +1246,11 @@ export async function botFactCheck(botId: string): Promise<{ success: boolean; e
   if (!bot || !bot.is_bot || !bot.bot_active) return { success: false, error: 'Bot inactive' };
 
   const personality = parsePersonality(bot.bot_personality);
-  if (personality.type !== 'analyst') return { success: false, error: 'Only analyst bots fact check' };
-  if (Math.random() > personality.factCheckProbability) return { success: false, error: 'Skipped by probability' };
+  // Fact check is primarily for analyst and recruiting_insider, but others can too at low rates
+  const factCheckRate = personality.type === 'analyst' ? 0.15
+    : personality.type === 'recruiting_insider' ? 0.08
+    : personality.factCheckProbability || 0.02;
+  if (Math.random() > factCheckRate) return { success: false, error: 'Skipped by probability' };
 
   // Find bold claims to fact check
   const { data: posts } = await supabase
@@ -1181,6 +1312,263 @@ export async function botFactCheck(botId: string): Promise<{ success: boolean; e
 }
 
 // ============================================================
+// Bot accepts pending challenges (NEW)
+// ============================================================
+
+export async function botAcceptChallenge(botId: string): Promise<{ success: boolean; error?: string }> {
+  const supabase = createAdminClient();
+  const bot = await fetchBot(botId);
+  if (!bot || !bot.is_bot || !bot.bot_active) return { success: false, error: 'Bot inactive' };
+
+  const personality = parsePersonality(bot.bot_personality);
+  // Only accept with personality-driven probability
+  if (Math.random() > (personality.challengeProbability || 0.1)) return { success: false, error: 'Skipped by probability' };
+
+  // Find pending challenges where this bot is the challenged party
+  // Grace period: only accept challenges older than 30 minutes (let humans accept first)
+  const thirtyMinAgo = new Date(Date.now() - 30 * 60 * 1000).toISOString();
+  const { data: pendingChallenges } = await supabase
+    .from('challenges')
+    .select('id, topic, challenger_id, post_id')
+    .eq('challenged_id', botId)
+    .eq('status', 'PENDING')
+    .lt('created_at', thirtyMinAgo)
+    .order('created_at', { ascending: true })
+    .limit(3);
+
+  if (!pendingChallenges?.length) return { success: false, error: 'No pending challenges' };
+
+  const challenge = pendingChallenges[0]!;
+
+  // Generate argument via AI
+  const schoolName = bot.school?.name || 'my team';
+  let argument = await generateReplyContent(
+    personality,
+    bot.school,
+    `You've been challenged on this topic: "${challenge.topic}". Write a passionate 2-3 sentence argument defending your position as a ${schoolName} fan. Be competitive and specific.`,
+    bot.bot_mood ?? 5
+  );
+
+  if (!argument) {
+    argument = `${schoolName} speaks for itself. Look at the results on the field. That's all that needs to be said.`;
+  }
+
+  // Apply humanizer
+  argument = humanizeContent(argument, personality, {
+    bot_region: bot.bot_region,
+    bot_age_bracket: bot.bot_age_bracket,
+    bot_mood: bot.bot_mood ?? 5,
+    schoolName: bot.school?.name,
+    mascotName: bot.school?.mascot,
+  });
+
+  // Accept the challenge
+  const { error } = await supabase
+    .from('challenges')
+    .update({
+      challenged_argument: argument,
+      status: 'ACTIVE',
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', challenge.id);
+
+  if (error) return { success: false, error: error.message };
+
+  // Also submit challenger's argument if the challenger is a bot
+  const challengerBot = await fetchBot(challenge.challenger_id);
+  if (challengerBot?.is_bot) {
+    const challengerPersonality = parsePersonality(challengerBot.bot_personality);
+    let challengerArg = await generateReplyContent(
+      challengerPersonality,
+      challengerBot.school,
+      `You challenged someone on: "${challenge.topic}". Write your opening argument in 2-3 passionate sentences. Back it up with real facts.`,
+      challengerBot.bot_mood ?? 5
+    );
+    if (!challengerArg) {
+      challengerArg = `I stand by what I said. The facts are clear and history backs me up.`;
+    }
+    challengerArg = humanizeContent(challengerArg, challengerPersonality, {
+      bot_region: challengerBot.bot_region,
+      bot_age_bracket: challengerBot.bot_age_bracket,
+      bot_mood: challengerBot.bot_mood ?? 5,
+      schoolName: challengerBot.school?.name,
+      mascotName: challengerBot.school?.mascot,
+    });
+
+    // Update challenger argument; if both are now set, move to VOTING
+    await supabase
+      .from('challenges')
+      .update({
+        challenger_argument: challengerArg,
+        status: 'VOTING',
+        voting_ends_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', challenge.id);
+  }
+
+  // Log
+  await supabase.from('bot_activity_log').insert({
+    bot_id: botId,
+    action_type: 'POST',
+    target_post_id: challenge.post_id,
+    content_preview: `[CHALLENGE ACCEPTED] ${challenge.topic?.slice(0, 100)}`,
+    success: true,
+  });
+
+  return { success: true };
+}
+
+// ============================================================
+// Bot revisits aged takes whose revisit date has passed (NEW)
+// ============================================================
+
+export async function botRevisitAgedTakes(botId: string): Promise<{ success: boolean; error?: string }> {
+  const supabase = createAdminClient();
+  const bot = await fetchBot(botId);
+  if (!bot || !bot.is_bot || !bot.bot_active) return { success: false, error: 'Bot inactive' };
+
+  const personality = parsePersonality(bot.bot_personality);
+
+  // Find aged takes past their revisit date that this bot marked
+  const today = new Date().toISOString().split('T')[0];
+  const { data: agedTakes } = await supabase
+    .from('aging_takes')
+    .select('id, post_id, revisit_date')
+    .eq('user_id', botId)
+    .lte('revisit_date', today!)
+    .limit(3);
+
+  if (!agedTakes?.length) return { success: false, error: 'No aged takes to revisit' };
+
+  const take = agedTakes[0]!;
+
+  // Fetch the original post
+  const { data: originalPost } = await supabase
+    .from('posts')
+    .select('content')
+    .eq('id', take.post_id)
+    .single();
+
+  if (!originalPost) return { success: false, error: 'Original post not found' };
+
+  // Generate revisit verdict
+  let replyContent = await generateReplyContent(
+    personality,
+    bot.school,
+    `You are revisiting a prediction you filed a receipt on. Original take: "${(originalPost.content as string).slice(0, 300)}". Were you right or wrong? Write a short 1-2 sentence verdict. Use "Called it." energy if right, or "Eating crow on this one" energy if wrong. Be honest.`,
+    bot.bot_mood ?? 5
+  );
+
+  if (!replyContent) {
+    replyContent = Math.random() < 0.5
+      ? 'Called it. I said what I said and the results speak for themselves.'
+      : 'Taking the L on this one. Sometimes you miss. That\'s football.';
+  }
+
+  replyContent = humanizeContent(replyContent, personality, {
+    bot_region: bot.bot_region,
+    bot_age_bracket: bot.bot_age_bracket,
+    bot_mood: bot.bot_mood ?? 5,
+    schoolName: bot.school?.name,
+    mascotName: bot.school?.mascot,
+  });
+
+  // Post the revisit reply
+  const { error } = await supabase.from('posts').insert({
+    author_id: botId,
+    content: replyContent,
+    post_type: 'STANDARD',
+    school_id: bot.school_id,
+    parent_id: take.post_id,
+    status: 'PUBLISHED',
+  });
+
+  if (error) return { success: false, error: error.message };
+
+  // Log
+  await supabase.from('bot_activity_log').insert({
+    bot_id: botId,
+    action_type: 'REPLY',
+    target_post_id: take.post_id,
+    content_preview: `[REVISIT] ${replyContent.slice(0, 100)}`,
+    success: true,
+  });
+
+  return { success: true };
+}
+
+// ============================================================
+// Bot flags a post (very rare) (NEW)
+// ============================================================
+
+export async function botFlagPost(botId: string): Promise<{ success: boolean; error?: string }> {
+  const supabase = createAdminClient();
+  const bot = await fetchBot(botId);
+  if (!bot || !bot.is_bot || !bot.bot_active) return { success: false, error: 'Bot inactive' };
+
+  const personality = parsePersonality(bot.bot_personality);
+
+  // Very rare: 2% for old_school, 1% for homer, basically never for others
+  const flagRate = personality.type === 'old_school' ? 0.02
+    : personality.type === 'homer' ? 0.01
+    : 0.005;
+  if (Math.random() > flagRate) return { success: false, error: 'Skipped by probability' };
+
+  // Find posts with aggressive language
+  const { data: posts } = await supabase
+    .from('posts')
+    .select('id, author_id, content, school_id')
+    .neq('author_id', botId)
+    .neq('school_id', bot.school_id) // Never flag own school
+    .eq('status', 'PUBLISHED')
+    .is('parent_id', null)
+    .order('created_at', { ascending: false })
+    .limit(10);
+
+  if (!posts?.length) return { success: false, error: 'No posts to flag' };
+
+  for (const post of posts) {
+    const content = (post.content as string || '').toLowerCase();
+    const hasAggressiveLanguage = /\b(trash|garbage|pathetic|embarrassing|disgrace|joke|clown)\b/.test(content);
+    if (!hasAggressiveLanguage) continue;
+
+    // Check if already reported
+    const { data: existing } = await supabase
+      .from('reports')
+      .select('id')
+      .eq('post_id', post.id)
+      .eq('reporter_id', botId)
+      .limit(1);
+    if (existing?.length) continue;
+
+    const reasons = ['INAPPROPRIATE', 'PERSONAL_ATTACK', 'MISINFORMATION'];
+    const reason = reasons[Math.floor(Math.random() * reasons.length)]!;
+
+    const { error } = await supabase.from('reports').insert({
+      reporter_id: botId,
+      post_id: post.id,
+      reported_user_id: post.author_id,
+      reason,
+    });
+
+    if (error) continue;
+
+    await supabase.from('bot_activity_log').insert({
+      bot_id: botId,
+      action_type: 'POST',
+      target_post_id: post.id,
+      content_preview: `[FLAG] ${reason}`,
+      success: true,
+    });
+
+    return { success: true };
+  }
+
+  return { success: false, error: 'No flaggable posts found' };
+}
+
+// ============================================================
 // Time-of-day activity modifier
 // ============================================================
 
@@ -1239,10 +1627,13 @@ export async function runBotCycle(): Promise<{
     return emptyResult;
   }
 
-  // Time-of-day check
-  const activityMod = getTimeActivityMultiplier();
-  if (Math.random() > activityMod) {
-    return { ...emptyResult, globalActive: true };
+  // Time-of-day check (skip in dev so every trigger produces output)
+  const isDev = process.env.NODE_ENV === 'development';
+  if (!isDev) {
+    const activityMod = getTimeActivityMultiplier();
+    if (Math.random() > activityMod) {
+      return { ...emptyResult, globalActive: true };
+    }
   }
 
   // Get active bots
@@ -1257,10 +1648,44 @@ export async function runBotCycle(): Promise<{
     return { ...emptyResult, globalActive: true };
   }
 
-  // Pick 2-4 random bots
-  const maxBots = Math.min(4, activeBots.length);
-  const numBots = Math.max(2, Math.floor(Math.random() * maxBots) + 1);
-  const selectedBots = shuffleArray(activeBots).slice(0, numBots);
+  // Time-aware bot count
+  const now = new Date();
+  const estHour = (now.getUTCHours() - 5 + 24) % 24;
+  const isSaturday = now.getDay() === 6;
+  let maxBotsForCycle: number;
+  if (estHour >= 0 && estHour < 6) maxBotsForCycle = 1;
+  else if (estHour >= 6 && estHour < 9) maxBotsForCycle = 2;
+  else if (isSaturday && estHour >= 10 && estHour <= 23) maxBotsForCycle = 4;
+  else if (estHour >= 17 && estHour <= 23) maxBotsForCycle = 3;
+  else maxBotsForCycle = 3;
+
+  const numBots = Math.min(maxBotsForCycle, activeBots.length, Math.max(1, Math.floor(Math.random() * maxBotsForCycle) + 1));
+
+  // Check last 3 posts on feed to enforce spacing rules
+  const { data: lastFeedPosts } = await supabase
+    .from('posts')
+    .select('author_id, school_id')
+    .eq('status', 'PUBLISHED')
+    .is('parent_id', null)
+    .order('created_at', { ascending: false })
+    .limit(3);
+
+  const recentAuthorIds = new Set((lastFeedPosts ?? []).map(p => p.author_id));
+  const recentSchoolIds = new Set((lastFeedPosts ?? []).map(p => p.school_id).filter(Boolean));
+
+  // Round-robin: pick bots by longest idle first, then filter
+  const sortedBots = [...activeBots].sort((a, b) => {
+    // Prefer bots that haven't posted recently (simple id-based fallback)
+    return 0; // Will use bot_last_post_at when available via full profile fetch
+  });
+  const shuffled = shuffleArray(sortedBots);
+
+  // Filter: skip bots that posted in the last 3 feed posts or recently
+  const eligibleBots = shuffled.filter(b => !recentAuthorIds.has(b.id));
+  const selectedBots = (eligibleBots.length >= numBots ? eligibleBots : shuffled).slice(0, numBots);
+
+  // Track schools selected this cycle to avoid same-school consecutive posts
+  const schoolsThisCycle = new Set<string>();
 
   let posted = 0;
   let reacted = 0;
@@ -1273,10 +1698,40 @@ export async function runBotCycle(): Promise<{
   const errors: string[] = [];
 
   for (const bot of selectedBots) {
-    // 30% of the time, reply instead of posting (creates bot-to-bot interaction)
+    // Fetch full bot profile for throttle checks
+    const botProfile = await fetchBot(bot.id);
+    if (!botProfile) continue;
+
+    // Post throttle: skip if bot posted recently (2 min dev, 60 min prod)
+    const postCooldownMinutes = process.env.NODE_ENV === 'development' ? 2 : 60;
+    const lastPostAt = botProfile.bot_post_count_today !== null
+      ? (await supabase.from('profiles').select('bot_last_post_at').eq('id', bot.id).single()).data?.bot_last_post_at
+      : null;
+    const minutesSinceLastPost = lastPostAt
+      ? (Date.now() - new Date(lastPostAt as string).getTime()) / 60000
+      : Infinity;
+    const canPost = minutesSinceLastPost >= postCooldownMinutes;
+
+    // Same-school throttle
+    const botSchoolId = botProfile.school_id;
+    const schoolAlreadyPosted = botSchoolId && schoolsThisCycle.has(botSchoolId);
+
+    // ---- PRIMARY ACTION: Post or Reply ----
     const actionRoll = Math.random();
-    if (actionRoll < 0.30) {
-      // REPLY mode: reply to an existing post (prioritizes other bots)
+    if (canPost && !schoolAlreadyPosted && actionRoll < 0.65) {
+      // POST mode (65%): create a new take
+      try {
+        const result = await postBotTake(bot.id);
+        if (result.success) {
+          posted++;
+          if (botSchoolId) schoolsThisCycle.add(botSchoolId);
+        }
+        else if (result.error) errors.push(`Post[${bot.username}]: ${result.error}`);
+      } catch (err) {
+        errors.push(`Post[${bot.username}]: ${err instanceof Error ? err.message : String(err)}`);
+      }
+    } else {
+      // REPLY mode (35% or when throttled): reply to an existing post
       try {
         const result = await botReplyToPost(bot.id);
         if (result.success) replied++;
@@ -1284,43 +1739,20 @@ export async function runBotCycle(): Promise<{
       } catch (err) {
         errors.push(`Reply[${bot.username}]: ${err instanceof Error ? err.message : String(err)}`);
       }
-    } else if (actionRoll < 0.85) {
-      // POST mode: create a new take (55% of the time)
-      try {
-        const result = await postBotTake(bot.id);
-        if (result.success) posted++;
-        else if (result.error) errors.push(`Post[${bot.username}]: ${result.error}`);
-      } catch (err) {
-        errors.push(`Post[${bot.username}]: ${err instanceof Error ? err.message : String(err)}`);
-      }
-    } else {
-      // REPLY+POST mode: do both (15% of the time)
-      try {
-        const postResult = await postBotTake(bot.id);
-        if (postResult.success) posted++;
-      } catch (err) {
-        errors.push(`Post[${bot.username}]: ${err instanceof Error ? err.message : String(err)}`);
-      }
-      try {
-        const replyResult = await botReplyToPost(bot.id);
-        if (replyResult.success) replied++;
-      } catch (err) {
-        errors.push(`Reply[${bot.username}]: ${err instanceof Error ? err.message : String(err)}`);
-      }
     }
 
-    // 60% chance to react
-    if (Math.random() < 0.6) {
-      try {
-        const result = await botReactToPosts(bot.id);
-        if (result.count > 0) reacted += result.count;
-      } catch (err) {
-        errors.push(`React[${bot.username}]: ${err instanceof Error ? err.message : String(err)}`);
-      }
+    // ---- GUARANTEED REACTIONS: Every bot reacts to 2-3 posts per cycle ----
+    try {
+      const result = await botReactToPosts(bot.id);
+      if (result.count > 0) reacted += result.count;
+    } catch (err) {
+      errors.push(`React[${bot.username}]: ${err instanceof Error ? err.message : String(err)}`);
     }
 
-    // 25% chance to repost
-    if (Math.random() < 0.25) {
+    // ---- SECONDARY ACTIONS (personality-driven) ----
+
+    // 30% chance to repost
+    if (Math.random() < 0.30) {
       try {
         const result = await botRepostContent(bot.id);
         if (result.success) reposted++;
@@ -1337,7 +1769,7 @@ export async function runBotCycle(): Promise<{
       errors.push(`Challenge[${bot.username}]: ${err instanceof Error ? err.message : String(err)}`);
     }
 
-    // Fact check (analyst only)
+    // Fact check (personality-driven, not analyst-only anymore)
     try {
       const result = await botFactCheck(bot.id);
       if (result.success) factChecked++;
@@ -1359,6 +1791,14 @@ export async function runBotCycle(): Promise<{
       if (result.count > 0) saved += result.count;
     } catch (err) {
       errors.push(`Save[${bot.username}]: ${err instanceof Error ? err.message : String(err)}`);
+    }
+
+    // Accept pending challenges (new)
+    try {
+      const result = await botAcceptChallenge(bot.id);
+      if (result.success) challenged++;
+    } catch (err) {
+      errors.push(`AcceptChallenge[${bot.username}]: ${err instanceof Error ? err.message : String(err)}`);
     }
   }
 

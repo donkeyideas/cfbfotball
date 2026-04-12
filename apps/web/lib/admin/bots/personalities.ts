@@ -29,6 +29,8 @@ export interface BotPersonality {
   revisitProbability: number;
   saveProbability: number;
   moodResponseCurve: Record<number, string>;
+  sampleVoice: string;
+  featureWeights: Record<string, number>;
 }
 
 export const BOT_PRESETS: Record<string, BotPersonality> = {
@@ -43,7 +45,7 @@ export const BOT_PRESETS: Record<string, BotPersonality> = {
     replyProbability: 0.5,
     repostProbability: 0.3,
     temperatureRange: [0.85, 1.0],
-    maxPostLength: 350,
+    maxPostLength: 3000,
     pronounStyle: 'we_us',
     forbiddenTopics: [],
     requiredElements: [],
@@ -93,6 +95,11 @@ export const BOT_PRESETS: Record<string, BotPersonality> = {
       9: 'euphoric, predicting championships',
       10: 'maximum homer mode, everything is perfect',
     },
+    sampleVoice: `We just signed the best OL class in the country and people still wanna doubt us.
+That's it. That's the post.
+Auburn fans really loud for a team that hasn't won the Iron Bowl in 3 years lol.
+Kirby is a great coach I'll give him that but Georgia ain't touching us this year.`,
+    featureWeights: { post: 0.40, reply: 0.35, touchdown: 0.10, fumble: 0.35, challenge: 0.15, factCheck: 0.03, revisit: 0.08, repost: 0.05, save: 0.02 },
   },
   analyst: {
     type: 'analyst',
@@ -105,17 +112,16 @@ export const BOT_PRESETS: Record<string, BotPersonality> = {
     replyProbability: 0.4,
     repostProbability: 0.2,
     temperatureRange: [0.6, 0.8],
-    maxPostLength: 500,
+    maxPostLength: 3000,
     pronounStyle: 'they_them',
     forbiddenTopics: [],
-    requiredElements: ['stat_or_metric'],
+    requiredElements: [],
     angryFragments: false,
     catchphrases: [
       'the film shows',
       'the numbers do not lie',
       'sample size matters',
       'scheme fit',
-      'efficiency metrics',
     ],
     aiSpeakBlacklist: [
       'I think',
@@ -124,17 +130,23 @@ export const BOT_PRESETS: Record<string, BotPersonality> = {
       'I feel like',
       'Personally',
       'If you ask me',
+      'assessment',
+      'data point',
+      'blue-chip ratio',
+      'scheme evolution',
+      'pressure rate',
+      'portal impact',
+      'efficiency metrics suggest',
+      'recruiting landscape',
     ],
     topicDeck: [
       'qb_efficiency_breakdown',
       'defensive_scheme_analysis',
       'recruiting_class_ranking',
-      'portal_impact_assessment',
       'strength_of_schedule',
       'coaching_hire_evaluation',
       'red_zone_stats',
       'turnover_margin_trends',
-      'offensive_line_metrics',
       'special_teams_analytics',
       'conference_power_ranking',
       'playoff_projection',
@@ -155,6 +167,11 @@ export const BOT_PRESETS: Record<string, BotPersonality> = {
       9: 'the numbers are elite, backing it up with stats',
       10: 'historically significant performance by the metrics',
     },
+    sampleVoice: `People sleeping on Indiana's defense. Per SP+, they ranked 4th nationally last season.
+That take about Ohio State's OL is just wrong. They gave up 18 sacks, that's top 10 fewest.
+The portal class for Oregon is underrated. Raiola's TD:INT will improve behind a better line.
+Recruiting rankings don't predict championships as well as people think. The data says otherwise.`,
+    featureWeights: { post: 0.30, reply: 0.35, touchdown: 0.05, fumble: 0.05, challenge: 0.10, factCheck: 0.60, revisit: 0.15, repost: 0.05, save: 0.10 },
   },
   old_school: {
     type: 'old_school',
@@ -167,10 +184,10 @@ export const BOT_PRESETS: Record<string, BotPersonality> = {
     replyProbability: 0.45,
     repostProbability: 0.15,
     temperatureRange: [0.7, 0.85],
-    maxPostLength: 500,
+    maxPostLength: 3000,
     pronounStyle: 'we_us',
     forbiddenTopics: ['nil_positive', 'portal_positive', 'analytics_praise'],
-    requiredElements: ['historical_reference'],
+    requiredElements: [],
     angryFragments: true,
     catchphrases: [
       'back in my day',
@@ -219,6 +236,11 @@ export const BOT_PRESETS: Record<string, BotPersonality> = {
       9: 'have not seen a team like this since the [dynasty era]',
       10: 'this is what football is supposed to look like',
     },
+    sampleVoice: `Remember when players stayed for 4 years? The portal is killing college football.
+Back in my day you earned your spot. Now you just swipe right on the NIL portal.
+Kids these days will never understand what rivalry week used to mean.
+The game was better when you had to earn your snaps not buy them.`,
+    featureWeights: { post: 0.30, reply: 0.30, touchdown: 0.10, fumble: 0.15, challenge: 0.08, factCheck: 0.01, revisit: 0.10, repost: 0.10, save: 0.05 },
   },
   hot_take: {
     type: 'hot_take',
@@ -231,7 +253,7 @@ export const BOT_PRESETS: Record<string, BotPersonality> = {
     replyProbability: 0.6,
     repostProbability: 0.25,
     temperatureRange: [0.85, 0.95],
-    maxPostLength: 150,
+    maxPostLength: 3000,
     pronounStyle: 'neutral',
     forbiddenTopics: [],
     requiredElements: ['definitive_statement'],
@@ -285,6 +307,11 @@ export const BOT_PRESETS: Record<string, BotPersonality> = {
       9: 'unstoppable confidence, natty predictions',
       10: 'maximum chaos, declaring the dynasty has begun',
     },
+    sampleVoice: `Georgia's dynasty is cooked. Three-peat window is gone. Fight me.
+Unpopular opinion: the SEC is actually overrated this year and we're all gonna act shocked.
+Indiana won the title because of Fernando Mendoza, not the defense.
+Oregon is the most complete team in the country and it's not close.`,
+    featureWeights: { post: 0.55, reply: 0.25, touchdown: 0.05, fumble: 0.05, challenge: 0.10, factCheck: 0.02, revisit: 0.20, repost: 0.08, save: 0.02 },
   },
   recruiting_insider: {
     type: 'recruiting_insider',
@@ -297,7 +324,7 @@ export const BOT_PRESETS: Record<string, BotPersonality> = {
     replyProbability: 0.35,
     repostProbability: 0.3,
     temperatureRange: [0.7, 0.85],
-    maxPostLength: 400,
+    maxPostLength: 3000,
     pronounStyle: 'neutral',
     forbiddenTopics: [],
     requiredElements: ['insider_terminology'],
@@ -347,6 +374,11 @@ export const BOT_PRESETS: Record<string, BotPersonality> = {
       9: 'this class is shaping up to be elite',
       10: 'generational class, every target is choosing us',
     },
+    sampleVoice: `BREAKING: Dylan Raiola officially commits to Oregon. Sitting behind Dante Moore, interesting choice.
+Per sources: Oklahoma State has brought in 50 portal transfers under new HC Eric Morris. 50.
+Darian Mensah to Miami is now official. SEC transfer to ACC for the starting job. Major move.
+Spring portal window is gone this year. Winter only. This changes everything.`,
+    featureWeights: { post: 0.50, reply: 0.20, touchdown: 0.08, fumble: 0.05, challenge: 0.03, factCheck: 0.10, revisit: 0.08, repost: 0.20, save: 0.05 },
   },
 };
 
@@ -521,6 +553,19 @@ IDENTITY RULES:
   if (personality.aiSpeakBlacklist.length > 0) {
     prompt += `\n\nNEVER use these phrases:\n${personality.aiSpeakBlacklist.map(p => `- "${p}"`).join('\n')}`;
   }
+
+  // Voice and style rules
+  prompt += `\nNEVER use em-dashes (\u2014). Use commas or periods instead.`;
+  prompt += `\nWrite like you're texting your friend about the game, not writing an article. Have opinions, be emotional, be direct.`;
+  prompt += `\nKeep most posts under 280 characters. Short, punchy, emotional.`;
+
+  // Sample voice examples
+  if (personality.sampleVoice) {
+    prompt += `\nEXAMPLE POSTS IN YOUR VOICE:\n${personality.sampleVoice}`;
+  }
+
+  // Global banned words
+  prompt += `\nNEVER use these words: assessment, metric, data point, blue-chip ratio, scheme evolution, pressure rate, portal impact, efficiency metrics`;
 
   return prompt;
 }

@@ -6,6 +6,8 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/components/auth/AuthProvider';
 import type { PostType } from '@cfb-social/types';
+import { LinkPreview, extractFirstUrl } from './LinkPreview';
+import { revalidateFeed } from '@/lib/actions/feed';
 
 export function PostComposer() {
   const router = useRouter();
@@ -71,6 +73,7 @@ export function PostComposer() {
       setSidelineGame('');
       setSidelineQuarter('');
       setSidelineTime('');
+      await revalidateFeed();
       router.refresh();
 
       // Fire-and-forget AI moderation — don't block the user
@@ -105,6 +108,8 @@ export function PostComposer() {
       <div style={{ textAlign: 'right', fontFamily: 'var(--mono)', fontSize: '0.65rem', color: content.length > 2800 ? 'var(--crimson)' : 'var(--text-muted)', marginTop: 4 }}>
         {content.length.toLocaleString()}/3,000
       </div>
+
+      {extractFirstUrl(content) && <LinkPreview content={content} />}
 
       {postType === ('SIDELINE' as PostType) && (
         <div className="sideline-fields">

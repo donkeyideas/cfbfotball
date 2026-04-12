@@ -21,8 +21,9 @@ export async function generateMetadata({ params }: SchoolPageProps) {
 
   if (!data) return { title: 'School' };
 
-  const title = `${data.name} Football | Fans, Takes & Transfer Portal`;
-  const description = `${data.name} ${data.mascot ?? ''} college football community. Join the conversation, track portal moves, debate rivalries, and represent your school.`.trim();
+  const mascotStr = data.mascot ? ` ${data.mascot}` : '';
+  const title = `${data.name}${mascotStr} Fans -- Debates, Takes & Predictions | CFB Social`;
+  const description = `Join ${data.name}${mascotStr} fans on CFB Social. Post hot takes, debate rivals, track recruiting and the transfer portal. College football's most passionate community.`;
 
   return {
     title,
@@ -106,10 +107,35 @@ export default async function SchoolPage({ params }: SchoolPageProps) {
       <BreadcrumbJsonLd
         items={[
           { name: 'Home', url: 'https://cfbsocial.com' },
-          { name: 'Schools', url: 'https://cfbsocial.com/feed' },
+          { name: 'Schools', url: 'https://cfbsocial.com/schools' },
           { name: school.name, url: `https://cfbsocial.com/school/${slug}` },
         ]}
       />
+      <h1
+        style={{
+          fontFamily: 'var(--serif)',
+          color: 'var(--ink-dark)',
+          fontSize: '1.75rem',
+          fontWeight: 700,
+          margin: '1.5rem 0 0.5rem',
+          lineHeight: 1.25,
+        }}
+      >
+        {school.name} Football Fan Community
+      </h1>
+      <p
+        style={{
+          color: 'var(--faded-ink)',
+          fontSize: '0.95rem',
+          lineHeight: 1.6,
+          margin: '0 0 1.25rem',
+          maxWidth: '52rem',
+        }}
+      >
+        The {school.name}{school.mascot ? ` ${school.mascot}` : ''} community on CFB Social.
+        {' '}Debate the {school.conference || 'conference'}, track {school.name}&apos;s recruiting class, file predictions, and talk trash to rival fans.
+        {' '}College football&apos;s most passionate fan debates, all in one place.
+      </p>
       <SchoolHub
         school={school}
         fanCount={fanCount ?? 0}

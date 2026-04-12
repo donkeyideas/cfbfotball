@@ -6,9 +6,11 @@ import { PostEngagement } from './PostEngagement';
 import { BallotButtons } from './BallotButtons';
 import { PostActions } from './PostActions';
 import { ReportModal } from '../moderation/ReportModal';
+import { LinkPreview } from './LinkPreview';
 import { useColors } from '@/lib/theme/ThemeProvider';
 import { typography } from '@/lib/theme/typography';
 import { withAlpha } from '@/lib/theme/utils';
+import { timeAgo } from '@/lib/utils/timeAgo';
 import type { PostData } from './PostCard';
 
 interface NewspaperClippingCardProps {
@@ -183,6 +185,7 @@ export const NewspaperClippingCard = memo(function NewspaperClippingCard({ post,
         >
           <Text style={styles.repostStampText}>REPOSTED</Text>
           <Text style={styles.repostStampUser}>@{post._repostedBy.username}</Text>
+          {post._repostTime && <Text style={styles.repostStampUser}>{timeAgo(post._repostTime)} ago</Text>}
         </Pressable>
       )}
 
@@ -217,6 +220,8 @@ export const NewspaperClippingCard = memo(function NewspaperClippingCard({ post,
           <Text style={styles.content}>{body}</Text>
         ) : null}
       </Pressable>
+
+      <LinkPreview content={post.content} />
 
       {/* Receipt stamp with date for aging takes */}
       {hasAgingTake && receiptDate && (

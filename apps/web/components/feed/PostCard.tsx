@@ -8,6 +8,7 @@ import { BallotButtons } from './BallotButtons';
 import { PostActions } from './PostActions';
 import { AppealForm } from '@/components/moderation/AppealForm';
 import { AgingTakeTimerWrapper } from './AgingTakeTimerWrapper';
+import { LinkPreview } from './LinkPreview';
 
 interface PostAuthor {
   id: string;
@@ -59,6 +60,7 @@ interface Post {
   aging_takes?: AgingTake[];
   // Repost metadata (set when this post appears as a repost in the feed)
   _repostedBy?: { username: string; display_name: string | null } | null;
+  _repostTime?: string | null;
 }
 
 export const PostCard = memo(function PostCard({ post }: { post: Post }) {
@@ -82,11 +84,12 @@ export const PostCard = memo(function PostCard({ post }: { post: Post }) {
   }
 });
 
-function RepostStamp({ repostedBy }: { repostedBy: { username: string; display_name: string | null } }) {
+function RepostStamp({ repostedBy, repostTime }: { repostedBy: { username: string; display_name: string | null }; repostTime?: string | null }) {
   return (
     <Link href={`/profile/${repostedBy.username}`} className="repost-stamp">
       <span className="repost-stamp-label">REPOSTED</span>
       <span className="repost-stamp-user">@{repostedBy.username}</span>
+      {repostTime && <span className="repost-stamp-time" suppressHydrationWarning>{getTimeAgo(new Date(repostTime))} ago</span>}
     </Link>
   );
 }
@@ -202,7 +205,7 @@ const ClassicPost = memo(function ClassicPost({ post }: { post: Post }) {
     });
     return (
       <article className="post-card post-receipt" style={schoolStyle}>
-        {post._repostedBy && <RepostStamp repostedBy={post._repostedBy} />}
+        {post._repostedBy && <RepostStamp repostedBy={post._repostedBy} repostTime={post._repostTime} />}
         <div className="receipt-seal">
           <span className="receipt-seal-text">Receipt<br />Filed</span>
         </div>
@@ -210,6 +213,7 @@ const ClassicPost = memo(function ClassicPost({ post }: { post: Post }) {
         <Link href={`/post/${post.id}`} className="post-body-link">
           <div className="post-body">{post.content}</div>
         </Link>
+        <LinkPreview content={post.content} />
         <div className="receipt-stamp" suppressHydrationWarning>RECEIPT FILED &mdash; Review {receiptDate}</div>
         <PostBottom post={post} />
       </article>
@@ -218,11 +222,12 @@ const ClassicPost = memo(function ClassicPost({ post }: { post: Post }) {
 
   return (
     <article className="post-card post-classic" style={schoolStyle}>
-      {post._repostedBy && <RepostStamp repostedBy={post._repostedBy} />}
+      {post._repostedBy && <RepostStamp repostedBy={post._repostedBy} repostTime={post._repostTime} />}
       <PostUserRow post={post} />
       <Link href={`/post/${post.id}`} className="post-body-link">
         <div className="post-body">{post.content}</div>
       </Link>
+      <LinkPreview content={post.content} />
       <PostBottom post={post} />
     </article>
   );
@@ -239,7 +244,7 @@ const ReceiptPost = memo(function ReceiptPost({ post }: { post: Post }) {
 
   return (
     <article className="post-card post-receipt" style={schoolStyle}>
-      {post._repostedBy && <RepostStamp repostedBy={post._repostedBy} />}
+      {post._repostedBy && <RepostStamp repostedBy={post._repostedBy} repostTime={post._repostTime} />}
       <div className="receipt-seal">
         <span className="receipt-seal-text">Verified<br />Receipt</span>
       </div>
@@ -247,6 +252,7 @@ const ReceiptPost = memo(function ReceiptPost({ post }: { post: Post }) {
       <Link href={`/post/${post.id}`} className="post-body-link">
         <div className="post-body">{post.content}</div>
       </Link>
+      <LinkPreview content={post.content} />
       <div className="receipt-stamp">RECEIPT CONFIRMED</div>
       <PostBottom post={post} />
     </article>
@@ -300,7 +306,7 @@ const PressBoxPost = memo(function PressBoxPost({ post }: { post: Post }) {
 
   return (
     <article className="post-card post-pressbox" style={schoolStyle}>
-      {post._repostedBy && <RepostStamp repostedBy={post._repostedBy} />}
+      {post._repostedBy && <RepostStamp repostedBy={post._repostedBy} repostTime={post._repostTime} />}
       <div className="pressbox-header">
         <span className="pressbox-title">Sideline Report</span>
         <span className="pressbox-time" suppressHydrationWarning>{headerTime}</span>
@@ -321,6 +327,7 @@ const PressBoxPost = memo(function PressBoxPost({ post }: { post: Post }) {
         <Link href={`/post/${post.id}`} className="post-body-link">
           <div className="pressbox-content">{post.content}</div>
         </Link>
+        <LinkPreview content={post.content} />
       </div>
       <div className="pressbox-footer">
         <PostBottom post={post} />
@@ -340,7 +347,7 @@ const RivalryPost = memo(function RivalryPost({ post }: { post: Post }) {
 
   return (
     <article className="post-card post-rivalry" style={schoolStyle}>
-      {post._repostedBy && <RepostStamp repostedBy={post._repostedBy} />}
+      {post._repostedBy && <RepostStamp repostedBy={post._repostedBy} repostTime={post._repostTime} />}
       <div className="rivalry-header">
         <div className="rivalry-label">Rivalry Ring</div>
         <div className="rivalry-title">Challenge Result</div>
@@ -350,6 +357,7 @@ const RivalryPost = memo(function RivalryPost({ post }: { post: Post }) {
         <Link href={`/post/${post.id}`} className="post-body-link">
           <div className="post-body">{post.content}</div>
         </Link>
+        <LinkPreview content={post.content} />
         <PostBottom post={post} />
       </div>
     </article>
@@ -367,7 +375,7 @@ const PredictionPost = memo(function PredictionPost({ post }: { post: Post }) {
 
   return (
     <article className="post-card post-prediction" style={schoolStyle}>
-      {post._repostedBy && <RepostStamp repostedBy={post._repostedBy} />}
+      {post._repostedBy && <RepostStamp repostedBy={post._repostedBy} repostTime={post._repostTime} />}
       <div className="prediction-header">
         <span className="prediction-label">Community Poll</span>
         <span className="prediction-tag">PREDICTION</span>
@@ -377,6 +385,7 @@ const PredictionPost = memo(function PredictionPost({ post }: { post: Post }) {
         <Link href={`/post/${post.id}`} className="post-body-link">
           <div className="prediction-question">{post.content}</div>
         </Link>
+        <LinkPreview content={post.content} />
       </div>
       <div className="prediction-footer">
         <PostBottom post={post} />
@@ -402,7 +411,7 @@ const AgingTakePost = memo(function AgingTakePost({ post }: { post: Post }) {
 
   return (
     <article className="post-card post-aging" style={schoolStyle}>
-      {post._repostedBy && <RepostStamp repostedBy={post._repostedBy} />}
+      {post._repostedBy && <RepostStamp repostedBy={post._repostedBy} repostTime={post._repostTime} />}
       <div className="aging-header">
         <span className="aging-label">Aging Take</span>
         <span className="aging-date" suppressHydrationWarning>Filed {dateStr}</span>
@@ -412,6 +421,7 @@ const AgingTakePost = memo(function AgingTakePost({ post }: { post: Post }) {
         <Link href={`/post/${post.id}`} className="post-body-link">
           <div className="aging-quote">&ldquo;{post.content}&rdquo;</div>
         </Link>
+        <LinkPreview content={post.content} />
         <AgingTakeTimerWrapper postId={post.id} />
       </div>
       <div className="aging-footer">

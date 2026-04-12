@@ -19,6 +19,7 @@ const navItems: { href: string; label: string; badgeKey?: 'notifications' | 'riv
   { href: '/predictions', label: 'Predictions' },
   { href: '/recruiting', label: 'Recruiting Desk' },
   { href: '/vault', label: 'The Vault' },
+  { href: '/schools', label: 'All Schools' },
   { href: '/receipts', label: 'My Receipts' },
 ];
 

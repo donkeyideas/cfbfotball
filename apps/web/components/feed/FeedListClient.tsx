@@ -106,6 +106,7 @@ export function FeedListClient({ tab, cursor: initialCursor, userSchoolId }: Fee
             _feedKey: `repost-${r.id}`,
             _feedTime: r.created_at as string,
             _repostedBy: reposter ?? null,
+            _repostTime: r.created_at as string,
           };
         });
     }
@@ -116,6 +117,7 @@ export function FeedListClient({ tab, cursor: initialCursor, userSchoolId }: Fee
         _feedKey: `post-${p.id}`,
         _feedTime: p.created_at as string,
         _repostedBy: null as { username: string; display_name: string | null } | null,
+        _repostTime: null as string | null,
       }));
 
       // Merge and sort

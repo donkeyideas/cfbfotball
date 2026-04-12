@@ -4,6 +4,7 @@
 
 import { createAdminClient } from '@/lib/admin/supabase/admin';
 import { BOT_PRESETS } from './personalities';
+import { generateBotUsername, generateBotDisplayName } from './username-generator';
 
 // Top FBS school abbreviations for priority seeding (2 bots each)
 const TOP_25_ABBREVIATIONS = [
@@ -133,9 +134,10 @@ export async function seedBots(onProgress?: (msg: string) => void): Promise<{ cr
   // Helper to create one bot
   async function createOneBot(school: School, personalityType: string, suffix: number) {
     const personality = BOT_PRESETS[personalityType] ?? BOT_PRESETS.homer;
-    const abbr = school.abbreviation.toLowerCase().replace(/[^a-z]/g, '');
-    const username = `${abbr}_${personalityType}_${suffix}`;
-    const email = `bot-${username}@cfbsocial.com`;
+    const schoolInfo = { name: school.name, mascot: school.mascot, abbreviation: school.abbreviation };
+    const username = generateBotUsername(schoolInfo, personalityType);
+    const email = `bot-${username.toLowerCase().replace(/[^a-z0-9]/g, '')}${suffix}@cfbsocial.com`;
+    const displayName = generateBotDisplayName(schoolInfo, personalityType);
 
     const vars = {
       school: school.name,
@@ -144,9 +146,6 @@ export async function seedBots(onProgress?: (msg: string) => void): Promise<{ cr
       color: school.primary_color,
       conference: school.conference,
     };
-
-    const nameTemplates = (NAME_TEMPLATES[personalityType] ?? NAME_TEMPLATES.homer)!;
-    const displayName = fillTemplate(pickRandom(nameTemplates)!, vars);
 
     const bioTemplates = (BIO_TEMPLATES[personalityType] ?? BIO_TEMPLATES.homer)!;
     const bio = fillTemplate(pickRandom(bioTemplates)!, vars);
@@ -182,7 +181,7 @@ export async function seedBots(onProgress?: (msg: string) => void): Promise<{ cr
           display_name: displayName,
           bio,
           is_bot: true,
-          bot_active: false,
+          bot_active: true,
           bot_personality: personality as unknown as Record<string, unknown>,
           school_id: school.id,
           banner_color: school.primary_color,
@@ -199,7 +198,7 @@ export async function seedBots(onProgress?: (msg: string) => void): Promise<{ cr
           display_name: displayName,
           bio,
           is_bot: true,
-          bot_active: false,
+          bot_active: true,
           bot_personality: personality as unknown as Record<string, unknown>,
           school_id: school.id,
           banner_color: school.primary_color,

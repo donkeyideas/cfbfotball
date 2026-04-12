@@ -44,6 +44,25 @@ const AI_SPEAK_PATTERNS = [
   /^given (?:the|that|how)\s+/i,
   /^in light of\s+/i,
   /^with (?:the|all|that) (?:recent|being|said)\s+/i,
+  // Expanded AI-ism patterns
+  /^furthermore[,.]?\s*/i,
+  /^however[,.]?\s*/i,
+  /^nevertheless[,.]?\s*/i,
+  /^in conclusion[,.]?\s*/i,
+  /^it[''\u2019]s worth noting (?:that\s+)?/i,
+  /^it is important (?:to\s+|that\s+)?/i,
+  /^i appreciate\s+/i,
+  /^thank you for\s+/i,
+  /^let me explain\s*/i,
+  /^that being said[,.]?\s*/i,
+  /^to be fair[,.]?\s*/i,
+  /^it should be noted (?:that\s+)?/i,
+  /^one could argue (?:that\s+)?/i,
+  /^at the end of the day[,.]?\s*/i,
+  /^all things considered[,.]?\s*/i,
+  /^when all is said and done[,.]?\s*/i,
+  /^moving forward[,.]?\s*/i,
+  /^with that said[,.]?\s*/i,
 ];
 
 function stripAiSpeak(text: string): string {
@@ -263,6 +282,90 @@ function fragmentize(text: string): string {
 }
 
 // ============================================================
+// Internet shorthand injection (age-bracket aware)
+// ============================================================
+
+const GEN_Z_SHORTHAND = ['tbh', 'ngl', 'fr fr', 'lowkey', 'no cap'];
+const MILLENNIAL_SHORTHAND = ['lol', 'lmao', 'imo'];
+
+function injectShorthand(text: string, ageBracket: string): string {
+  // No shorthand for gen_x or boomer
+  if (ageBracket === 'gen_x' || ageBracket === 'boomer') return text;
+
+  const chance = ageBracket === 'gen_z' ? 0.10 : ageBracket === 'millennial' ? 0.08 : 0;
+  if (chance <= 0 || Math.random() >= chance) return text;
+
+  const pool = ageBracket === 'gen_z' ? GEN_Z_SHORTHAND : MILLENNIAL_SHORTHAND;
+  const shorthand = pool[Math.floor(Math.random() * pool.length)]!;
+
+  // Split into sentences and pick one random sentence to append to
+  const sentences = text.split(/(?<=[.!?])\s+/);
+  if (sentences.length === 0) return text;
+
+  const idx = Math.floor(Math.random() * sentences.length);
+  const sentence = sentences[idx]!;
+
+  // Strip trailing punctuation, append shorthand, restore punctuation
+  const trailingMatch = sentence.match(/([.!?]+)$/);
+  if (trailingMatch) {
+    const stripped = sentence.slice(0, -trailingMatch[1]!.length);
+    sentences[idx] = `${stripped} ${shorthand}${trailingMatch[1]}`;
+  } else {
+    sentences[idx] = `${sentence} ${shorthand}`;
+  }
+
+  return sentences.join(' ');
+}
+
+// ============================================================
+// Sentence shortener for homer/hot_take personalities
+// ============================================================
+
+function shortenSentences(text: string, personalityType: string): string {
+  if (personalityType !== 'homer' && personalityType !== 'hot_take') return text;
+
+  const sentences = text.split(/(?<=[.!?])\s+/);
+  const result: string[] = [];
+
+  for (const sentence of sentences) {
+    const words = sentence.split(/\s+/);
+    if (words.length > 25) {
+      // Try to truncate at nearest clause boundary under 20 words
+      let truncated = sentence;
+      let found = false;
+
+      // Walk through words looking for comma/semicolon boundaries
+      for (let i = Math.min(19, words.length - 1); i >= 8; i--) {
+        const word = words[i]!;
+        if (/[,;]$/.test(word)) {
+          // Found a clause boundary at or under 20 words
+          truncated = words.slice(0, i + 1).join(' ');
+          // Replace trailing comma/semicolon with period
+          truncated = truncated.replace(/[,;]$/, '.');
+          found = true;
+          break;
+        }
+      }
+
+      if (!found) {
+        // No clause boundary found; hard cut at 20 words
+        truncated = words.slice(0, 20).join(' ');
+        // Ensure it ends with punctuation
+        if (!/[.!?]$/.test(truncated)) {
+          truncated = truncated.replace(/[,;:]$/, '') + '.';
+        }
+      }
+
+      result.push(truncated);
+    } else {
+      result.push(sentence);
+    }
+  }
+
+  return result.join(' ');
+}
+
+// ============================================================
 // Post-social-media styling
 // ============================================================
 
@@ -289,8 +392,17 @@ export function humanizeContent(
   const region = profile.bot_region ?? 'south';
   const ageBracket = profile.bot_age_bracket ?? 'millennial';
 
+  // 0. Em-dash removal — biggest AI tell
+  text = text.replace(/\u2014/g, ', ');
+  text = text.replace(/\u2013/g, '-');
+  text = text.replace(/---/g, ', ');
+  text = text.replace(/--/g, '-');
+
   // 1. Extended AI-speak removal
   text = stripAiSpeak(text);
+
+  // 1.5. Sentence shortener for homer/hot_take (cut long-winded AI sentences)
+  text = shortenSentences(text, personality.type);
 
   // 2. Pronoun enforcement
   if (profile.schoolName && profile.mascotName) {
@@ -333,7 +445,10 @@ export function humanizeContent(
     }
   }
 
-  // 9. Social media styling
+  // 9. Internet shorthand injection (age-bracket aware, max 1 per post)
+  text = injectShorthand(text, ageBracket);
+
+  // 10. Social media styling
   text = socialMediaStyle(text);
 
   // Ensure first char is uppercase (unless gen_z all-lowercase)

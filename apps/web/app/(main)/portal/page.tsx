@@ -5,16 +5,16 @@ import { PortalFilters } from '@/components/portal/PortalFilters';
 export const revalidate = 60;
 
 export const metadata = {
-  title: 'College Football Transfer Portal Tracker | Portal Wire',
+  title: 'College Football Transfer Portal Tracker & Fan Reactions | CFB Social',
   description: 'Track every college football transfer portal entry and commitment across FBS. Filter by position, star rating, and status. Predict where players will land and claim recruits for your school.',
   openGraph: {
-    title: 'College Football Transfer Portal Tracker | CFB Social',
-    description: 'Track every CFB transfer portal entry. Filter by position, stars, and status.',
+    title: 'College Football Transfer Portal Tracker & Fan Reactions | CFB Social',
+    description: 'Track every CFB transfer portal entry. Filter by position, stars, and status. Fan reactions included.',
   },
   twitter: {
     card: 'summary_large_image' as const,
-    title: 'College Football Transfer Portal Tracker | CFB Social',
-    description: 'Track every CFB transfer portal entry. Filter by position, stars, and status.',
+    title: 'College Football Transfer Portal Tracker & Fan Reactions | CFB Social',
+    description: 'Track every CFB transfer portal entry. Filter by position, stars, and status. Fan reactions included.',
   },
   alternates: {
     canonical: 'https://cfbsocial.com/portal',

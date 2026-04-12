@@ -1655,6 +1655,36 @@ html.dark .fb-desc {
 }
 
 /* ============================================================
+   FEED LOADING
+   ============================================================ */
+
+.feed-loading-bar {
+  width: 260px;
+  height: 3px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+}
+
+.feed-loading-bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -60%;
+  width: 60%;
+  height: 100%;
+  background: var(--crimson);
+  border-radius: 2px;
+  animation: feed-loading 1.2s ease-in-out infinite;
+}
+
+@keyframes feed-loading {
+  0% { left: -60%; }
+  100% { left: 100%; }
+}
+
+/* ============================================================
    FEED HEADER & TABS
    ============================================================ */
 
@@ -2086,12 +2116,26 @@ html.dark .sideline-field {
   line-height: 1;
 }
 
+.repost-stamp-time {
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  font-weight: 400;
+  color: var(--crimson);
+  line-height: 1;
+  opacity: 0.7;
+  margin-left: 2px;
+}
+
 html.dark .repost-stamp {
   border-color: #c4705a;
 }
 
 html.dark .repost-stamp-label,
 html.dark .repost-stamp-user {
+  color: #c4705a;
+}
+
+html.dark .repost-stamp-time {
   color: #c4705a;
 }
 
@@ -5623,5 +5667,157 @@ html.dark .modal-close:hover {
 
 html.dark .modal-error {
   background: rgba(200,60,60,0.15);
+}
+
+/* =============================================
+   Link Preview Card (OG embeds)
+   ============================================= */
+
+.link-preview {
+  display: block;
+  border: 1.5px solid rgba(59,47,30,0.15);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 14px;
+  text-decoration: none;
+  color: inherit;
+  background: var(--cream, #faf8f3);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.link-preview:hover {
+  border-color: rgba(59,47,30,0.3);
+  box-shadow: 0 2px 8px rgba(59,47,30,0.08);
+  text-decoration: none;
+  color: inherit;
+}
+
+.link-preview-image {
+  position: relative;
+  width: 100%;
+  max-height: 280px;
+  overflow: hidden;
+  background: rgba(59,47,30,0.05);
+  border-bottom: 1px solid rgba(59,47,30,0.08);
+}
+
+.link-preview-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 280px;
+  object-fit: cover;
+}
+
+.link-preview-info {
+  padding: 12px 14px;
+}
+
+.link-preview-site {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--faded-ink, #8b7e6e);
+  margin-bottom: 4px;
+}
+
+.link-preview-favicon {
+  width: 14px;
+  height: 14px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.link-preview-title {
+  font-family: var(--serif);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--ink, #3b2f1e);
+  line-height: 1.35;
+  margin-bottom: 4px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.link-preview-desc {
+  font-family: var(--serif);
+  font-size: 0.82rem;
+  color: var(--faded-ink, #8b7e6e);
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Loading skeleton */
+.link-preview-loading {
+  display: flex;
+  gap: 0;
+  flex-direction: column;
+}
+
+.link-preview-skeleton-img {
+  width: 100%;
+  height: 80px;
+  background: linear-gradient(90deg, rgba(59,47,30,0.06) 25%, rgba(59,47,30,0.12) 50%, rgba(59,47,30,0.06) 75%);
+  background-size: 200% 100%;
+  animation: link-preview-shimmer 1.5s infinite;
+}
+
+.link-preview-skeleton-line {
+  height: 10px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, rgba(59,47,30,0.06) 25%, rgba(59,47,30,0.12) 50%, rgba(59,47,30,0.06) 75%);
+  background-size: 200% 100%;
+  animation: link-preview-shimmer 1.5s infinite;
+  margin-bottom: 6px;
+}
+
+@keyframes link-preview-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Dark mode */
+html.dark .link-preview {
+  background: var(--dark-surface, #2a2520);
+  border-color: var(--dark-border, #504a42);
+}
+
+html.dark .link-preview:hover {
+  border-color: #6b6359;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+html.dark .link-preview-image {
+  background: rgba(255,255,255,0.04);
+  border-bottom-color: var(--dark-border, #504a42);
+}
+
+html.dark .link-preview-site {
+  color: #a09888;
+}
+
+html.dark .link-preview-title {
+  color: #ddd8ce;
+}
+
+html.dark .link-preview-desc {
+  color: #a09888;
+}
+
+html.dark .link-preview-skeleton-img,
+html.dark .link-preview-skeleton-line {
+  background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%);
+  background-size: 200% 100%;
+  animation: link-preview-shimmer 1.5s infinite;
 }
 

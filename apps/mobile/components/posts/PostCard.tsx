@@ -23,6 +23,7 @@ export interface PostData {
   _userReposted?: boolean;
   _userSaved?: boolean;
   _repostedBy?: { username: string; display_name: string | null } | null;
+  _repostTime?: string | null;
   _feedKey?: string;
   aging_takes?: {
     id: string;

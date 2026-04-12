@@ -34,12 +34,16 @@ export async function aiChat(
         ]
       : [{ role: 'user', content: prompt }];
 
-    const response = await getClient().chat.completions.create({
-      model,
-      messages,
-      temperature: opts?.temperature ?? 0.7,
-      max_tokens: opts?.maxTokens ?? 600,
-    });
+    const timeoutMs = opts?.timeout ?? 10_000;
+    const response = await getClient().chat.completions.create(
+      {
+        model,
+        messages,
+        temperature: opts?.temperature ?? 0.7,
+        max_tokens: opts?.maxTokens ?? 600,
+      },
+      { timeout: timeoutMs },
+    );
 
     responseText = response.choices[0]?.message?.content?.trim() ?? '';
     promptTokens = response.usage?.prompt_tokens ?? 0;
@@ -77,6 +81,27 @@ export async function aiChat(
       });
     } catch {
       // Never let logging failures break the main flow
+    }
+  }
+}
+
+/**
+ * Wraps aiChat() with 1 retry on failure after a 2-second delay.
+ * Returns null on final failure instead of throwing.
+ */
+export async function aiChatWithRetry(
+  prompt: string,
+  opts?: { feature?: string; subType?: string; temperature?: number; maxTokens?: number; timeout?: number; systemPrompt?: string },
+): Promise<string | null> {
+  try {
+    return await aiChat(prompt, opts);
+  } catch {
+    // Wait 2 seconds before retrying
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    try {
+      return await aiChat(prompt, opts);
+    } catch {
+      return null;
     }
   }
 }

@@ -21,25 +21,30 @@ const PENALTY_MAP: Record<string, PenaltyInfo> = {
     description: 'Personal attacks and toxic behavior are not tolerated. Keep the trash talk about the game, not the person.',
     yards: 15,
   },
-  off_topic_sports: {
-    name: 'Illegal Formation',
-    description: 'This content appears to be about a different sport. CFB Social is all about college football.',
-    yards: 5,
-  },
   politics: {
     name: 'False Start',
     description: 'Political discussion is out of bounds here. Keep the focus on college football.',
     yards: 5,
   },
+  sexual_content: {
+    name: 'Illegal Procedure',
+    description: 'Sexually explicit content has no place on this platform. Keep it about football.',
+    yards: 15,
+  },
+  gore_violence: {
+    name: 'Roughing the Passer',
+    description: 'Graphic violence and shock content are out of bounds. Football hits are fine, real-world violence is not.',
+    yards: 15,
+  },
+  crypto_scams: {
+    name: 'Delay of Game',
+    description: 'Crypto promotions, scams, and unrelated advertising slow down the game for everyone.',
+    yards: 10,
+  },
   harassment: {
     name: 'Pass Interference',
     description: 'Targeting or harassing other users disrupts fair play for everyone.',
     yards: 15,
-  },
-  spam: {
-    name: 'Delay of Game',
-    description: 'Repetitive, promotional, or spam-like content slows down the game for everyone.',
-    yards: 5,
   },
   hate_speech: {
     name: 'Targeting',

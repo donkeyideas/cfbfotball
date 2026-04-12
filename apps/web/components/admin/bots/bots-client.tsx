@@ -70,7 +70,7 @@ function timeAgo(dateStr: string | null): string {
 export function BotsClient({ bots: initialBots, globalActive: initialGlobalActive, stats, recentActivity, schools, personalityDist, eventQueue: initialEventQueue }: Props) {
   const [bots, setBots] = useState(initialBots);
   const [globalActive, setGlobalActive] = useState(initialGlobalActive);
-  const [tab, setTab] = useState<'bots' | 'create' | 'activity' | 'events' | 'seed'>('bots');
+  const [tab, setTab] = useState<'bots' | 'create' | 'activity' | 'events' | 'seed' | 'settings'>('bots');
   const [search, setSearch] = useState('');
   const [filterConf, setFilterConf] = useState('');
   const [filterPersonality, setFilterPersonality] = useState('');
@@ -107,6 +107,48 @@ export function BotsClient({ bots: initialBots, globalActive: initialGlobalActiv
   const [diversifying, setDiversifying] = useState(false);
   const [seedingKnowledge, setSeedingKnowledge] = useState(false);
   const [seedingP5, setSeedingP5] = useState(false);
+
+  // Settings
+  const [settingsLoading, setSettingsLoading] = useState(false);
+  const [settingsSaving, setSettingsSaving] = useState(false);
+  const [botSettings, setBotSettings] = useState<Record<string, string>>({
+    bot_min_post_interval_seconds: '900',
+    bot_max_posts_per_day: '5',
+    bot_engagement_probability: '0.6',
+    bot_rivalry_interval_hours: '3',
+    bot_cross_engagement_enabled: 'true',
+  });
+
+  const loadSettings = useCallback(async () => {
+    setSettingsLoading(true);
+    try {
+      const res = await fetch('/api/admin/bots/settings');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.settings) setBotSettings(prev => ({ ...prev, ...data.settings }));
+      }
+    } catch { /* ignore */ }
+    setSettingsLoading(false);
+  }, []);
+
+  async function handleSaveSettings() {
+    setSettingsSaving(true);
+    try {
+      const res = await fetch('/api/admin/bots/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ settings: botSettings }),
+      });
+      if (res.ok) {
+        showSuccess('Bot settings saved');
+      } else {
+        showError('Failed to save settings');
+      }
+    } catch {
+      showError('Failed to save settings');
+    }
+    setSettingsSaving(false);
+  }
 
   function showSuccess(msg: string) {
     setSuccess(msg);
@@ -478,6 +520,7 @@ export function BotsClient({ bots: initialBots, globalActive: initialGlobalActiv
           { key: 'activity', label: 'Activity Log' },
           { key: 'events', label: 'Event Queue' },
           { key: 'seed', label: 'Setup' },
+          { key: 'settings', label: 'Settings' },
         ].map((t) => (
           <button
             key={t.key}
@@ -924,6 +967,152 @@ export function BotsClient({ bots: initialBots, globalActive: initialGlobalActiv
               <Database className={`h-4 w-4 ${seedingKnowledge ? 'animate-spin' : ''}`} />
               {seedingKnowledge ? 'Seeding...' : 'Seed Local Knowledge'}
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Settings Tab */}
+      {tab === 'settings' && (
+        <div className="space-y-4" style={{ maxWidth: 700 }}>
+          <div className="admin-card p-6">
+            <h2 style={{ fontFamily: 'var(--admin-serif)', fontSize: '1rem', fontWeight: 700, marginBottom: 16 }}>Bot Engine Settings</h2>
+            <p className="text-sm mb-6" style={{ color: 'var(--admin-text-secondary)' }}>
+              Adjust bot behavior without redeploying. Changes take effect on the next cron cycle.
+            </p>
+
+            <div className="space-y-5">
+              {/* Min Post Interval */}
+              <div>
+                <label className="block text-sm font-medium mb-1">Minimum Post Interval (seconds)</label>
+                <p className="text-xs mb-2" style={{ color: 'var(--admin-text-muted)' }}>
+                  Minimum time between posts from the same bot. Default: 900 (15 minutes).
+                </p>
+                <input
+                  type="number"
+                  min={60}
+                  max={7200}
+                  value={botSettings.bot_min_post_interval_seconds}
+                  onChange={(e) => setBotSettings(s => ({ ...s, bot_min_post_interval_seconds: e.target.value }))}
+                  className="admin-input"
+                  style={{ width: 120 }}
+                />
+              </div>
+
+              {/* Max Posts Per Day */}
+              <div>
+                <label className="block text-sm font-medium mb-1">Max Posts Per Day (per bot)</label>
+                <p className="text-xs mb-2" style={{ color: 'var(--admin-text-muted)' }}>
+                  Daily post limit for each bot. Default: 5.
+                </p>
+                <input
+                  type="number"
+                  min={1}
+                  max={20}
+                  value={botSettings.bot_max_posts_per_day}
+                  onChange={(e) => setBotSettings(s => ({ ...s, bot_max_posts_per_day: e.target.value }))}
+                  className="admin-input"
+                  style={{ width: 120 }}
+                />
+              </div>
+
+              {/* Engagement Probability */}
+              <div>
+                <label className="block text-sm font-medium mb-1">Engagement Probability</label>
+                <p className="text-xs mb-2" style={{ color: 'var(--admin-text-muted)' }}>
+                  Base probability (0-1) that a bot engages (reacts/replies) per cycle. Default: 0.6.
+                </p>
+                <input
+                  type="number"
+                  min={0}
+                  max={1}
+                  step={0.05}
+                  value={botSettings.bot_engagement_probability}
+                  onChange={(e) => setBotSettings(s => ({ ...s, bot_engagement_probability: e.target.value }))}
+                  className="admin-input"
+                  style={{ width: 120 }}
+                />
+              </div>
+
+              {/* Rivalry Interval */}
+              <div>
+                <label className="block text-sm font-medium mb-1">Rivalry Thread Interval (hours)</label>
+                <p className="text-xs mb-2" style={{ color: 'var(--admin-text-muted)' }}>
+                  Hours between rivalry conversation threads. Default: 3.
+                </p>
+                <input
+                  type="number"
+                  min={1}
+                  max={24}
+                  value={botSettings.bot_rivalry_interval_hours}
+                  onChange={(e) => setBotSettings(s => ({ ...s, bot_rivalry_interval_hours: e.target.value }))}
+                  className="admin-input"
+                  style={{ width: 120 }}
+                />
+              </div>
+
+              {/* Cross-Engagement Toggle */}
+              <div>
+                <label className="block text-sm font-medium mb-1">Cross-Bot Engagement</label>
+                <p className="text-xs mb-2" style={{ color: 'var(--admin-text-muted)' }}>
+                  Allow bots to react to and reply to each other's posts.
+                </p>
+                <button
+                  onClick={() => setBotSettings(s => ({
+                    ...s,
+                    bot_cross_engagement_enabled: s.bot_cross_engagement_enabled === 'true' ? 'false' : 'true',
+                  }))}
+                  className="btn-admin"
+                  style={{
+                    background: botSettings.bot_cross_engagement_enabled === 'true' ? '#16a34a' : 'var(--admin-surface)',
+                    color: botSettings.bot_cross_engagement_enabled === 'true' ? '#fff' : 'var(--admin-text)',
+                    padding: '6px 16px',
+                    fontWeight: 600,
+                  }}
+                >
+                  {botSettings.bot_cross_engagement_enabled === 'true' ? 'Enabled' : 'Disabled'}
+                </button>
+              </div>
+
+              {/* Global Active */}
+              <div style={{ borderTop: '1px solid var(--admin-border)', paddingTop: 16 }}>
+                <label className="block text-sm font-medium mb-1">Master Bot Toggle</label>
+                <p className="text-xs mb-2" style={{ color: 'var(--admin-text-muted)' }}>
+                  Global on/off switch for the entire bot system.
+                </p>
+                <button
+                  onClick={handleToggleAll}
+                  disabled={toggling}
+                  className="btn-admin"
+                  style={{
+                    background: globalActive ? '#16a34a' : '#dc2626',
+                    color: '#fff',
+                    padding: '8px 20px',
+                    fontWeight: 700,
+                  }}
+                >
+                  {toggling ? 'Updating...' : globalActive ? 'SYSTEM ACTIVE' : 'SYSTEM INACTIVE'}
+                </button>
+              </div>
+            </div>
+
+            <div style={{ marginTop: 24, display: 'flex', gap: 8 }}>
+              <button
+                onClick={handleSaveSettings}
+                disabled={settingsSaving}
+                className="btn-admin"
+                style={{ background: 'var(--admin-accent)', color: '#fff', padding: '10px 24px', fontWeight: 600 }}
+              >
+                {settingsSaving ? 'Saving...' : 'Save Settings'}
+              </button>
+              <button
+                onClick={loadSettings}
+                disabled={settingsLoading}
+                className="btn-admin"
+                style={{ background: 'var(--admin-surface)', padding: '10px 16px' }}
+              >
+                {settingsLoading ? 'Loading...' : 'Reload'}
+              </button>
+            </div>
           </div>
         </div>
       )}

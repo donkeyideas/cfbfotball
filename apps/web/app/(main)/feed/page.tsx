@@ -11,18 +11,18 @@ import { CollectionPageJsonLd } from '@/components/seo/JsonLd';
 import { FEED_POST_SELECT, FEED_REPOST_SELECT } from '@/lib/queries/feed';
 
 export const metadata = {
-  title: 'College Football Fan Opinions & Takes | The Feed',
-  description: 'Read the latest college football fan opinions, hot takes, predictions, and rivalry debates from fans across 653 schools. The live CFB fan community feed — join the discussion.',
+  title: 'CFB Social -- College Football Fan Debates, Takes & Predictions',
+  description: 'The #1 community for college football fans. Post takes, debate rivals, file predictions, and track the transfer portal across all 653 CFB schools.',
   openGraph: {
-    title: 'College Football Fan Opinions & Takes | CFB Social',
-    description: 'The live college football social feed. Fan opinions, takes, predictions, and rivalry debates.',
+    title: 'CFB Social -- College Football Fan Debates, Takes & Predictions',
+    description: 'The #1 community for college football fans. Post takes, debate rivals, file predictions, and track the transfer portal across all 653 CFB schools.',
     type: 'website',
     images: [{ url: 'https://cfbsocial.com/logo.png', width: 256, height: 256, alt: 'CFB Social Logo' }],
   },
   twitter: {
     card: 'summary' as const,
-    title: 'College Football Fan Opinions & Takes | CFB Social',
-    description: 'The live college football social feed. Fan opinions, takes, predictions, and rivalry debates.',
+    title: 'CFB Social -- College Football Fan Debates, Takes & Predictions',
+    description: 'The #1 community for college football fans. Post takes, debate rivals, file predictions, and track the transfer portal across all 653 CFB schools.',
     images: ['https://cfbsocial.com/logo.png'],
   },
   alternates: {
@@ -367,6 +367,7 @@ async function renderFeedItems(
           _feedKey: `repost-${r.id}`,
           _feedTime: r.created_at as string,
           _repostedBy: reposter ?? null,
+          _repostTime: r.created_at as string,
         };
       });
   }
@@ -376,6 +377,7 @@ async function renderFeedItems(
     _feedKey: `post-${p.id}`,
     _feedTime: p.created_at as string,
     _repostedBy: null as { username: string; display_name: string | null } | null,
+    _repostTime: null as string | null,
   }));
 
   const merged = [...postItems, ...repostItems]

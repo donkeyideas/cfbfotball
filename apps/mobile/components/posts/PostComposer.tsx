@@ -19,6 +19,7 @@ import { supabase } from '@/lib/supabase';
 import { typography } from '@/lib/theme/typography';
 import { useColors } from '@/lib/theme/ThemeProvider';
 import { MAX_POST_CHARS } from '@/lib/constants';
+import { LinkPreview, extractFirstUrl } from './LinkPreview';
 
 type PostType = 'STANDARD' | 'RECEIPT' | 'PREDICTION' | 'SIDELINE' | 'AGING_TAKE';
 
@@ -339,6 +340,9 @@ export function PostComposer({ visible, onClose, onPostCreated }: PostComposerPr
                   autoFocus
                 />
               </View>
+
+              {/* Link preview while composing */}
+              {extractFirstUrl(content) && <LinkPreview content={content} />}
 
               {/* Sideline report fields (Photo type) */}
               {postType === 'SIDELINE' && (

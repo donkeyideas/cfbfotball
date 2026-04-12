@@ -26,7 +26,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE_URL}/terms`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.3 },
     { url: `${BASE_URL}/contact`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.3 },
     { url: `${BASE_URL}/delete-account`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.2 },
+    { url: `${BASE_URL}/schools`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
   ];
+
+  // Conference hub pages
+  const conferencePages: MetadataRoute.Sitemap = [
+    'sec', 'big-ten', 'big-12', 'acc', 'pac-12', 'american',
+    'sun-belt', 'conference-usa', 'mac', 'mountain-west', 'independents',
+  ].map((conf) => ({
+    url: `${BASE_URL}/conferences/${conf}`,
+    lastModified: new Date(),
+    changeFrequency: 'weekly' as const,
+    priority: 0.7,
+  }));
 
   // Dynamic school pages (653 schools)
   const { data: schools } = await supabase
@@ -57,5 +69,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }));
 
-  return [...staticPages, ...schoolPages, ...postPages];
+  return [...staticPages, ...conferencePages, ...schoolPages, ...postPages];
 }

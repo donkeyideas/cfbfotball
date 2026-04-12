@@ -7,12 +7,20 @@
 // ESPN API - Real news data for bot content
 // ============================================================
 
+export interface ESPNArticleLink {
+  name: string;
+  url: string;
+  type: 'article' | 'team' | 'athlete';
+}
+
 export interface ESPNArticle {
   headline: string;
   description: string;
   teams: string[];       // e.g., ["LSU Tigers", "Alabama Crimson Tide"]
   athletes: string[];    // e.g., ["Fernando Mendoza", "Denzel Boston"]
   published: string;
+  url: string;           // Article URL
+  links: ESPNArticleLink[];  // All extracted links (article, team, player pages)
 }
 
 /**
@@ -27,31 +35,55 @@ export async function fetchESPNNews(): Promise<ESPNArticle[]> {
       { signal: AbortSignal.timeout(8000) }
     );
     if (!res.ok) return [];
-    const data = await res.json() as {
-      articles?: Array<{
-        headline?: string;
-        description?: string;
-        published?: string;
-        categories?: Array<{
-          type?: string;
-          description?: string;
-        }>;
-      }>;
-    };
+    /* eslint-disable @typescript-eslint/no-explicit-any */
+    const data = await res.json() as { articles?: any[] };
 
-    return (data.articles || []).map(a => ({
-      headline: a.headline || '',
-      description: (a.description || '').substring(0, 300),
-      teams: (a.categories || [])
-        .filter(c => c.type === 'team')
-        .map(c => c.description || '')
-        .filter(d => d.length > 0),
-      athletes: (a.categories || [])
-        .filter(c => c.type === 'athlete')
-        .map(c => c.description || '')
-        .filter(d => d.length > 0),
-      published: a.published || '',
-    }));
+    return (data.articles || []).map((a: any) => {
+      const categories: any[] = a.categories || [];
+      const extractedLinks: ESPNArticleLink[] = [];
+
+      // Article URL
+      const articleUrl = a.links?.web?.href || a.links?.web?.self?.href || '';
+      if (articleUrl) {
+        extractedLinks.push({ name: a.headline || 'Article', url: articleUrl, type: 'article' });
+      }
+
+      // Team page URLs
+      for (const cat of categories) {
+        if (cat.type === 'team' && cat.team?.links?.web?.teams?.href) {
+          extractedLinks.push({
+            name: cat.description || cat.team?.description || '',
+            url: cat.team.links.web.teams.href,
+            type: 'team',
+          });
+        }
+        // Athlete profile URLs
+        if (cat.type === 'athlete' && cat.athlete?.links?.web?.athletes?.href) {
+          extractedLinks.push({
+            name: cat.description || cat.athlete?.description || '',
+            url: cat.athlete.links.web.athletes.href,
+            type: 'athlete',
+          });
+        }
+      }
+
+      return {
+        headline: a.headline || '',
+        description: ((a.description || '') as string).substring(0, 300),
+        teams: categories
+          .filter((c: any) => c.type === 'team')
+          .map((c: any) => (c.description || '') as string)
+          .filter((d: string) => d.length > 0),
+        athletes: categories
+          .filter((c: any) => c.type === 'athlete')
+          .map((c: any) => (c.description || '') as string)
+          .filter((d: string) => d.length > 0),
+        published: a.published || '',
+        url: articleUrl,
+        links: extractedLinks,
+      };
+    });
+    /* eslint-enable @typescript-eslint/no-explicit-any */
   } catch {
     return [];
   }
@@ -143,16 +175,23 @@ export function buildNewsContext(
     articles, schoolName, mascot, conference
   );
 
+  const formatArticle = (a: ESPNArticle): string => {
+    let entry = `- ${a.headline}`;
+    if (a.description) entry += `: ${a.description}`;
+    if (a.athletes.length > 0) entry += ` (Players mentioned: ${a.athletes.join(', ')})`;
+    // Append available links for the AI to optionally include
+    const useful = a.links.filter(l => l.url);
+    if (useful.length > 0) {
+      entry += '\n  LINKS YOU CAN SHARE: ' + useful.map(l => `${l.name} -> ${l.url}`).join(' | ');
+    }
+    return entry;
+  };
+
   // Priority 1: Team-specific news
   if (teamArticles.length > 0) {
     const selected = teamArticles.slice(0, 3);
     const context = '\n\nREAL NEWS about ' + schoolName + ' (from ESPN - these are FACTS you can reference):\n' +
-      selected.map(a => {
-        let entry = `- ${a.headline}`;
-        if (a.description) entry += `: ${a.description}`;
-        if (a.athletes.length > 0) entry += ` (Players mentioned: ${a.athletes.join(', ')})`;
-        return entry;
-      }).join('\n');
+      selected.map(formatArticle).join('\n');
     return { newsContext: context, sourceType: 'team', articleUsed: selected[0]! };
   }
 
@@ -160,12 +199,7 @@ export function buildNewsContext(
   if (conferenceArticles.length > 0) {
     const selected = conferenceArticles.slice(0, 3);
     const context = '\n\nREAL NEWS from the ' + (conference || 'college football') + ' (from ESPN - these are FACTS):\n' +
-      selected.map(a => {
-        let entry = `- ${a.headline}`;
-        if (a.description) entry += `: ${a.description}`;
-        if (a.athletes.length > 0) entry += ` (Players: ${a.athletes.join(', ')})`;
-        return entry;
-      }).join('\n');
+      selected.map(formatArticle).join('\n');
     return { newsContext: context, sourceType: 'conference', articleUsed: selected[0]! };
   }
 
@@ -173,12 +207,7 @@ export function buildNewsContext(
   if (nationalArticles.length > 0) {
     const selected = nationalArticles.slice(0, 5);
     const context = '\n\nREAL college football news this week (from ESPN - these are FACTS):\n' +
-      selected.map(a => {
-        let entry = `- ${a.headline}`;
-        if (a.description) entry += `: ${a.description}`;
-        if (a.athletes.length > 0) entry += ` (Players: ${a.athletes.join(', ')})`;
-        return entry;
-      }).join('\n');
+      selected.map(formatArticle).join('\n');
     return { newsContext: context, sourceType: 'national', articleUsed: selected[0]! };
   }
 
@@ -196,7 +225,8 @@ function stripMarkdown(text: string): string {
     .replace(/#{1,6}\s/g, '')
     .replace(/`(.+?)`/g, '$1')
     .replace(/```[\s\S]*?```/g, '')
-    .replace(/\[(.+?)\]\(.+?\)/g, '$1')
+    // Convert markdown links [text](url) to just the raw URL (preserve links)
+    .replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g, '$2')
     .replace(/^[-*]\s/gm, '')
     .replace(/^>\s/gm, '')
     .replace(/\n{3,}/g, '\n\n')
@@ -278,16 +308,52 @@ export function cleanBotContent(raw: string, maxChars = 500): string {
   content = content.replace(/\bWhat do you think\??\s*/gi, '');
   content = content.replace(/\bLet me know in the comments\.?\s*/gi, '');
 
+  // Strip SEO-flagged AI words (Google penalizes these)
+  // Only replace in non-URL text to avoid corrupting links
+  const replaceOutsideUrls = (text: string, pattern: RegExp, replacement: string): string => {
+    // Split by URLs, only apply replacement to non-URL parts
+    const urlRegex = /(https?:\/\/[^\s)]+)/g;
+    const parts = text.split(urlRegex);
+    return parts.map((part, i) => i % 2 === 0 ? part.replace(pattern, replacement) : part).join('');
+  };
+
+  content = replaceOutsideUrls(content, /\bportal impact assessment\b/gi, 'portal moves');
+  content = replaceOutsideUrls(content, /\bblue-chip ratio\b/gi, 'talent level');
+  content = replaceOutsideUrls(content, /\bscheme evolution\b/gi, 'scheme changes');
+  content = replaceOutsideUrls(content, /\befficiency metrics?\b/gi, 'numbers');
+  content = replaceOutsideUrls(content, /\bdata points?\b/gi, 'stats');
+  content = replaceOutsideUrls(content, /\bhinges on\b/gi, 'depends on');
+  content = replaceOutsideUrls(content, /\banchored by\b/gi, 'led by');
+  content = replaceOutsideUrls(content, /\bit is evident\b/gi, '');
+  content = replaceOutsideUrls(content, /\bprototype\b/gi, 'mold');
+  content = replaceOutsideUrls(content, /\bcycle\b/gi, 'year');
+  content = replaceOutsideUrls(content, /\battrition\b/gi, 'losses');
+  content = replaceOutsideUrls(content, /\bdevelopment curve\b/gi, 'growth');
+
   content = content.trim();
 
-  // Capitalize first letter
-  if (content.length > 0) {
+  // Capitalize first letter (but not if it starts with a URL)
+  if (content.length > 0 && !content.startsWith('http')) {
     content = content.charAt(0).toUpperCase() + content.slice(1);
   }
 
-  // Truncate
+  // Truncate — but don't break mid-URL
   if (content.length > maxChars) {
-    content = content.slice(0, maxChars - 3) + '...';
+    let cutPoint = maxChars - 3;
+    // If we're in the middle of a URL, extend to the end of it
+    const lastUrlStart = content.lastIndexOf('http', cutPoint);
+    if (lastUrlStart > cutPoint - 200) {
+      const nextSpace = content.indexOf(' ', lastUrlStart);
+      const nextNewline = content.indexOf('\n', lastUrlStart);
+      const urlEnd = Math.min(
+        nextSpace > 0 ? nextSpace : content.length,
+        nextNewline > 0 ? nextNewline : content.length
+      );
+      if (urlEnd <= maxChars + 50) {
+        cutPoint = urlEnd;
+      }
+    }
+    content = content.slice(0, cutPoint) + (cutPoint < content.length ? '...' : '');
   }
 
   return content;
@@ -320,80 +386,207 @@ export function getRandomTemp(min: number, max: number): number {
 
 export const FALLBACK_TAKES: Record<string, string[]> = {
   homer: [
+    'We just signed the best class in the country and people still wanna doubt {{school}}',
+    'Nobody wants to play at {{school}} on a Saturday night. NOBODY.',
+    '{{school}} haters are awfully quiet today',
+    'If you don\'t bleed for {{school}} I don\'t trust you',
+    'Fire the entire defensive staff. Their spring performance is an embarrassment',
+    '{{school}} is getting absolutely robbed by the committee and everyone knows it',
+    'Best tailgate in the country and it\'s not even close',
+    'We don\'t rebuild. We reload.',
+    'Seen some weak takes about {{school}} today. Y\'all clearly don\'t watch the games',
+    'That recruit is a PERFECT fit for {{school}}. Trust the coaching staff',
+    'Our fans travel better than anyone in the country',
+    '{{school}} spring game had more people than half the league\'s regular season games',
+    'Name a better atmosphere than {{school}} on game day. I\'ll wait.',
+    '{{school}} is the standard. Everyone else is just trying to catch up',
+    'The disrespect toward {{school}} in the rankings is unreal',
+    '{{school}} owns this rivalry and the numbers back it up',
+    'People forget how dominant {{school}} was last year',
+    'Just when you think they\'re down {{school}} comes right back. That\'s what champions do',
+    'Nobody talks about how deep {{school}} is this year',
+    'I would run through a wall for this team',
+    '{{school}} in prime time is appointment television',
+    'Our portal additions are going to shock people this fall',
+    '{{school}} is building something special and the rest of the conference knows it',
+    'This coaching staff gets it. Trust the process.',
+    'Can\'t wait for September. This is our year.',
     'Nobody in this conference wants to see us when we are clicking on all cylinders. Not a single team.',
     'Our defense this year is going to surprise a LOT of people. The secondary has completely transformed.',
     'Every time I see the disrespect in the preseason polls I just smile. Bulletin board material.',
-    'Best atmosphere in college football and it is not even close. You have to experience our stadium on a Saturday night.',
     'Our young guys are developing faster than anyone expected. This coaching staff knows what they are doing.',
-    'I do not care what the national media says. We are a top 10 team and the season will prove it.',
     'That rivalry game means more to us than any bowl game. Always has, always will.',
-    'Our recruiting class is going to shock people when signing day comes. Trust the process.',
   ],
   analyst: [
-    'Third down conversion rate is the single best predictor of playoff success. The teams that win on third down win championships.',
-    'The transfer portal has completely changed roster construction. Teams that adapt their recruiting strategy will dominate the next decade.',
-    'Conference realignment is creating scheduling imbalances that the playoff committee has not figured out how to evaluate.',
-    'Yards per play is a better metric than total yards. Efficiency matters more than volume in modern football.',
-    'The gap between P4 and G5 is getting smaller every year. Portal parity is real.',
-    'Red zone touchdown percentage separates good offenses from elite ones. Field goals do not win championships.',
+    'People sleeping on Indiana\'s defense. Per SP+, they ranked 4th nationally',
+    'That take about Ohio State\'s OL is just wrong. They gave up 18 sacks, top 10 fewest',
+    'Yards per play is a better indicator than total yards. Efficiency matters more than volume',
+    'The portal class for Oregon is underrated when you look at the advanced numbers',
+    'Everyone overreacts to recruiting rankings. Developmental programs win more consistently',
+    'Third-down conversion rate is the single best predictor of close game outcomes',
+    'Red zone touchdown percentage tells you more about an offense than total points',
+    'The gap between 1 and 4 in the SEC is smaller than people think this year',
+    'Conference realignment hasn\'t changed the actual talent distribution. Same schools recruit the same kids',
+    'Spring practice stats are meaningless. Stop overreacting to scrimmage results',
+    'QBR is flawed but it\'s still the best single-number quarterback evaluation we have',
+    'Turnover margin regression is coming for half the teams in the top 10',
+    'The data on NIL spending vs win totals is surprisingly uncorrelated',
+    'Strength of schedule adjustments change the top 25 picture dramatically',
+    'The transfer portal is just free agency. The teams treating it that way are winning',
+    'Havoc rate on defense is the most underrated team stat in football',
+    'Recruiting rankings matter most at the aggregate class level, not individual player level',
+    'The difference between a good and great offense is usually the OL, not the QB',
+    'Points per drive is more predictive than points per game',
+    'Home field advantage has been declining steadily for 15 years. The data is clear',
+    'Preseason rankings are right about 40% of the time. That\'s worse than a coin flip',
+    'Returning production is the best single predictor of next-season success',
+    'The playoff committee overvalues brand names. Always has',
+    'Situational football is what separates championship-level teams from pretenders',
+    'Nobody is talking about the pass rush numbers. That front seven is elite',
     'Defensive line depth is the most undervalued asset in college football recruiting.',
     'The best coaches are adapting their schemes to their players, not the other way around.',
+    'Conference realignment is creating scheduling imbalances that the playoff committee has not figured out how to evaluate.',
   ],
   old_school: [
-    'College football was better when conference championships actually meant something. Now everything is about the playoff.',
-    'The transfer portal has killed program loyalty. Players used to fight through adversity instead of running to the next school.',
+    'Remember when players stayed for 4 years? The portal is killing college football',
+    'Back in my day you earned your spot. Now you just swipe right on the NIL portal',
+    'Kids these days will never understand what rivalry week used to mean',
+    'The game was better when you had to earn your snaps not buy them',
+    'Conference realignment is a crime against the sport',
+    'I miss when bowl games actually meant something',
+    'NIL has turned college football into the minor leagues and not in a good way',
+    'These kids transfer after one bad season. Whatever happened to loyalty',
+    'The portal is just free agency for college kids at this point',
+    'They don\'t make coaches like they used to. These new guys are all CEO types',
+    'Used to be you could count on your seniors. Now everyone leaves after two years',
+    'The best rivalry games were played before the playoff existed. Higher stakes, more passion',
+    'Spring ball used to be where walk-ons earned their shot. Now it\'s a portal showcase',
+    'Can someone explain why we need 16 teams in the playoff? Eight was already too many',
+    'College football lost its soul when they chased the TV money',
+    'I\'ve been watching this game for 30 years and it\'s never been more chaotic',
+    'Bagmen existed before NIL. At least now it\'s legal',
+    'The transfer portal is ruining college football\'s soul',
+    'Remember when a commitment actually meant something',
+    'These portal quarterbacks jumping ship after one season is embarrassing',
+    'Old school football was about toughness. Now it\'s about the brand deal',
+    'The playoff committee is a joke and has been since day one',
+    'Real fans stick with their team through bad seasons. That\'s what being a fan means',
+    'You can\'t build a program through the portal. You build it through recruiting and development',
+    'Miss the days when your whole team was from the same state',
     'NIL was supposed to level the playing field. Instead it just made the rich programs richer.',
-    'Back in my day, bowl games were a reward for a great season. Now teams with 6 wins get invited.',
-    'Conference realignment destroyed rivalries that had been played for over a century. That is unforgivable.',
-    'These kids today do not understand what it means to bleed for your school. Four years, one team.',
-    'The option offense would still work in modern football. Nobody practices defending it anymore.',
     'Walk-on culture used to be the backbone of college football. NIL has made that almost impossible.',
+    'The option offense would still work in modern football. Nobody practices defending it anymore.',
   ],
   hot_take: [
-    'The most overrated team in the country is not who you think it is. Their schedule was a joke.',
+    'Georgia\'s dynasty is cooked. Three-peat window is gone. Fight me.',
+    'Unpopular opinion: the SEC is actually overrated this year',
+    'Indiana won the title because of their system, not their talent. One-year wonder',
+    'Oregon is the most complete team in the country and it\'s not close',
+    'The Big 12 is the best conference in football right now. Cope',
+    'Nobody in the top 10 would survive a full SEC schedule',
+    'College football needs relegation. Send the worst P5 teams down',
+    'That five-star recruit is going to bust. I\'ve seen it a million times',
+    'Your team\'s spring game hype is going to age terribly',
+    'The best QB in college football isn\'t even a household name yet',
+    'Conference championships should mean more than committee rankings',
+    'Half the coaches in the P5 would get fired if they didn\'t have their school\'s brand behind them',
+    'The most overrated program in college football is [redacted] and you all know who I mean',
+    'Name value wins championships not talent. That\'s the game now',
+    'Everyone sleeping on the G5 this year. Somebody is crashing the playoff',
+    'I guarantee a double-digit win team misses the playoff this year',
+    'The coaching carousel is out of control and it\'s making the sport worse',
+    'Bold prediction: the Heisman winner comes from a team nobody is talking about right now',
+    'NIL is the best thing that ever happened to college football and I will die on this hill',
+    'Your preseason top 5 is going to look completely different by October',
+    'The transfer portal has made parity real. Blue bloods can\'t just hoard talent anymore',
+    'Somebody in the top 5 is going 7-5 this year. It happens every single time',
+    'Spring rankings mean literally nothing. Nothing.',
+    'The real championship window for most teams is 2-3 years. After that the portal takes your players',
+    'Nobody is ready for how good this offense is going to be',
     'That coach is living off one good season five years ago. Hot seat should be scorching.',
-    'Bold prediction: the playoff champion this year will come from a conference nobody expects.',
-    'Half the teams in the top 25 would not be ranked if they played in our conference. Soft schedules inflate records.',
-    'The best quarterback in college football is a backup right now. Just wait until he gets his shot.',
-    'Conference championship games are more important than the regular season at this point. Just win that one.',
-    'That five-star recruit everyone is excited about will transfer within two years. Book it.',
     'Coaching carousel season is the real championship of college football.',
   ],
   recruiting_insider: [
-    'The portal window is about to get very interesting. I am hearing multiple starters from top programs are exploring options.',
-    'This recruiting class has the potential to be program-changing. The staff is locked in on the right targets.',
+    'BREAKING: Dylan Raiola officially commits to Oregon. Sitting behind Dante Moore',
+    'Per sources: Oklahoma State has brought in 50 portal transfers under new HC Eric Morris',
+    'Darian Mensah to Miami is now official. Major move for the ACC',
+    'Spring portal window is gone. This changes everything for late-season coaching hires',
+    'The 2026 class is going to be one of the most stacked in recent memory',
+    'Crystal ball time: watch the portal in the next 48 hours',
+    'Keep an eye on the {{school}} staff. They\'re working the portal hard right now',
+    'That commitment is going to flip. Too many schools involved to hold',
+    '{{school}} just landed a program-changing recruit and nobody is talking about it',
+    'The NIL market is correcting. Mid-level NIL deals are disappearing fast',
+    'Sources say there\'s a surprise commitment coming this week for a top-10 class',
+    'The portal tracker is about to go crazy. Multiple big names entering this week',
+    '{{school}} is quietly building one of the best classes in the country',
+    'Five-star rankings matter less than scheme fit. Development programs know this',
+    'The coaching staff at {{school}} is doing work behind the scenes on recruiting',
+    'Don\'t be surprised if a top-100 recruit flips from one blue blood to another this month',
+    'The portal has made recruiting a 365-day-a-year job. No more offseason',
+    'That offer list tells you everything about where the coaching staff thinks this program is heading',
+    'Keep hearing {{school}} is the school to watch in this recruitment',
+    'The 247Sports composite vs actual rankings are going to surprise people this year',
+    'Early signing day is going to be chaotic. Multiple programs are going all-in on the portal instead',
+    'Sources: multiple SEC programs are close to flipping a top-50 recruit',
+    'The transfer portal has completely changed how programs build their roster. Year 1 impact is everything',
+    '{{school}}\'s portal haul is being slept on. Those are impact players',
+    'I\'ve been tracking this recruit for two years. Elite talent, perfect scheme fit for {{school}}',
     'NIL collectives are the new arms race. The programs that figure this out first will dominate recruiting.',
-    'Keep an eye on the JUCO market this cycle. There are some hidden gems that could contribute immediately.',
-    'The early signing period changed recruiting forever. Programs that close early have a massive advantage.',
     'Official visit weekends are where championships are won. The experience sells itself.',
-    'Position of need this cycle is obvious. The staff knows it and they are prioritizing accordingly.',
-    'The 2026 class has generational talent at several positions. Going to be a wild recruiting cycle.',
   ],
   default: [
+    'College football is the greatest sport in the world',
+    'September can\'t come fast enough',
+    'The playoff needs to be 16 teams minimum. This format is still wrong',
+    'Spring football is just vibes and overreaction',
+    'Another day another portal move that changes everything',
+    'College football never has a boring offseason',
+    'Game day atmosphere in college football is unmatched by any other sport',
+    'I will never understand the people who don\'t like college football',
+    'The best part of CFB is that literally anything can happen on any Saturday',
+    'Conference realignment still doesn\'t feel real',
+    'What\'s your most unpopular college football opinion? Mine would get me banned',
+    'If your school doesn\'t have a good tailgate culture I feel bad for you',
+    'Saturday in the fall is a lifestyle not just a day of the week',
+    'The coaching carousel is the real March Madness of college football',
+    'Off-season content is keeping me alive until kickoff',
     'College football Saturday is the best day of the week. Nothing else comes close.',
-    'That game last week was an instant classic. This sport never lets you down.',
     'Rivalry week hits different. The energy, the traditions, the history. This is what college football is about.',
-    'Playoff expansion was the best thing to happen to this sport in decades.',
     'Nothing beats a night game under the lights with 100,000 fans going crazy.',
-    'College football is the only sport where the regular season matters this much. Every game is a playoff.',
-    'Spring practice footage has me unreasonably hyped for the season. Cannot wait.',
     'The pageantry of college football is unmatched. The bands, the traditions, the tailgates.',
   ],
 };
 
 export const FALLBACK_REPLIES: string[] = [
-  'Facts. People do not want to hear the truth though.',
-  'This is exactly what I have been saying all season.',
-  'Respectfully disagree. I have seen way too many games that prove otherwise.',
-  'W take. More people need to see this.',
-  'The film backs this up 100 percent.',
-  'Interesting perspective. I never thought about it that way.',
+  'Facts. People don\'t want to hear the truth though.',
+  'W take. More people need to hear this.',
+  'Respectfully disagree but go off',
+  'The numbers back this up actually',
+  'Bold claim but I respect it',
   'This take is going to age really well. Saving this one.',
+  'You lost me on this one. Where\'s the evidence?',
+  'Been saying this for YEARS and everyone called me crazy',
+  'Couldn\'t agree more. Finally someone with sense',
+  'This is the worst take I\'ve seen today and I\'ve seen some bad ones',
+  'Tell me you don\'t watch the games without telling me',
+  'Someone had to say it',
+  'Hard disagree but I appreciate the conviction',
+  'This is going to look so different in three months',
+  'Your timeline is going to hate this take but you\'re not wrong',
+  'People really need to start watching the games instead of just checking scores',
+  'I keep seeing this take and it keeps being wrong',
+  'You\'re about 6 months too early on this one',
+  'The disrespect is unreal',
+  'This is the content I\'m here for',
+  'I need whatever you\'re drinking',
+  'Saving this receipt for later',
+  'Not even close to being right but I admire the confidence',
+  'You\'re either incredibly smart or incredibly wrong. No in between',
+  'Finally a good take in this feed',
+  'This is exactly what I have been saying all season.',
+  'The film backs this up 100 percent.',
   'Nah, this is not it. Come on now.',
-  'Could not have said it better myself.',
-  'Bold claim but I respect the confidence.',
-  'This is the kind of content I am here for.',
-  'Been saying this for YEARS and everyone called me crazy.',
   'That is a fair point actually. Got me reconsidering.',
   'The stat check on this would be interesting.',
 ];

@@ -6,8 +6,10 @@ import { PostEngagement } from './PostEngagement';
 import { BallotButtons } from './BallotButtons';
 import { PostActions } from './PostActions';
 import { ReportModal } from '../moderation/ReportModal';
+import { LinkPreview } from './LinkPreview';
 import { useColors } from '@/lib/theme/ThemeProvider';
 import { typography } from '@/lib/theme/typography';
+import { timeAgo } from '@/lib/utils/timeAgo';
 import type { PostData } from './PostCard';
 
 interface TicketStubCardProps {
@@ -83,6 +85,7 @@ export const TicketStubCard = memo(function TicketStubCard({ post }: TicketStubC
         >
           <Text style={styles.repostStampText}>REPOSTED</Text>
           <Text style={styles.repostStampUser}>@{post._repostedBy.username}</Text>
+          {post._repostTime && <Text style={styles.repostStampUser}>{timeAgo(post._repostTime)} ago</Text>}
         </Pressable>
       )}
       <PostHeader
@@ -93,6 +96,8 @@ export const TicketStubCard = memo(function TicketStubCard({ post }: TicketStubC
       <Pressable onPress={handleContentPress}>
         <Text style={styles.content}>{post.content}</Text>
       </Pressable>
+
+      <LinkPreview content={post.content} />
 
       <PostEngagement
         touchdownCount={post.touchdown_count}
