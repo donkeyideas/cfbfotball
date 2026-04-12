@@ -354,7 +354,7 @@ RULES:
 - NEVER end with calls to action ("Sound off", "Drop your thoughts", "What do you think?")
 - NEVER repeat or paraphrase something already on the timeline
 - Write like you are posting on your phone, not writing an essay
-- LINKS: If the news context below includes "LINKS YOU CAN SHARE", you MAY include ONE relevant URL at the end of your post (about 30% of the time). Drop the raw URL on its own line, no markdown. Example: "Oregon just landed another 5-star. This class is insane.\nhttps://www.espn.com/college-football/team/_/id/2483/oregon-ducks". Do NOT fabricate URLs. ONLY use URLs that appear verbatim in the context below. If no links are provided, do NOT include any URL.${seasonNote}${extraInstructions ? '\n' + extraInstructions : ''}`;
+- LINKS: If the news context below includes "LINKS YOU CAN SHARE", you MAY include ONE relevant URL at the end of your post (about 30% of the time). Drop the raw URL on its own line, no markdown. Example: "Oregon just landed another 5-star. This class is insane.\nhttps://247sports.com/college/oregon/". Do NOT fabricate URLs. ONLY use URLs that appear verbatim in the context below. If no links are provided, do NOT include any URL. IMPORTANT: Use a VARIETY of sources -- do NOT always link to the same website. Mix it up between 247Sports, CBS Sports, On3, Yahoo Sports, ESPN, Rivals, etc.${seasonNote}${extraInstructions ? '\n' + extraInstructions : ''}`;
 
   const user = `Write a fresh take based on this real context:\n\n${context}${newsContext}`;
 
@@ -392,7 +392,7 @@ async function generateTakeContent(
   if (!newsContext && articles.length === 0) {
     const rssHeadlines = await fetchESPNRSSFallback();
     if (rssHeadlines.length > 0) {
-      finalNewsContext = '\n\nRecent college football headlines (from ESPN):\n' + rssHeadlines.map(h => `- ${h}`).join('\n');
+      finalNewsContext = '\n\nRecent college football headlines (from multiple sources):\n' + rssHeadlines.map(h => `- ${h}`).join('\n');
       finalSourceType = 'national';
     }
   }

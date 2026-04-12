@@ -60,42 +60,54 @@ Talk about: spring practice, the portal, recruiting classes, coaching changes, o
     'The 2026 NFL Draft is happening this week -- which programs lost the most talent?',
     'Spring practice takeaways: which teams look the most improved heading into summer?',
   ],
-  /** Reference links bots can share in posts. ONLY real, verified URLs. */
+  /** Reference links bots can share in posts. Diverse sources -- do NOT favor any single outlet. */
   referenceLinks: {
-    // Team pages
+    // Team pages -- spread across ESPN, CBS, 247Sports, and official sites
     teams: {
-      Oregon: 'https://www.espn.com/college-football/team/_/id/2483/oregon-ducks',
-      Alabama: 'https://www.espn.com/college-football/team/_/id/333/alabama-crimson-tide',
-      Georgia: 'https://www.espn.com/college-football/team/_/id/61/georgia-bulldogs',
-      'Ohio State': 'https://www.espn.com/college-football/team/_/id/194/ohio-state-buckeyes',
-      Texas: 'https://www.espn.com/college-football/team/_/id/251/texas-longhorns',
-      Miami: 'https://www.espn.com/college-football/team/_/id/2390/miami-hurricanes',
-      Colorado: 'https://www.espn.com/college-football/team/_/id/38/colorado-buffaloes',
-      'Oklahoma State': 'https://www.espn.com/college-football/team/_/id/197/oklahoma-state-cowboys',
-      Indiana: 'https://www.espn.com/college-football/team/_/id/84/indiana-hoosiers',
-      'Notre Dame': 'https://www.espn.com/college-football/team/_/id/87/notre-dame-fighting-irish',
-      'Texas A&M': 'https://www.espn.com/college-football/team/_/id/245/texas-am-aggies',
-      Clemson: 'https://www.espn.com/college-football/team/_/id/228/clemson-tigers',
-      Michigan: 'https://www.espn.com/college-football/team/_/id/130/michigan-wolverines',
-      LSU: 'https://www.espn.com/college-football/team/_/id/99/lsu-tigers',
-      USC: 'https://www.espn.com/college-football/team/_/id/30/usc-trojans',
-      Florida: 'https://www.espn.com/college-football/team/_/id/57/florida-gators',
-      Auburn: 'https://www.espn.com/college-football/team/_/id/2/auburn-tigers',
-      Tennessee: 'https://www.espn.com/college-football/team/_/id/2633/tennessee-volunteers',
-      Penn_State: 'https://www.espn.com/college-football/team/_/id/213/penn-state-nittany-lions',
-      Oklahoma: 'https://www.espn.com/college-football/team/_/id/201/oklahoma-sooners',
+      Oregon: 'https://247sports.com/college/oregon/',
+      Alabama: 'https://www.cbssports.com/college-football/teams/ALA/alabama-crimson-tide/',
+      Georgia: 'https://www.on3.com/teams/georgia-bulldogs/',
+      'Ohio State': 'https://247sports.com/college/ohio-state/',
+      Texas: 'https://www.on3.com/teams/texas-longhorns/',
+      Miami: 'https://247sports.com/college/miami/',
+      Colorado: 'https://www.cbssports.com/college-football/teams/COLO/colorado-buffaloes/',
+      'Oklahoma State': 'https://www.on3.com/teams/oklahoma-state-cowboys/',
+      Indiana: 'https://247sports.com/college/indiana/',
+      'Notre Dame': 'https://www.cbssports.com/college-football/teams/ND/notre-dame-fighting-irish/',
+      'Texas A&M': 'https://247sports.com/college/texas-am/',
+      Clemson: 'https://www.on3.com/teams/clemson-tigers/',
+      Michigan: 'https://www.cbssports.com/college-football/teams/MICH/michigan-wolverines/',
+      LSU: 'https://247sports.com/college/lsu/',
+      USC: 'https://www.on3.com/teams/usc-trojans/',
+      Florida: 'https://247sports.com/college/florida/',
+      Auburn: 'https://www.cbssports.com/college-football/teams/AUB/auburn-tigers/',
+      Tennessee: 'https://www.on3.com/teams/tennessee-volunteers/',
+      Penn_State: 'https://247sports.com/college/penn-state/',
+      Oklahoma: 'https://www.cbssports.com/college-football/teams/OKLA/oklahoma-sooners/',
     } as Record<string, string>,
-    // Recruiting / portal resources
+    // Recruiting / portal resources -- multiple outlets
     recruiting: [
       { label: '247Sports Team Rankings 2026', url: 'https://247sports.com/season/2026-football/compositeteamrankings/' },
       { label: 'On3 Transfer Portal', url: 'https://www.on3.com/transfer-portal/football/' },
-      { label: 'ESPN Recruiting Rankings', url: 'https://www.espn.com/college-sports/football/recruiting/rankings/_/class/2026' },
       { label: 'Rivals Recruiting', url: 'https://n.rivals.com/team_rankings/2026/all-teams/football' },
+      { label: 'CBS Sports Recruiting', url: 'https://www.cbssports.com/college-football/news/college-football-recruiting-rankings/' },
+      { label: 'Yahoo Sports CFB', url: 'https://sports.yahoo.com/college-football/' },
     ],
-    // Draft
+    // Draft -- multiple outlets
     draft: [
-      { label: 'ESPN 2026 NFL Draft', url: 'https://www.espn.com/nfl/draft/rounds/_/round/1' },
       { label: 'NFL Draft Tracker', url: 'https://www.nfl.com/draft/' },
+      { label: 'CBS Sports NFL Draft', url: 'https://www.cbssports.com/nfl/draft/' },
+      { label: 'The Athletic NFL Draft', url: 'https://www.nytimes.com/athletic/nfl/draft/' },
+    ],
+    // General CFB news -- multiple outlets for variety
+    general: [
+      { label: 'CBS Sports College Football', url: 'https://www.cbssports.com/college-football/' },
+      { label: 'Yahoo Sports College Football', url: 'https://sports.yahoo.com/college-football/' },
+      { label: 'Sports Illustrated CFB', url: 'https://www.si.com/college-football' },
+      { label: 'FOX Sports College Football', url: 'https://www.foxsports.com/college-football' },
+      { label: '247Sports News', url: 'https://247sports.com/college/football/' },
+      { label: 'On3 College Football', url: 'https://www.on3.com/college-football/' },
+      { label: 'The Athletic CFB', url: 'https://www.nytimes.com/athletic/college-football/' },
     ],
   },
   seasonYear: '2026',
@@ -113,11 +125,18 @@ export function buildNewsContextString(): string {
   const spring = CURRENT_CFB_CONTEXT.springPracticeStories.join(' | ');
   const topics = CURRENT_CFB_CONTEXT.hotTopics.join(' | ');
 
-  // Build a compact links section the AI can pick from
+  // Build a compact links section the AI can pick from — diverse sources
   const refs = CURRENT_CFB_CONTEXT.referenceLinks;
-  const teamLinks = Object.entries(refs.teams).map(([name, url]) => `${name}: ${url}`).join(' | ');
+  // Shuffle team links so no single source always appears first
+  const teamEntries = Object.entries(refs.teams);
+  for (let i = teamEntries.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [teamEntries[i], teamEntries[j]] = [teamEntries[j]!, teamEntries[i]!];
+  }
+  const teamLinks = teamEntries.map(([name, url]) => `${name}: ${url}`).join(' | ');
   const recruitLinks = refs.recruiting.map(r => `${r.label}: ${r.url}`).join(' | ');
   const draftLinks = refs.draft.map(r => `${r.label}: ${r.url}`).join(' | ');
+  const generalLinks = refs.general.map(r => `${r.label}: ${r.url}`).join(' | ');
 
   return [
     timeline,
@@ -128,10 +147,11 @@ export function buildNewsContextString(): string {
     `Spring practice: ${spring}`,
     `Hot topics: ${topics}`,
     '',
-    'LINKS YOU CAN SHARE (use sparingly, only when relevant to your post):',
+    'LINKS YOU CAN SHARE (use sparingly, only when relevant to your post -- use a VARIETY of sources, do NOT always use the same site):',
     `Team pages: ${teamLinks}`,
     `Recruiting/Portal: ${recruitLinks}`,
     `NFL Draft: ${draftLinks}`,
+    `General CFB news: ${generalLinks}`,
   ].join('\n');
 }
 

@@ -1,10 +1,10 @@
 // ============================================================
 // Bot Content Utilities
-// ESPN API news, content cleaning, fallback content
+// Multi-source CFB news, content cleaning, fallback content
 // ============================================================
 
 // ============================================================
-// ESPN API - Real news data for bot content
+// News API - Real news data from multiple sources
 // ============================================================
 
 export interface ESPNArticleLink {
@@ -21,17 +21,16 @@ export interface ESPNArticle {
   published: string;
   url: string;           // Article URL
   links: ESPNArticleLink[];  // All extracted links (article, team, player pages)
+  source: string;        // Which outlet this came from
 }
 
 /**
  * Fetch real CFB news from ESPN API with team + player metadata.
- * This is the PRIMARY source of truth for bot content — ensures
- * bots only reference real, current events.
  */
-export async function fetchESPNNews(): Promise<ESPNArticle[]> {
+async function fetchESPNArticles(): Promise<ESPNArticle[]> {
   try {
     const res = await fetch(
-      'https://site.api.espn.com/apis/site/v2/sports/football/college-football/news?limit=25',
+      'https://site.api.espn.com/apis/site/v2/sports/football/college-football/news?limit=20',
       { signal: AbortSignal.timeout(8000) }
     );
     if (!res.ok) return [];
@@ -42,13 +41,11 @@ export async function fetchESPNNews(): Promise<ESPNArticle[]> {
       const categories: any[] = a.categories || [];
       const extractedLinks: ESPNArticleLink[] = [];
 
-      // Article URL
       const articleUrl = a.links?.web?.href || a.links?.web?.self?.href || '';
       if (articleUrl) {
         extractedLinks.push({ name: a.headline || 'Article', url: articleUrl, type: 'article' });
       }
 
-      // Team page URLs
       for (const cat of categories) {
         if (cat.type === 'team' && cat.team?.links?.web?.teams?.href) {
           extractedLinks.push({
@@ -57,7 +54,6 @@ export async function fetchESPNNews(): Promise<ESPNArticle[]> {
             type: 'team',
           });
         }
-        // Athlete profile URLs
         if (cat.type === 'athlete' && cat.athlete?.links?.web?.athletes?.href) {
           extractedLinks.push({
             name: cat.description || cat.athlete?.description || '',
@@ -81,6 +77,7 @@ export async function fetchESPNNews(): Promise<ESPNArticle[]> {
         published: a.published || '',
         url: articleUrl,
         links: extractedLinks,
+        source: 'ESPN',
       };
     });
     /* eslint-enable @typescript-eslint/no-explicit-any */
@@ -90,35 +87,186 @@ export async function fetchESPNNews(): Promise<ESPNArticle[]> {
 }
 
 /**
- * Fallback: Fetch headlines from ESPN RSS if API fails.
+ * Parse RSS feed XML into articles. Works for CBS, Yahoo, SI, Fox, etc.
  */
-export async function fetchESPNRSSFallback(): Promise<string[]> {
+function parseRSSArticles(xml: string, source: string, limit = 15): ESPNArticle[] {
+  const articles: ESPNArticle[] = [];
+  const itemRegex = /<item>([\s\S]*?)<\/item>/g;
+  let match;
+  while ((match = itemRegex.exec(xml)) !== null && articles.length < limit) {
+    const block = match[1] || '';
+
+    // Title
+    const titleCdata = block.match(/<title><!\[CDATA\[(.+?)\]\]><\/title>/);
+    const titlePlain = block.match(/<title>([^<]+)<\/title>/);
+    const title = (titleCdata?.[1] || titlePlain?.[1] || '').trim();
+    if (!title || title.length < 10) continue;
+
+    // Description
+    const descCdata = block.match(/<description><!\[CDATA\[(.+?)\]\]><\/description>/);
+    const descPlain = block.match(/<description>([^<]+)<\/description>/);
+    const desc = (descCdata?.[1] || descPlain?.[1] || '').replace(/<[^>]+>/g, '').trim();
+
+    // Link
+    const linkMatch = block.match(/<link>([^<]+)<\/link>/) || block.match(/<link><!\[CDATA\[(.+?)\]\]><\/link>/);
+    const link = (linkMatch?.[1] || '').trim();
+
+    // pubDate
+    const pubMatch = block.match(/<pubDate>([^<]+)<\/pubDate>/);
+    const pubDate = (pubMatch?.[1] || '').trim();
+
+    const links: ESPNArticleLink[] = [];
+    if (link) {
+      links.push({ name: title, url: link, type: 'article' });
+    }
+
+    // Extract team names from title/desc (basic heuristic)
+    const teams: string[] = [];
+
+    articles.push({
+      headline: title,
+      description: desc.substring(0, 300),
+      teams,
+      athletes: [],
+      published: pubDate,
+      url: link,
+      links,
+      source,
+    });
+  }
+  return articles;
+}
+
+/**
+ * Fetch CFB news from CBS Sports RSS.
+ */
+async function fetchCBSNews(): Promise<ESPNArticle[]> {
   try {
-    const res = await fetch('https://www.espn.com/espn/rss/ncf/news', {
-      signal: AbortSignal.timeout(5000),
+    const res = await fetch('https://www.cbssports.com/rss/headlines/college-football/', {
+      signal: AbortSignal.timeout(6000),
     });
     if (!res.ok) return [];
     const xml = await res.text();
-    const items: string[] = [];
-    const itemRegex = /<item>([\s\S]*?)<\/item>/g;
-    let itemMatch;
-    while ((itemMatch = itemRegex.exec(xml)) !== null && items.length < 10) {
-      const block = itemMatch[1] || '';
-      const titleCdata = block.match(/<title><!\[CDATA\[(.+?)\]\]><\/title>/);
-      const titlePlain = block.match(/<title>([^<]+)<\/title>/);
-      const title = (titleCdata?.[1] || titlePlain?.[1] || '').trim();
-      if (!title || title.length < 10 || title.toLowerCase().includes('espn') || title.startsWith('www.')) continue;
-
-      const descCdata = block.match(/<description><!\[CDATA\[(.+?)\]\]><\/description>/);
-      const descPlain = block.match(/<description>([^<]+)<\/description>/);
-      const desc = (descCdata?.[1] || descPlain?.[1] || '').trim();
-
-      items.push(desc && desc.length > 20 ? `${title} -- ${desc.substring(0, 150)}` : title);
-    }
-    return items;
+    return parseRSSArticles(xml, 'CBS Sports');
   } catch {
     return [];
   }
+}
+
+/**
+ * Fetch CFB news from Yahoo Sports RSS.
+ */
+async function fetchYahooNews(): Promise<ESPNArticle[]> {
+  try {
+    const res = await fetch('https://sports.yahoo.com/college-football/rss/', {
+      signal: AbortSignal.timeout(6000),
+    });
+    if (!res.ok) return [];
+    const xml = await res.text();
+    return parseRSSArticles(xml, 'Yahoo Sports');
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Fetch CFB news from 247Sports / On3 RSS.
+ */
+async function fetch247News(): Promise<ESPNArticle[]> {
+  try {
+    const res = await fetch('https://247sports.com/college/football/rss/', {
+      signal: AbortSignal.timeout(6000),
+    });
+    if (!res.ok) return [];
+    const xml = await res.text();
+    return parseRSSArticles(xml, '247Sports');
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Fetch real CFB news from MULTIPLE sources.
+ * Combines ESPN API + CBS Sports RSS + Yahoo RSS + 247Sports RSS.
+ * Shuffles results so no single source dominates the prompt.
+ */
+export async function fetchESPNNews(): Promise<ESPNArticle[]> {
+  // Fetch all sources in parallel — each has its own timeout/error handling
+  const [espn, cbs, yahoo, two47] = await Promise.all([
+    fetchESPNArticles(),
+    fetchCBSNews(),
+    fetchYahooNews(),
+    fetch247News(),
+  ]);
+
+  // Combine all articles
+  const all = [...espn, ...cbs, ...yahoo, ...two47];
+
+  // Deduplicate by headline similarity (avoid same story from multiple outlets)
+  const seen = new Set<string>();
+  const deduped = all.filter(a => {
+    // Normalize headline for dedup: lowercase, strip punctuation, take first 40 chars
+    const key = a.headline.toLowerCase().replace(/[^a-z0-9 ]/g, '').substring(0, 40);
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+
+  // Shuffle so no source always appears first in the prompt
+  for (let i = deduped.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [deduped[i], deduped[j]] = [deduped[j]!, deduped[i]!];
+  }
+
+  return deduped;
+}
+
+/**
+ * Fallback: Fetch headlines from multiple RSS feeds if API fails.
+ */
+export async function fetchESPNRSSFallback(): Promise<string[]> {
+  const urls = [
+    'https://www.espn.com/espn/rss/ncf/news',
+    'https://www.cbssports.com/rss/headlines/college-football/',
+    'https://sports.yahoo.com/college-football/rss/',
+  ];
+
+  const results = await Promise.all(
+    urls.map(async (url) => {
+      try {
+        const res = await fetch(url, { signal: AbortSignal.timeout(5000) });
+        if (!res.ok) return [];
+        const xml = await res.text();
+        const items: string[] = [];
+        const itemRegex = /<item>([\s\S]*?)<\/item>/g;
+        let itemMatch;
+        while ((itemMatch = itemRegex.exec(xml)) !== null && items.length < 5) {
+          const block = itemMatch[1] || '';
+          const titleCdata = block.match(/<title><!\[CDATA\[(.+?)\]\]><\/title>/);
+          const titlePlain = block.match(/<title>([^<]+)<\/title>/);
+          const title = (titleCdata?.[1] || titlePlain?.[1] || '').trim();
+          if (!title || title.length < 10 || title.startsWith('www.')) continue;
+
+          const descCdata = block.match(/<description><!\[CDATA\[(.+?)\]\]><\/description>/);
+          const descPlain = block.match(/<description>([^<]+)<\/description>/);
+          const desc = (descCdata?.[1] || descPlain?.[1] || '').replace(/<[^>]+>/g, '').trim();
+
+          items.push(desc && desc.length > 20 ? `${title} -- ${desc.substring(0, 150)}` : title);
+        }
+        return items;
+      } catch {
+        return [];
+      }
+    })
+  );
+
+  // Flatten and shuffle
+  const all = results.flat();
+  for (let i = all.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [all[i], all[j]] = [all[j]!, all[i]!];
+  }
+  return all.slice(0, 10);
 }
 
 /**
@@ -176,7 +324,7 @@ export function buildNewsContext(
   );
 
   const formatArticle = (a: ESPNArticle): string => {
-    let entry = `- ${a.headline}`;
+    let entry = `- [${a.source}] ${a.headline}`;
     if (a.description) entry += `: ${a.description}`;
     if (a.athletes.length > 0) entry += ` (Players mentioned: ${a.athletes.join(', ')})`;
     // Append available links for the AI to optionally include
@@ -190,7 +338,7 @@ export function buildNewsContext(
   // Priority 1: Team-specific news
   if (teamArticles.length > 0) {
     const selected = teamArticles.slice(0, 3);
-    const context = '\n\nREAL NEWS about ' + schoolName + ' (from ESPN - these are FACTS you can reference):\n' +
+    const context = '\n\nREAL NEWS about ' + schoolName + ' (from multiple sources - these are FACTS you can reference):\n' +
       selected.map(formatArticle).join('\n');
     return { newsContext: context, sourceType: 'team', articleUsed: selected[0]! };
   }
@@ -198,7 +346,7 @@ export function buildNewsContext(
   // Priority 2: Conference news
   if (conferenceArticles.length > 0) {
     const selected = conferenceArticles.slice(0, 3);
-    const context = '\n\nREAL NEWS from the ' + (conference || 'college football') + ' (from ESPN - these are FACTS):\n' +
+    const context = '\n\nREAL NEWS from the ' + (conference || 'college football') + ' (from multiple sources - these are FACTS):\n' +
       selected.map(formatArticle).join('\n');
     return { newsContext: context, sourceType: 'conference', articleUsed: selected[0]! };
   }
@@ -206,7 +354,7 @@ export function buildNewsContext(
   // Priority 3: National news
   if (nationalArticles.length > 0) {
     const selected = nationalArticles.slice(0, 5);
-    const context = '\n\nREAL college football news this week (from ESPN - these are FACTS):\n' +
+    const context = '\n\nREAL college football news this week (from multiple sources - these are FACTS):\n' +
       selected.map(formatArticle).join('\n');
     return { newsContext: context, sourceType: 'national', articleUsed: selected[0]! };
   }
