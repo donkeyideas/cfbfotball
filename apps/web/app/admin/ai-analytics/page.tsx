@@ -26,7 +26,7 @@ async function SearchAIData() {
     audit = {
       pages: [],
       crawledAt: new Date().toISOString(),
-      siteUrl: process.env.WEB_APP_URL ?? 'http://localhost:4200',
+      siteUrl: process.env.NEXT_PUBLIC_APP_URL ?? (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:4200'),
       totalPages: 0,
       seoScore: 0,
       aeoScore: 0,

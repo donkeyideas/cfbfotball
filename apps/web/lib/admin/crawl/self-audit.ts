@@ -571,7 +571,10 @@ function detectIssues(pages: CrawledPage[]): AuditIssue[] {
 /* -------------------------------------------------------------------------- */
 
 export async function crawlOwnSite(): Promise<SelfAuditResult> {
-  const siteUrl = process.env.WEB_APP_URL ?? 'http://localhost:4200';
+  const siteUrl =
+    process.env.NEXT_PUBLIC_APP_URL ??
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null) ??
+    'http://localhost:4200';
 
   const pages = await Promise.all(
     PAGES_TO_CRAWL.map((path) => crawlPage(siteUrl, path)),

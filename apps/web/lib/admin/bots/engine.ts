@@ -1155,13 +1155,40 @@ export async function botIssueChallenge(botId: string): Promise<{ success: boole
 
     if (error) continue;
 
+    // Generate a visible reply on the post so it shows in comments
+    let replyContent = await generateReplyContent(
+      personality,
+      bot.school,
+      `You just issued a challenge on this post: "${postContent}". Write a 1-3 sentence reply calling out the poster. Be competitive and bold — you're throwing down the gauntlet. Example tones: "I'm calling you out on this one." / "Let's settle this — your program vs mine." / "Bold words. Prove it. Challenge issued."`,
+      bot.bot_mood ?? 5
+    );
+    if (!replyContent) {
+      replyContent = `I'm calling you out on this one. Challenge issued. Let's see if you can back it up.`;
+    }
+    replyContent = humanizeContent(replyContent, personality, {
+      bot_region: bot.bot_region,
+      bot_age_bracket: bot.bot_age_bracket,
+      bot_mood: bot.bot_mood ?? 5,
+      schoolName: bot.school?.name,
+      mascotName: bot.school?.mascot,
+    });
+
+    await supabase.from('posts').insert({
+      author_id: botId,
+      content: replyContent,
+      post_type: 'STANDARD',
+      school_id: bot.school_id,
+      parent_id: post.id,
+      status: 'PUBLISHED',
+    });
+
     // Log
     await supabase.from('bot_activity_log').insert({
       bot_id: botId,
-      action_type: 'POST',
+      action_type: 'REPLY',
       target_post_id: post.id,
       created_post_id: challenge.id,
-      content_preview: `[CHALLENGE] ${topic.slice(0, 100)}`,
+      content_preview: `[CHALLENGE] ${replyContent.slice(0, 100)}`,
       success: true,
     });
 
@@ -1223,11 +1250,38 @@ export async function botMarkForAging(botId: string): Promise<{ success: boolean
 
     if (error) continue;
 
+    // Generate a visible reply so the receipt filing shows in comments
+    let replyContent = await generateReplyContent(
+      personality,
+      bot.school,
+      `You are filing a receipt on this prediction: "${(post.content as string).slice(0, 200)}". Write a 1-2 sentence reply marking this take for revisit. Be confident you'll come back to it. Example tones: "Filing a receipt on this one." / "Bookmarking this. We'll see in a few weeks." / "Screenshot this. I'm coming back for you."`,
+      bot.bot_mood ?? 5
+    );
+    if (!replyContent) {
+      replyContent = `Filing a receipt on this one. We'll revisit.`;
+    }
+    replyContent = humanizeContent(replyContent, personality, {
+      bot_region: bot.bot_region,
+      bot_age_bracket: bot.bot_age_bracket,
+      bot_mood: bot.bot_mood ?? 5,
+      schoolName: bot.school?.name,
+      mascotName: bot.school?.mascot,
+    });
+
+    await supabase.from('posts').insert({
+      author_id: botId,
+      content: replyContent,
+      post_type: 'STANDARD',
+      school_id: bot.school_id,
+      parent_id: post.id,
+      status: 'PUBLISHED',
+    });
+
     await supabase.from('bot_activity_log').insert({
       bot_id: botId,
-      action_type: 'POST',
+      action_type: 'REPLY',
       target_post_id: post.id,
-      content_preview: `[AGING] Filed receipt (revisit in ${daysOut} days)`,
+      content_preview: `[AGING] ${replyContent.slice(0, 100)}`,
       success: true,
     });
 
@@ -1246,10 +1300,8 @@ export async function botFactCheck(botId: string): Promise<{ success: boolean; e
   if (!bot || !bot.is_bot || !bot.bot_active) return { success: false, error: 'Bot inactive' };
 
   const personality = parsePersonality(bot.bot_personality);
-  // Fact check is primarily for analyst and recruiting_insider, but others can too at low rates
-  const factCheckRate = personality.type === 'analyst' ? 0.15
-    : personality.type === 'recruiting_insider' ? 0.08
-    : personality.factCheckProbability || 0.02;
+  // Use personality-driven fact check probability directly
+  const factCheckRate = personality.factCheckProbability || 0.10;
   if (Math.random() > factCheckRate) return { success: false, error: 'Skipped by probability' };
 
   // Find bold claims to fact check
@@ -1293,12 +1345,39 @@ export async function botFactCheck(botId: string): Promise<{ success: boolean; e
 
       if (error) continue;
 
+      // Generate a visible reply so the fact check shows in comments
+      let replyContent = await generateReplyContent(
+        personality,
+        bot.school,
+        `You are fact-checking this claim: "${(post.content as string).slice(0, 200)}". Write a 1-3 sentence reply questioning or verifying the claim. Be analytical and specific. Example tones: "Gonna need a source on that one." / "Actually, the numbers tell a different story..." / "Fact check: this checks out, but context matters."`,
+        bot.bot_mood ?? 5
+      );
+      if (!replyContent) {
+        replyContent = `Gonna need a source on that one. Fact check filed.`;
+      }
+      replyContent = humanizeContent(replyContent, personality, {
+        bot_region: bot.bot_region,
+        bot_age_bracket: bot.bot_age_bracket,
+        bot_mood: bot.bot_mood ?? 5,
+        schoolName: bot.school?.name,
+        mascotName: bot.school?.mascot,
+      });
+
+      await supabase.from('posts').insert({
+        author_id: botId,
+        content: replyContent,
+        post_type: 'STANDARD',
+        school_id: bot.school_id,
+        parent_id: post.id,
+        status: 'PUBLISHED',
+      });
+
       await supabase.from('bot_activity_log').insert({
         bot_id: botId,
-        action_type: 'POST',
+        action_type: 'REPLY',
         target_post_id: post.id,
         created_post_id: factCheck.id,
-        content_preview: '[FACT CHECK] Requested',
+        content_preview: `[FACT CHECK] ${replyContent.slice(0, 100)}`,
         success: true,
       });
 
@@ -1793,12 +1872,20 @@ export async function runBotCycle(): Promise<{
       errors.push(`Save[${bot.username}]: ${err instanceof Error ? err.message : String(err)}`);
     }
 
-    // Accept pending challenges (new)
+    // Accept pending challenges
     try {
       const result = await botAcceptChallenge(bot.id);
       if (result.success) challenged++;
     } catch (err) {
       errors.push(`AcceptChallenge[${bot.username}]: ${err instanceof Error ? err.message : String(err)}`);
+    }
+
+    // Revisit aged takes whose revisit date has passed
+    try {
+      const result = await botRevisitAgedTakes(bot.id);
+      if (result.success) aged++;
+    } catch (err) {
+      errors.push(`Revisit[${bot.username}]: ${err instanceof Error ? err.message : String(err)}`);
     }
   }
 
