@@ -7,16 +7,18 @@ import { CollectionPageJsonLd } from '@/components/seo/JsonLd';
 export const revalidate = 60;
 
 export const metadata = {
-  title: 'College Football Predictions & Fan Receipts | CFB Social',
+  title: 'CFB Predictions & Receipts',
   description: 'Make college football predictions and put your takes on record. Track prediction accuracy, see the leaderboard, and collect receipts when you are right. The CFB predictions tracker.',
   openGraph: {
-    title: 'College Football Predictions & Fan Receipts | CFB Social',
+    title: 'CFB Predictions & Receipts | CFB Social',
     description: 'File college football predictions and track your record. Receipts or busts, history will judge.',
+    images: [{ url: 'https://www.cfbsocial.com/logo.png', width: 256, height: 256, alt: 'CFB Social Logo' }],
   },
   twitter: {
     card: 'summary_large_image' as const,
-    title: 'College Football Predictions & Fan Receipts | CFB Social',
+    title: 'CFB Predictions & Receipts | CFB Social',
     description: 'File college football predictions and track your record. Receipts or busts, history will judge.',
+    images: ['https://www.cfbsocial.com/logo.png'],
   },
   alternates: {
     canonical: 'https://www.cfbsocial.com/predictions',

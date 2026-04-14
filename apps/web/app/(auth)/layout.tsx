@@ -14,6 +14,19 @@ export default function AuthLayout({
 
         {/* Auth card */}
         <div className="gridiron-card p-8">{children}</div>
+
+        {/* SEO FAQ section */}
+        <div className="footer-faq" style={{ marginTop: 32 }}>
+          <h2 className="footer-faq-heading">Why join CFB Social?</h2>
+          <ul className="footer-faq-list">
+            <li>Post takes and debate college football across 653 schools</li>
+            <li>File predictions and earn receipts when you are right</li>
+            <li>Track the transfer portal and claim recruits for your school</li>
+            <li>Build your fan dynasty and climb the leaderboard</li>
+          </ul>
+          <h3 className="footer-faq-heading">Is CFB Social free?</h3>
+          <p className="footer-faq-text">Yes, CFB Social is completely free. Sign up, pick your school, and start engaging with the college football community.</p>
+        </div>
       </div>
     </div>
   );

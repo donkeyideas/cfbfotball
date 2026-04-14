@@ -6,11 +6,18 @@ import { DynastyTierBadge } from '@/components/dynasty/DynastyTierBadge';
 export const dynamic = 'force-dynamic';
 
 export const metadata = {
-  title: 'CFB Dynasty Mode -- Build Your Fan Legacy | CFB Social',
+  title: 'Dynasty Mode - Build Your Legacy',
   description: 'Build your college football dynasty on CFB Social. Earn XP, unlock achievements, climb the leaderboard, and rise through tiers from Walk-On to Hall of Fame across 653 schools.',
   openGraph: {
-    title: 'CFB Dynasty Mode -- Build Your Fan Legacy | CFB Social',
+    title: 'Dynasty Mode - Build Your Legacy | CFB Social',
     description: 'Build your college football dynasty. Earn XP, unlock achievements, and climb the leaderboard.',
+    images: [{ url: 'https://www.cfbsocial.com/logo.png', width: 256, height: 256, alt: 'CFB Social Logo' }],
+  },
+  twitter: {
+    card: 'summary' as const,
+    title: 'Dynasty Mode - Build Your Legacy | CFB Social',
+    description: 'Build your college football dynasty. Earn XP, unlock achievements, and climb the leaderboard.',
+    images: ['https://www.cfbsocial.com/logo.png'],
   },
   alternates: {
     canonical: 'https://www.cfbsocial.com/dynasty',

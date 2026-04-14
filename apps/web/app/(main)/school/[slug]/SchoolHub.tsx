@@ -1,7 +1,9 @@
 'use client';
 
+import { useEffect } from 'react';
 import Link from 'next/link';
 import { PostCard } from '@/components/feed/PostCard';
+import { trackSchoolVisit } from '@/lib/analytics/track';
 
 interface SchoolHubProps {
   school: {
@@ -42,6 +44,10 @@ const tierLabels: Record<string, string> = {
 };
 
 export function SchoolHub({ school, fanCount, postCount, portalCount, posts, topFans }: SchoolHubProps) {
+  useEffect(() => {
+    trackSchoolVisit(school.id, school.slug);
+  }, [school.id, school.slug]);
+
   return (
     <div>
       {/* School Header */}

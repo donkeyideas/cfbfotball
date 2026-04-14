@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Script from 'next/script';
 import { Playfair_Display, Source_Sans_3, Special_Elite } from 'next/font/google';
-import { WebsiteJsonLd, OrganizationJsonLd } from '@/components/seo/JsonLd';
+import { WebsiteJsonLd, OrganizationJsonLd, FAQPageJsonLd } from '@/components/seo/JsonLd';
 import './globals.css';
 
 const playfair = Playfair_Display({
@@ -94,6 +94,14 @@ export default function RootLayout({
         />
         <WebsiteJsonLd />
         <OrganizationJsonLd />
+        <FAQPageJsonLd
+          questions={[
+            { question: 'What is CFB Social?', answer: 'CFB Social is the #1 college football fan community where fans debate rivalries, file predictions, track the transfer portal, and build their dynasty across all 653 FBS and FCS schools.' },
+            { question: 'How do I join CFB Social?', answer: 'Create a free account, pick your school, and start posting takes. You can also vote in Mascot Wars, enter Rivalry Ring debates, and climb the Dynasty leaderboard.' },
+            { question: 'Is CFB Social free to use?', answer: 'Yes, CFB Social is completely free. Sign up, choose your school, and start engaging with the college football community today.' },
+            { question: 'What features does CFB Social offer?', answer: 'CFB Social offers fan debates in the Rivalry Ring, transfer portal tracking, prediction filing with receipt tracking, Mascot Wars bracket tournaments, Dynasty Mode progression, live War Room game threads, and recruiting heat maps.' },
+          ]}
+        />
       </head>
       <body className="min-h-screen bg-paper text-ink antialiased">
         <Script

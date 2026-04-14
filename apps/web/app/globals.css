@@ -3336,6 +3336,36 @@ html.dark .aging-footer {
   margin-bottom: 6px;
 }
 
+.footer-faq {
+  max-width: 600px;
+  margin: 20px auto 0;
+  text-align: left;
+  padding: 0 16px;
+}
+.footer-faq-heading {
+  font-family: var(--sans);
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--faded-ink);
+  margin: 12px 0 4px;
+  letter-spacing: 0.2px;
+}
+.footer-faq-text {
+  font-family: var(--sans);
+  font-size: 0.68rem;
+  line-height: 1.5;
+  color: var(--faded-ink);
+  margin: 0;
+}
+.footer-faq-list {
+  font-family: var(--sans);
+  font-size: 0.68rem;
+  line-height: 1.6;
+  color: var(--faded-ink);
+  margin: 2px 0 0;
+  padding-left: 16px;
+}
+
 /* Hamburger: hidden on desktop, shown on mobile */
 .masthead-mobile-menu {
   display: none;

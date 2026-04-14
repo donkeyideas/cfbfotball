@@ -1,6 +1,6 @@
 'use client';
 
-import { memo } from 'react';
+import { memo, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import type { PostType } from '@cfb-social/types';
@@ -9,6 +9,7 @@ import { PostActions } from './PostActions';
 import { AppealForm } from '@/components/moderation/AppealForm';
 import { AgingTakeTimerWrapper } from './AgingTakeTimerWrapper';
 import { LinkPreview, extractFirstUrl, stripFirstUrl } from './LinkPreview';
+import { trackEvent } from '@/lib/analytics/track';
 
 interface PostAuthor {
   id: string;
@@ -64,24 +65,48 @@ interface Post {
 }
 
 export const PostCard = memo(function PostCard({ post }: { post: Post }) {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const trackedRef = useRef(false);
+
+  useEffect(() => {
+    const el = cardRef.current;
+    if (!el || trackedRef.current) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry && entry.isIntersecting && !trackedRef.current) {
+          trackedRef.current = true;
+          trackEvent({ event_type: 'post_viewed', event_target: 'post', target_id: post.id });
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.5 },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [post.id]);
+
   const isFlagged = post.status === 'FLAGGED';
 
-  if (isFlagged) return <PenaltyPost post={post} />;
+  const inner = isFlagged ? (
+    <PenaltyPost post={post} />
+  ) : (() => {
+    switch (post.post_type) {
+      case 'RECEIPT':
+        return <ReceiptPost post={post} />;
+      case 'PREDICTION':
+        return <PredictionPost post={post} />;
+      case 'AGING_TAKE':
+        return <AgingTakePost post={post} />;
+      case 'SIDELINE':
+        return <PressBoxPost post={post} />;
+      case 'CHALLENGE_RESULT':
+        return <RivalryPost post={post} />;
+      default:
+        return <ClassicPost post={post} />;
+    }
+  })();
 
-  switch (post.post_type) {
-    case 'RECEIPT':
-      return <ReceiptPost post={post} />;
-    case 'PREDICTION':
-      return <PredictionPost post={post} />;
-    case 'AGING_TAKE':
-      return <AgingTakePost post={post} />;
-    case 'SIDELINE':
-      return <PressBoxPost post={post} />;
-    case 'CHALLENGE_RESULT':
-      return <RivalryPost post={post} />;
-    default:
-      return <ClassicPost post={post} />;
-  }
+  return <div ref={cardRef}>{inner}</div>;
 });
 
 function RepostStamp({ repostedBy, repostTime }: { repostedBy: { username: string; display_name: string | null }; repostTime?: string | null }) {

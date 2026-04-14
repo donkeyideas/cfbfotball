@@ -5,11 +5,18 @@ import { CollectionPageJsonLd } from '@/components/seo/JsonLd';
 export const revalidate = 300;
 
 export const metadata = {
-  title: 'Hall of Fame | Top College Football Fans & Dynasty Leaders',
+  title: 'Hall of Fame - Top CFB Fans',
   description: 'The all-time greats of CFB Social. See the top dynasty leaders, touchdown leaders, most followed fans, most prolific posters, and best prediction records across the college football fan community.',
   openGraph: {
-    title: 'Hall of Fame | CFB Social',
+    title: 'Hall of Fame - Top CFB Fans | CFB Social',
     description: 'The all-time greats of CFB Social. Dynasty leaders, touchdown leaders, and prediction oracles.',
+    images: [{ url: 'https://www.cfbsocial.com/logo.png', width: 256, height: 256, alt: 'CFB Social Logo' }],
+  },
+  twitter: {
+    card: 'summary' as const,
+    title: 'Hall of Fame - Top CFB Fans | CFB Social',
+    description: 'The all-time greats of CFB Social. Dynasty leaders, touchdown leaders, and prediction oracles.',
+    images: ['https://www.cfbsocial.com/logo.png'],
   },
   alternates: {
     canonical: 'https://www.cfbsocial.com/hall-of-fame',

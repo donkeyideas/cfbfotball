@@ -2,8 +2,19 @@ import { Suspense } from 'react';
 import Link from 'next/link';
 
 export const metadata = {
-  title: 'The Vault | Saved College Football Posts & Bookmarks',
+  title: 'The Vault - Saved Posts',
   description: 'Your saved college football posts and bookmarks on CFB Social. Save the best takes, predictions, and debates to revisit later.',
+  openGraph: {
+    title: 'The Vault - Saved Posts | CFB Social',
+    description: 'Your saved college football posts and bookmarks on CFB Social. Save the best takes, predictions, and debates to revisit later.',
+    images: [{ url: 'https://www.cfbsocial.com/logo.png', width: 256, height: 256, alt: 'CFB Social Logo' }],
+  },
+  twitter: {
+    card: 'summary' as const,
+    title: 'The Vault - Saved Posts | CFB Social',
+    description: 'Your saved college football posts and bookmarks on CFB Social. Save the best takes, predictions, and debates to revisit later.',
+    images: ['https://www.cfbsocial.com/logo.png'],
+  },
   alternates: {
     canonical: 'https://www.cfbsocial.com/vault',
   },

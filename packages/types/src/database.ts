@@ -2817,6 +2817,50 @@ export type Database = {
           },
         ]
       }
+      user_events: {
+        Row: {
+          id: string
+          user_id: string | null
+          session_id: string | null
+          event_type: string
+          event_target: string | null
+          target_id: string | null
+          metadata: Json
+          duration_ms: number | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id?: string | null
+          session_id?: string | null
+          event_type: string
+          event_target?: string | null
+          target_id?: string | null
+          metadata?: Json
+          duration_ms?: number | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string | null
+          session_id?: string | null
+          event_type?: string
+          event_target?: string | null
+          target_id?: string | null
+          metadata?: Json
+          duration_ms?: number | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_events_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_achievements: {
         Row: {
           achievement_id: string

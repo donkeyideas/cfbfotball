@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { PostCard } from '@/components/feed/PostCard';
 import { ReplyComposer } from '@/components/feed/ReplyComposer';
 import { DiscussionPostJsonLd } from '@/components/seo/JsonLd';
+import { PostDwellTracker } from './PostDwellTracker';
 
 export const revalidate = 30;
 
@@ -67,6 +68,7 @@ export default async function PostPage({ params }: PostPageProps) {
         </Link>
       </div>
 
+      <PostDwellTracker postId={id} />
       <Suspense fallback={<PostSkeleton />}>
         <PostDetail postId={id} />
       </Suspense>

@@ -30,6 +30,10 @@ export function WebsiteJsonLd() {
           },
           'query-input': 'required name=search_term_string',
         },
+        speakable: {
+          '@type': 'SpeakableSpecification',
+          cssSelector: ['h1', '.feed-title', '.section-headline'],
+        },
       }}
     />
   );

@@ -859,6 +859,7 @@ function RecommendationsTab({
   severityFilter: 'all' | 'critical' | 'warning' | 'info';
   setSeverityFilter: (f: 'all' | 'critical' | 'warning' | 'info') => void;
 }) {
+  const [copied, setCopied] = useState(false);
   const filtered = severityFilter === 'all' ? issues : issues.filter((i) => i.severity === severityFilter);
   const criticals = issues.filter((i) => i.severity === 'critical').length;
   const warnings = issues.filter((i) => i.severity === 'warning').length;
@@ -871,10 +872,23 @@ function RecommendationsTab({
     { id: 'info', label: 'Info', count: infos },
   ];
 
+  const copyAll = () => {
+    const text = filtered
+      .map(
+        (issue) =>
+          `${issue.title}\n${issue.severity} | ${issue.category}\n${issue.description}\n\nAffected pages:\n${issue.affectedPages.join('\n')}`,
+      )
+      .join('\n\n---\n\n');
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
   return (
     <div className="space-y-6">
-      {/* Filter buttons */}
-      <div className="flex flex-wrap gap-2">
+      {/* Filter buttons + Copy All */}
+      <div className="flex flex-wrap items-center gap-2">
         {filters.map((f) => (
           <button
             key={f.id}
@@ -888,6 +902,12 @@ function RecommendationsTab({
             {f.label} ({f.count})
           </button>
         ))}
+        <button
+          onClick={copyAll}
+          className="ml-auto rounded-full border border-[var(--admin-border)] px-4 py-1.5 text-xs font-medium text-[var(--admin-text-muted)] transition-colors hover:bg-[var(--admin-surface-raised)] hover:text-[var(--admin-text)]"
+        >
+          {copied ? 'Copied!' : 'Copy All'}
+        </button>
       </div>
 
       {/* Summary */}

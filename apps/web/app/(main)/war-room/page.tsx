@@ -1,16 +1,18 @@
 import { WarRoomClient } from './WarRoomClient';
 
 export const metadata = {
-  title: 'College Football Hot Takes & Debates | CFB Social',
+  title: 'Live Game-Day War Room',
   description: 'Live college football scores and real-time game-day threads. Join the conversation during every CFB game with live chat, quick reactions, and fan commentary. Your digital tailgate.',
   openGraph: {
-    title: 'College Football Hot Takes & Debates | CFB Social',
+    title: 'Live Game-Day War Room | CFB Social',
     description: 'Live college football scores and game-day threads. Real-time chat, hot takes, and fan debates.',
+    images: [{ url: 'https://www.cfbsocial.com/logo.png', width: 256, height: 256, alt: 'CFB Social Logo' }],
   },
   twitter: {
     card: 'summary_large_image' as const,
-    title: 'College Football Hot Takes & Debates | CFB Social',
+    title: 'Live Game-Day War Room | CFB Social',
     description: 'Live college football scores and game-day threads. Real-time chat, hot takes, and fan debates.',
+    images: ['https://www.cfbsocial.com/logo.png'],
   },
   alternates: {
     canonical: 'https://www.cfbsocial.com/war-room',

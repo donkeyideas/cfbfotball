@@ -68,7 +68,7 @@ export function Masthead({ onMenuToggle, menuOpen }: MastheadProps) {
           {/* Center: Brand */}
           <div className="masthead-brand">
             <Link href="/feed">
-              <h1 className="masthead-title">CFB SOCIAL</h1>
+              <div className="masthead-title" role="banner">CFB SOCIAL</div>
             </Link>
             <div className="masthead-subtitle">
               College Football&apos;s Social Home &mdash; Est. 2026

@@ -3,16 +3,18 @@ import { MascotWarsClient } from './MascotWarsClient';
 export const revalidate = 60;
 
 export const metadata = {
-  title: 'Mascot Wars | College Football Mascot Tournament Bracket',
+  title: 'Mascot Wars Bracket Tournament',
   description: '64 college football mascots enter the bracket. Vote in head-to-head matchups to crown the ultimate CFB mascot champion. A CFB fan community tradition.',
   openGraph: {
-    title: 'Mascot Wars | CFB Social',
+    title: 'Mascot Wars Bracket Tournament | CFB Social',
     description: '64 mascots enter. One survives. Vote in the college football mascot tournament.',
+    images: [{ url: 'https://www.cfbsocial.com/logo.png', width: 256, height: 256, alt: 'CFB Social Logo' }],
   },
   twitter: {
     card: 'summary_large_image' as const,
-    title: 'Mascot Wars | CFB Social',
+    title: 'Mascot Wars Bracket Tournament | CFB Social',
     description: '64 mascots enter. One survives. Vote in the college football mascot tournament.',
+    images: ['https://www.cfbsocial.com/logo.png'],
   },
   alternates: {
     canonical: 'https://www.cfbsocial.com/mascot-wars',

@@ -8,16 +8,18 @@ import { CollectionPageJsonLd } from '@/components/seo/JsonLd';
 export const revalidate = 60;
 
 export const metadata = {
-  title: 'College Football Rivalry Debates | CFB Social',
+  title: 'College Football Rivalry Debates',
   description: 'Debate college football rivalries and settle fan arguments once and for all. Pick sides in school-vs-school matchups, issue challenges, and let the community judge. The best CFB fan debates.',
   openGraph: {
     title: 'College Football Rivalry Debates | CFB Social',
     description: 'Debate college football rivalries. Pick sides. Issue challenges. Let the community judge.',
+    images: [{ url: 'https://www.cfbsocial.com/logo.png', width: 256, height: 256, alt: 'CFB Social Logo' }],
   },
   twitter: {
     card: 'summary_large_image' as const,
     title: 'College Football Rivalry Debates | CFB Social',
     description: 'Debate college football rivalries. Pick sides. Issue challenges. Let the community judge.',
+    images: ['https://www.cfbsocial.com/logo.png'],
   },
   alternates: {
     canonical: 'https://www.cfbsocial.com/rivalry',

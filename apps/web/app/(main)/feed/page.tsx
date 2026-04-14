@@ -11,17 +11,17 @@ import { CollectionPageJsonLd } from '@/components/seo/JsonLd';
 import { FEED_POST_SELECT, FEED_REPOST_SELECT } from '@/lib/queries/feed';
 
 export const metadata = {
-  title: 'CFB Social -- College Football Fan Debates, Takes & Predictions',
+  title: 'College Football Fan Community',
   description: 'The #1 community for college football fans. Post takes, debate rivals, file predictions, and track the transfer portal across all 653 CFB schools.',
   openGraph: {
-    title: 'CFB Social -- College Football Fan Debates, Takes & Predictions',
+    title: 'College Football Fan Community | CFB Social',
     description: 'The #1 community for college football fans. Post takes, debate rivals, file predictions, and track the transfer portal across all 653 CFB schools.',
     type: 'website',
     images: [{ url: 'https://www.cfbsocial.com/logo.png', width: 256, height: 256, alt: 'CFB Social Logo' }],
   },
   twitter: {
     card: 'summary' as const,
-    title: 'CFB Social -- College Football Fan Debates, Takes & Predictions',
+    title: 'College Football Fan Community | CFB Social',
     description: 'The #1 community for college football fans. Post takes, debate rivals, file predictions, and track the transfer portal across all 653 CFB schools.',
     images: ['https://www.cfbsocial.com/logo.png'],
   },
