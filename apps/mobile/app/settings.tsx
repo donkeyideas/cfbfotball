@@ -24,6 +24,7 @@ import { Avatar } from '@/components/ui/Avatar';
 import { OrnamentDivider } from '@/components/ui/OrnamentDivider';
 import { LoadingScreen } from '@/components/ui/LoadingScreen';
 import { AuthGate } from '@/components/ui/AuthGate';
+import { CreateProfileModal } from '@/components/profile/CreateProfileModal';
 import { typography } from '@/lib/theme/typography';
 import Constants from 'expo-constants';
 
@@ -84,6 +85,8 @@ export default function SettingsScreen() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [showCreateProfile, setShowCreateProfile] = useState(false);
+  const [deletingProfileId, setDeletingProfileId] = useState<string | null>(null);
 
   // Load profile and notification preferences
   useEffect(() => {
@@ -255,6 +258,34 @@ export default function SettingsScreen() {
 
   function togglePref(key: keyof NotificationPrefs) {
     setPrefs((prev) => ({ ...prev, [key]: !prev[key] }));
+  }
+
+  async function handleDeleteProfile(profileId: string) {
+    if (!session?.user) return;
+    setDeletingProfileId(profileId);
+
+    const { error: delError } = await supabase
+      .from('profiles')
+      .delete()
+      .eq('id', profileId)
+      .eq('owner_id', session.user.id)
+      .neq('id', session.user.id); // Cannot delete primary
+
+    if (delError) {
+      showAlert('Incomplete Pass', delError.message);
+      setDeletingProfileId(null);
+      return;
+    }
+
+    // If deleted profile was active, switch to primary
+    if (profile?.id === profileId) {
+      const primary = profiles.find((p) => p.id === p.owner_id) ?? profiles[0];
+      if (primary) switchProfile(primary.id);
+    }
+
+    await refreshProfile();
+    setDeletingProfileId(null);
+    showAlert('Profile Deleted', 'The profile has been removed.');
   }
 
   if (loading) {
@@ -476,48 +507,95 @@ export default function SettingsScreen() {
         <Text style={styles.sectionTitle}>Account</Text>
 
         {/* Profile switcher */}
-        {profiles.length > 1 && (
-          <View style={{ gap: 6, marginBottom: 8 }}>
-            <Text style={styles.label}>Active Profile</Text>
-            {profiles.map((p) => {
-              const isActive = p.id === profile?.id;
-              return (
+        <View style={{ gap: 6, marginBottom: 8 }}>
+          <Text style={styles.label}>Your Profiles</Text>
+          {profiles.map((p) => {
+            const isActive = p.id === profile?.id;
+            const isPrimary = p.id === p.owner_id;
+            const isDeleting = deletingProfileId === p.id;
+            return (
+              <View
+                key={p.id}
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 10,
+                  padding: 12,
+                  borderWidth: isActive ? 2 : 1,
+                  borderColor: isActive ? dark : colors.border,
+                  borderRadius: 8,
+                  backgroundColor: isActive ? `${dark}10` : colors.surfaceRaised,
+                }}
+              >
                 <Pressable
-                  key={p.id}
+                  style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }}
                   onPress={() => {
                     if (!isActive) {
                       switchProfile(p.id);
                       showAlert('Switched', `Now using @${p.username ?? 'profile'}`);
                     }
                   }}
-                  style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    gap: 10,
-                    padding: 12,
-                    borderWidth: isActive ? 2 : 1,
-                    borderColor: isActive ? dark : colors.border,
-                    borderRadius: 8,
-                    backgroundColor: isActive ? `${dark}10` : colors.surfaceRaised,
-                  }}
                 >
                   <Avatar url={p.avatar_url} name={p.display_name || p.username} size={36} />
                   <View style={{ flex: 1 }}>
                     <Text style={{ fontFamily: typography.sansSemiBold, fontSize: 15, color: colors.ink }}>
                       {p.display_name || p.username || 'Unnamed'}
+                      {isPrimary ? (
+                        <Text style={{ fontFamily: typography.mono, fontSize: 10, color: colors.textMuted }}> (Primary)</Text>
+                      ) : null}
                     </Text>
                     <Text style={{ fontFamily: typography.mono, fontSize: 11, color: colors.textMuted }}>
                       @{p.username ?? 'unknown'}
                     </Text>
                   </View>
-                  {isActive && (
-                    <Text style={{ fontFamily: typography.mono, fontSize: 10, color: dark, letterSpacing: 1 }}>ACTIVE</Text>
-                  )}
+                  <Text style={{ fontFamily: typography.mono, fontSize: 10, color: isActive ? dark : colors.textMuted, letterSpacing: 1 }}>
+                    {isActive ? 'ACTIVE' : 'SWITCH'}
+                  </Text>
                 </Pressable>
-              );
-            })}
-          </View>
-        )}
+                {/* Delete button for alt profiles */}
+                {!isPrimary && (
+                  <Pressable
+                    onPress={() => handleDeleteProfile(p.id)}
+                    disabled={isDeleting}
+                    style={{ padding: 4 }}
+                  >
+                    {isDeleting ? (
+                      <ActivityIndicator size="small" color={colors.crimson} />
+                    ) : (
+                      <Text style={{ fontFamily: typography.sansBold, fontSize: 16, color: colors.crimson }}>X</Text>
+                    )}
+                  </Pressable>
+                )}
+              </View>
+            );
+          })}
+
+          {/* New Profile button */}
+          {profiles.length < 5 && (
+            <Pressable
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 6,
+                padding: 12,
+                borderWidth: 1,
+                borderColor: dark,
+                borderRadius: 8,
+                borderStyle: 'dashed',
+              }}
+              onPress={() => setShowCreateProfile(true)}
+            >
+              <Text style={{ fontFamily: typography.sansBold, fontSize: 18, color: dark }}>+</Text>
+              <Text style={{ fontFamily: typography.sansSemiBold, fontSize: 14, color: dark }}>New Profile</Text>
+            </Pressable>
+          )}
+        </View>
+
+        <CreateProfileModal
+          visible={showCreateProfile}
+          onClose={() => setShowCreateProfile(false)}
+        />
 
         <Pressable style={[styles.signOutButton, { borderColor: dark }]} onPress={handleSignOut}>
           <Text style={[styles.signOutText, { color: dark }]}>Sign Out</Text>

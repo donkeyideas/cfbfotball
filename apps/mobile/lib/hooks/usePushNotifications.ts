@@ -29,6 +29,7 @@ if (!isExpoGo) {
 export function usePushNotifications() {
   const { session } = useAuth();
   const responseListener = useRef<any>(null);
+  const coldStartHandled = useRef(false);
 
   useEffect(() => {
     if (isExpoGo || !session?.access_token) return;
@@ -42,17 +43,23 @@ export function usePushNotifications() {
       async () => session.access_token
     ).catch((err: any) => console.error('[Push] Registration failed:', err));
 
-    // Listen for notification taps (user interacts with a notification)
-    responseListener.current = Notifications.addNotificationResponseReceivedListener(
-      (response) => {
-        const data = response.notification.request.content.data;
-        if (data?.type === 'SYSTEM') {
-          router.push('/(tabs)/notifications');
-        } else if (data?.postId) {
-          router.push('/(tabs)/notifications');
-        } else {
-          router.push('/(tabs)/notifications');
+    // Handle cold-start: check if the app was opened from a notification tap
+    if (!coldStartHandled.current) {
+      coldStartHandled.current = true;
+      Notifications.getLastNotificationResponseAsync().then((response) => {
+        if (response) {
+          // Small delay to let the router initialize
+          setTimeout(() => {
+            router.push('/notifications');
+          }, 500);
         }
+      });
+    }
+
+    // Listen for notification taps while app is running (foreground/background)
+    responseListener.current = Notifications.addNotificationResponseReceivedListener(
+      () => {
+        router.push('/notifications');
       }
     );
 

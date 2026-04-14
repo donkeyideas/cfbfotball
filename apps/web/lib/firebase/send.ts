@@ -130,8 +130,8 @@ export async function sendPushToAudience(
   const supabase = createAdminClient();
   const result: SendResult = { sent: 0, failed: 0 };
 
-  // Get target user IDs based on audience
-  let userQuery = supabase.from('profiles').select('id');
+  // Get target user IDs based on audience (exclude bots)
+  let userQuery = supabase.from('profiles').select('id').or('is_bot.is.null,is_bot.eq.false');
 
   if (options.targetAudience === 'school' && options.targetId) {
     userQuery = userQuery.eq('school_id', options.targetId);

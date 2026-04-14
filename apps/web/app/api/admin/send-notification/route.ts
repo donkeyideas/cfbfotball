@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { after } from 'next/server';
 import { createAdminClient } from '@/lib/admin/supabase/admin';
-import { sendPushToAudience } from '@/lib/firebase/send';
+import { sendPushToAudience, sendPushToUser } from '@/lib/firebase/send';
+
+export const maxDuration = 120;
 
 export async function POST(req: NextRequest) {
   try {
@@ -12,7 +15,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Use the regular client to check auth
     const { createClient } = await import('@/lib/supabase/server');
     const userClient = await createClient();
     const { data: { user } } = await userClient.auth.getUser();
@@ -20,7 +22,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Check admin role
     const { data: profile } = await supabase
       .from('profiles')
       .select('role')
@@ -34,6 +35,27 @@ export async function POST(req: NextRequest) {
     const { title, body, targetAudience, targetId } = await req.json();
     if (!title || !body) {
       return NextResponse.json({ error: 'Title and body required' }, { status: 400 });
+    }
+
+    // Test mode — send only to the requesting admin (fast, no after() needed)
+    if (targetAudience === 'test') {
+      const pushResult = await sendPushToUser(user.id, {
+        title,
+        body,
+        data: { type: 'SYSTEM' },
+      });
+
+      await supabase.from('notifications').insert({
+        recipient_id: user.id,
+        type: 'SYSTEM',
+        data: { message: body, title },
+      });
+
+      return NextResponse.json({
+        success: true,
+        sent: pushResult.sent,
+        failed: pushResult.failed,
+      });
     }
 
     // Create system notification record
@@ -55,64 +77,70 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Failed to create notification' }, { status: 500 });
     }
 
-    // Send push notifications to audience
-    const result = await sendPushToAudience(
-      { title, body, data: { type: 'SYSTEM' } },
-      {
-        systemNotificationId: sysNotif.id,
-        targetAudience: targetAudience || 'all',
-        targetId: targetId || undefined,
-      }
-    );
+    // Respond immediately, do heavy work (push + in-app inserts) in after()
+    after(async () => {
+      try {
+        const adminClient = createAdminClient();
 
-    // Also create in-app SYSTEM notifications for the target audience
-    let userQuery = supabase.from('profiles').select('id');
-    if (targetAudience === 'school' && targetId) {
-      userQuery = userQuery.eq('school_id', targetId);
-    } else if (targetAudience === 'conference' && targetId) {
-      const { data: schools } = await supabase
-        .from('schools')
-        .select('id')
-        .eq('conference', targetId);
-      if (schools && schools.length > 0) {
-        userQuery = userQuery.in('school_id', schools.map((s) => s.id));
-      }
-    }
+        // Send push notifications to audience
+        const result = await sendPushToAudience(
+          { title, body, data: { type: 'SYSTEM' } },
+          {
+            systemNotificationId: sysNotif.id,
+            targetAudience: targetAudience || 'all',
+            targetId: targetId || undefined,
+          }
+        );
 
-    const { data: targetUsers } = await userQuery;
-    if (targetUsers && targetUsers.length > 0) {
-      // Batch insert in-app notifications (max 1000 at a time)
-      const batches = [];
-      for (let i = 0; i < targetUsers.length; i += 1000) {
-        const batch = targetUsers.slice(i, i + 1000).map((u) => ({
-          recipient_id: u.id,
-          type: 'SYSTEM',
-          data: { message: body, title, system_notification_id: sysNotif.id },
-        }));
-        batches.push(batch);
-      }
+        // Create in-app SYSTEM notifications for the target audience (exclude bots)
+        let userQuery = adminClient.from('profiles').select('id').or('is_bot.is.null,is_bot.eq.false');
+        if (targetAudience === 'school' && targetId) {
+          userQuery = userQuery.eq('school_id', targetId);
+        } else if (targetAudience === 'conference' && targetId) {
+          const { data: schools } = await adminClient
+            .from('schools')
+            .select('id')
+            .eq('conference', targetId);
+          if (schools && schools.length > 0) {
+            userQuery = userQuery.in('school_id', schools.map((s) => s.id));
+          }
+        }
 
-      for (const batch of batches) {
-        await supabase.from('notifications').insert(batch);
-      }
-    }
+        const { data: targetUsers } = await userQuery;
+        if (targetUsers && targetUsers.length > 0) {
+          for (let i = 0; i < targetUsers.length; i += 1000) {
+            const batch = targetUsers.slice(i, i + 1000).map((u) => ({
+              recipient_id: u.id,
+              type: 'SYSTEM',
+              data: { message: body, title, system_notification_id: sysNotif.id },
+            }));
+            await adminClient.from('notifications').insert(batch);
+          }
+        }
 
-    // Update system notification with results
-    await supabase
-      .from('system_notifications')
-      .update({
-        status: 'sent',
-        sent_count: result.sent,
-        failed_count: result.failed,
-        sent_at: new Date().toISOString(),
-      })
-      .eq('id', sysNotif.id);
+        // Update system notification with results
+        await adminClient
+          .from('system_notifications')
+          .update({
+            status: 'sent',
+            sent_count: result.sent,
+            failed_count: result.failed,
+            sent_at: new Date().toISOString(),
+          })
+          .eq('id', sysNotif.id);
+
+        console.log(`[Send Notification] "${title}" — push: ${result.sent} sent, ${result.failed} failed, ${targetUsers?.length ?? 0} in-app`);
+      } catch (err) {
+        console.error('[Send Notification] Background error:', err);
+      }
+    });
 
     return NextResponse.json({
       success: true,
       id: sysNotif.id,
-      sent: result.sent,
-      failed: result.failed,
+      sent: 0,
+      failed: 0,
+      queued: true,
     });
   } catch (err) {
     console.error('[Send Notification] Error:', err);

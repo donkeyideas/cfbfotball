@@ -23,6 +23,7 @@ export function ComposeTab({ schools, conferences }: Props) {
   const [generating, setGenerating] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [showGenMenu, setShowGenMenu] = useState(false);
+  const [testSending, setTestSending] = useState(false);
   const [result, setResult] = useState<{ success: boolean; sent?: number; failed?: number; error?: string } | null>(null);
   const genMenuRef = useRef<HTMLDivElement>(null);
 
@@ -97,7 +98,35 @@ export function ComposeTab({ schools, conferences }: Props) {
     }
   }
 
-  const canSend = title.trim() && body.trim() && !sending && !generating && (audience === 'all' || targetId);
+  async function handleTestSend() {
+    setTestSending(true);
+    setResult(null);
+
+    try {
+      const res = await fetch('/api/admin/send-notification', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: title || 'Test Notification',
+          body: body || 'This is a test notification from the admin panel.',
+          targetAudience: 'test',
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        setResult({ success: true, sent: data.sent, failed: data.failed });
+      } else {
+        setResult({ success: false, error: data.error });
+      }
+    } catch {
+      setResult({ success: false, error: 'Network error' });
+    } finally {
+      setTestSending(false);
+    }
+  }
+
+  const canSend = title.trim() && body.trim() && !sending && !generating && !testSending && (audience === 'all' || targetId);
 
   return (
     <div className="compose-tab">
@@ -289,19 +318,34 @@ export function ComposeTab({ schools, conferences }: Props) {
           </div>
         )}
 
-        <button
-          className="btn-admin compose-send-btn"
-          disabled={!canSend}
-          onClick={() => setShowConfirm(true)}
-          style={{ opacity: canSend ? 1 : 0.5 }}
-        >
-          {sending ? 'Sending...' : 'Send Notification'}
-        </button>
+        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+          <button
+            className="btn-admin compose-send-btn"
+            disabled={!canSend}
+            onClick={() => setShowConfirm(true)}
+            style={{ opacity: canSend ? 1 : 0.5 }}
+          >
+            {sending ? 'Sending...' : 'Send Notification'}
+          </button>
+          <button
+            className="btn-admin"
+            disabled={testSending || sending}
+            onClick={handleTestSend}
+            style={{
+              background: 'var(--admin-accent-secondary, #555)',
+              opacity: testSending || sending ? 0.5 : 1,
+            }}
+          >
+            {testSending ? 'Sending Test...' : 'Send Test to Me'}
+          </button>
+        </div>
 
         {result && (
           <div className={`compose-result ${result.success ? 'compose-result-success' : 'compose-result-error'}`}>
             {result.success
-              ? `Notification sent. Delivered: ${result.sent}, Failed: ${result.failed}`
+              ? result.sent !== undefined && result.sent > 0
+                ? `Notification sent. Delivered: ${result.sent}, Failed: ${result.failed}`
+                : 'Notification queued. Push delivery and in-app notifications are being sent in the background.'
               : `Failed: ${result.error}`
             }
           </div>
@@ -310,6 +354,7 @@ export function ComposeTab({ schools, conferences }: Props) {
 
       {showConfirm && (
         <ConfirmDialog
+          open={showConfirm}
           title="Send System Notification"
           message={`Send "${title}" to ${audience === 'all' ? 'all users' : audience === 'school' ? 'a school' : 'a conference'}? This action cannot be undone.`}
           confirmLabel="Send"

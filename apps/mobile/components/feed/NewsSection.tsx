@@ -16,18 +16,34 @@ interface LeaderEntry {
   school: { abbreviation: string } | null;
 }
 
+// Module-level cache to avoid re-fetching on every mount (e.g. scrolling past in feed)
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+let cachedNews: { trending: NewsArticle[]; recruiting: NewsArticle[]; portal: NewsArticle[] } | null = null;
+let cachedLeaders: LeaderEntry[] | null = null;
+let cacheTimestamp = 0;
+
 export function NewsSection() {
   const colors = useColors();
   const { dark, accent } = useSchoolTheme();
   const [activeTab, setActiveTab] = useState<NewsTab>('trending');
-  const [trending, setTrending] = useState<NewsArticle[]>([]);
-  const [recruiting, setRecruiting] = useState<NewsArticle[]>([]);
-  const [portal, setPortal] = useState<NewsArticle[]>([]);
-  const [leaders, setLeaders] = useState<LeaderEntry[]>([]);
+  const [trending, setTrending] = useState<NewsArticle[]>(cachedNews?.trending ?? []);
+  const [recruiting, setRecruiting] = useState<NewsArticle[]>(cachedNews?.recruiting ?? []);
+  const [portal, setPortal] = useState<NewsArticle[]>(cachedNews?.portal ?? []);
+  const [leaders, setLeaders] = useState<LeaderEntry[]>(cachedLeaders ?? []);
   const [selectedArticle, setSelectedArticle] = useState<NewsArticle | null>(null);
-  const [loaded, setLoaded] = useState(false);
+  const [loaded, setLoaded] = useState(cachedNews !== null);
 
   useEffect(() => {
+    // Use cache if still fresh
+    if (cachedNews && Date.now() - cacheTimestamp < CACHE_TTL) {
+      setTrending(cachedNews.trending);
+      setRecruiting(cachedNews.recruiting);
+      setPortal(cachedNews.portal);
+      if (cachedLeaders) setLeaders(cachedLeaders);
+      setLoaded(true);
+      return;
+    }
+
     const controller = new AbortController();
 
     // Fetch news feeds + Hall of Fame leaderboard in parallel
@@ -36,9 +52,14 @@ export function NewsSection() {
         .then((res) => (res.ok ? res.json() : null))
         .then((data) => {
           if (data) {
-            if (data.trending?.length > 0) setTrending(data.trending);
-            if (data.recruiting?.length > 0) setRecruiting(data.recruiting);
-            if (data.portal?.length > 0) setPortal(data.portal);
+            const t = data.trending?.length > 0 ? data.trending : [];
+            const r = data.recruiting?.length > 0 ? data.recruiting : [];
+            const p = data.portal?.length > 0 ? data.portal : [];
+            setTrending(t);
+            setRecruiting(r);
+            setPortal(p);
+            cachedNews = { trending: t, recruiting: r, portal: p };
+            cacheTimestamp = Date.now();
           }
         }),
       supabase
@@ -48,7 +69,9 @@ export function NewsSection() {
         .limit(5)
         .then(({ data }) => {
           if (data && data.length > 0) {
-            setLeaders(data as unknown as LeaderEntry[]);
+            const mapped = data as unknown as LeaderEntry[];
+            setLeaders(mapped);
+            cachedLeaders = mapped;
           }
         }),
     ])

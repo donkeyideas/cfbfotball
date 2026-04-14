@@ -137,8 +137,10 @@ export default function FeedScreen() {
   }), [colors]);
 
   // ------------------------------------------------------------------
-  // Fetch followed user IDs (needed for the Following tab)
+  // Fetch followed user IDs (only when Following tab is active)
   // ------------------------------------------------------------------
+  const followingFetchedRef = useRef(false);
+
   const fetchFollowing = useCallback(async () => {
     if (!userId) {
       setFollowedIds([]);
@@ -150,12 +152,16 @@ export default function FeedScreen() {
       .eq('follower_id', userId);
     if (data) {
       setFollowedIds(data.map((f: { following_id: string }) => f.following_id));
+      followingFetchedRef.current = true;
     }
   }, [userId]);
 
+  // Lazy-load: only fetch following IDs when user switches to Following tab
   useEffect(() => {
-    fetchFollowing();
-  }, [fetchFollowing]);
+    if (activeTab === 'following' && !followingFetchedRef.current) {
+      fetchFollowing();
+    }
+  }, [activeTab, fetchFollowing]);
 
   // ------------------------------------------------------------------
   // Build query for the active tab
@@ -282,16 +288,50 @@ export default function FeedScreen() {
       }
 
       try {
-        // For receipts tab, pre-query aging_takes to get post IDs
-        let receiptPostIds: string[] | undefined;
-        if (activeTab === 'receipts') {
-          const { data: agingTakePosts } = await supabase
-            .from('aging_takes')
-            .select('post_id');
-          receiptPostIds = agingTakePosts?.map((a: { post_id: string }) => a.post_id) ?? [];
-        }
+        // For receipts tab, fetch aging_takes IDs in parallel with main query
+        let data: unknown[] | null = null;
+        let error: unknown = null;
 
-        const { data, error } = await buildQuery(offsetRef.current, receiptPostIds);
+        if (activeTab === 'receipts') {
+          // Parallel: get aging_takes IDs and RECEIPT posts simultaneously
+          const [agingRes, receiptRes] = await Promise.all([
+            supabase.from('aging_takes').select('post_id'),
+            supabase
+              .from('posts')
+              .select(POST_SELECT)
+              .in('status', ['PUBLISHED', 'FLAGGED'])
+              .is('parent_id', null)
+              .eq('post_type', 'RECEIPT')
+              .order('created_at', { ascending: false })
+              .range(offsetRef.current, offsetRef.current + PAGE_SIZE - 1),
+          ]);
+          const receiptPostIds = agingRes.data?.map((a: { post_id: string }) => a.post_id) ?? [];
+
+          // If we have aging take IDs, fetch those posts too
+          if (receiptPostIds.length > 0) {
+            const { data: agingPosts } = await supabase
+              .from('posts')
+              .select(POST_SELECT)
+              .in('status', ['PUBLISHED', 'FLAGGED'])
+              .is('parent_id', null)
+              .in('id', receiptPostIds)
+              .order('created_at', { ascending: false });
+
+            // Merge and deduplicate
+            const receiptIds = new Set((receiptRes.data ?? []).map((p: { id: string }) => p.id));
+            const uniqueAging = (agingPosts ?? []).filter((p: { id: string }) => !receiptIds.has(p.id));
+            data = [...(receiptRes.data ?? []), ...uniqueAging]
+              .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+              .slice(0, PAGE_SIZE);
+          } else {
+            data = receiptRes.data;
+          }
+          error = receiptRes.error;
+        } else {
+          const result = await buildQuery(offsetRef.current);
+          data = result.data;
+          error = result.error;
+        }
 
         if (!error && data) {
           const typed = data as unknown as PostData[];

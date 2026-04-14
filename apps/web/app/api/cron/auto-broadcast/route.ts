@@ -9,14 +9,12 @@ export const maxDuration = 120;
 
 /**
  * Auto-broadcast cron endpoint.
- * Called every hour by Vercel cron. Checks admin_settings to see if
- * auto-broadcast is enabled and whether enough time has passed since the
- * last broadcast. If so, generates AI content and sends to all users.
+ * Called every hour by Vercel cron. Checks admin_settings for a schedule
+ * of specific hours (Eastern Time) when broadcasts should be sent.
  *
- * Schedule: 0 * * * * (every hour — the interval setting gates actual sends)
+ * Schedule: 0 * * * * (every hour)
  */
 export async function GET(request: NextRequest) {
-  // Auth: CRON_SECRET, Vercel cron header, or dev mode bypass
   const authHeader = request.headers.get('authorization');
   const vercelCron = request.headers.get('x-vercel-cron');
   const isDev = process.env.NODE_ENV === 'development';
@@ -25,7 +23,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  // Respond immediately, do heavy work in after()
   after(async () => {
     try {
       await runAutoBroadcast();
@@ -40,11 +37,11 @@ export async function GET(request: NextRequest) {
 async function runAutoBroadcast() {
   const supabase = createAdminClient();
 
-  // --- 1. Check if auto-broadcast is enabled ---
+  // --- 1. Check if auto-broadcast is enabled and get schedule ---
   const { data: settingsRows } = await supabase
     .from('admin_settings')
     .select('key, value')
-    .in('key', ['auto_broadcast_enabled', 'auto_broadcast_interval_hours']);
+    .in('key', ['auto_broadcast_enabled', 'auto_broadcast_schedule']);
 
   const settings: Record<string, string> = {};
   for (const row of settingsRows ?? []) {
@@ -56,10 +53,35 @@ async function runAutoBroadcast() {
     return;
   }
 
-  const intervalHours = parseInt(settings.auto_broadcast_interval_hours || '12', 10);
-  if (intervalHours < 1) return;
+  // Parse the scheduled hours
+  let scheduledHours: number[] = [];
+  try {
+    scheduledHours = JSON.parse(settings.auto_broadcast_schedule || '[]');
+  } catch {
+    console.log('[auto-broadcast] Invalid schedule, skipping.');
+    return;
+  }
 
-  // --- 2. Check last broadcast time ---
+  if (!Array.isArray(scheduledHours) || scheduledHours.length === 0) {
+    console.log('[auto-broadcast] No hours scheduled, skipping.');
+    return;
+  }
+
+  // --- 2. Check if current Eastern Time hour matches the schedule ---
+  const now = new Date();
+  const etFormatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/New_York',
+    hour: 'numeric',
+    hour12: false,
+  });
+  const currentETHour = parseInt(etFormatter.format(now), 10);
+
+  if (!scheduledHours.includes(currentETHour)) {
+    console.log(`[auto-broadcast] Current ET hour (${currentETHour}) not in schedule [${scheduledHours.join(', ')}]. Skipping.`);
+    return;
+  }
+
+  // --- 3. Guard against duplicate sends in the same hour ---
   const { data: lastBroadcast } = await supabase
     .from('system_notifications')
     .select('created_at')
@@ -70,18 +92,14 @@ async function runAutoBroadcast() {
 
   if (lastBroadcast) {
     const lastTime = new Date(lastBroadcast.created_at).getTime();
-    const now = Date.now();
-    const hoursSinceLast = (now - lastTime) / (1000 * 60 * 60);
-
-    if (hoursSinceLast < intervalHours) {
-      console.log(
-        `[auto-broadcast] Only ${hoursSinceLast.toFixed(1)}h since last broadcast, need ${intervalHours}h. Skipping.`
-      );
+    const minutesSinceLast = (now.getTime() - lastTime) / (1000 * 60);
+    if (minutesSinceLast < 30) {
+      console.log(`[auto-broadcast] Last broadcast was ${minutesSinceLast.toFixed(0)}m ago, too recent. Skipping.`);
       return;
     }
   }
 
-  // --- 3. Get previous broadcasts to avoid duplicates ---
+  // --- 4. Get previous broadcasts to avoid duplicates ---
   const { data: previousBroadcasts } = await supabase
     .from('system_notifications')
     .select('title, body')
@@ -93,7 +111,7 @@ async function runAutoBroadcast() {
     .map((b, i) => `${i + 1}. "${b.title}" - ${(b.body || '').slice(0, 80)}`)
     .join('\n');
 
-  // --- 4. Generate AI content ---
+  // --- 5. Generate AI content ---
   const systemPrompt = `You are a community manager for CFB Social, the college football fan community. Users post takes, debate rivalries, file predictions, track the transfer portal, and build their dynasty.
 
 Generate a short, engaging system broadcast notification to keep fans excited and active.
@@ -140,7 +158,6 @@ Return ONLY valid JSON: {"title": "...", "body": "..."}`;
     body = bodyMatch?.[1] || 'The press box is buzzing. Drop your hottest take and join the conversation today.';
   }
 
-  // Clean up any markdown artifacts
   title = title.replace(/[*#_~`>-]{2,}/g, '').trim();
   body = body.replace(/[*#_~`>-]{2,}/g, '').trim();
 
@@ -149,7 +166,7 @@ Return ONLY valid JSON: {"title": "...", "body": "..."}`;
     return;
   }
 
-  // --- 5. Create system notification record ---
+  // --- 6. Create system notification record ---
   const { data: sysNotif, error: insertError } = await supabase
     .from('system_notifications')
     .insert({
@@ -157,7 +174,7 @@ Return ONLY valid JSON: {"title": "...", "body": "..."}`;
       body,
       target_audience: 'all',
       target_id: null,
-      created_by: null, // System-generated, no admin actor
+      created_by: null,
       status: 'sending',
     })
     .select()
@@ -168,15 +185,14 @@ Return ONLY valid JSON: {"title": "...", "body": "..."}`;
     return;
   }
 
-  // --- 6. Create in-app notifications for all users ---
-  const { data: allUsers } = await supabase.from('profiles').select('id');
+  // --- 7. Create in-app notifications for all real users (exclude bots) ---
+  const { data: allUsers } = await supabase.from('profiles').select('id').or('is_bot.is.null,is_bot.eq.false');
 
   if (!allUsers || allUsers.length === 0) {
     console.log('[auto-broadcast] No users found, skipping.');
     return;
   }
 
-  // Batch insert in-app notifications (max 1000 at a time)
   for (let i = 0; i < allUsers.length; i += 1000) {
     const batch = allUsers.slice(i, i + 1000).map((u) => ({
       recipient_id: u.id,
@@ -186,7 +202,7 @@ Return ONLY valid JSON: {"title": "...", "body": "..."}`;
     await supabase.from('notifications').insert(batch);
   }
 
-  // --- 7. Send push notifications ---
+  // --- 8. Send push notifications ---
   const result = await sendPushToAudience(
     { title, body, data: { type: 'SYSTEM' } },
     {
@@ -195,7 +211,7 @@ Return ONLY valid JSON: {"title": "...", "body": "..."}`;
     }
   );
 
-  // --- 8. Update system notification with results ---
+  // --- 9. Update system notification with results ---
   await supabase
     .from('system_notifications')
     .update({
@@ -207,6 +223,6 @@ Return ONLY valid JSON: {"title": "...", "body": "..."}`;
     .eq('id', sysNotif.id);
 
   console.log(
-    `[auto-broadcast] Sent "${title}" to ${allUsers.length} users (push: ${result.sent} ok, ${result.failed} failed)`
+    `[auto-broadcast] Sent "${title}" to ${allUsers.length} users at ${currentETHour}:00 ET (push: ${result.sent} ok, ${result.failed} failed)`
   );
 }

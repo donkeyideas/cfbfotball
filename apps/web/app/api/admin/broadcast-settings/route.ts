@@ -4,6 +4,8 @@ import { createAdminClient } from '@/lib/admin/supabase/admin';
 
 const BROADCAST_SETTING_KEYS = [
   'auto_broadcast_enabled',
+  'auto_broadcast_schedule',
+  // Legacy key — kept so old reads don't break
   'auto_broadcast_interval_hours',
 ];
 

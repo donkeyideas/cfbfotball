@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
 import type { PropsWithChildren } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { lightPalette, darkPalette } from './palettes';
@@ -68,17 +68,20 @@ export function ThemeProvider({ children }: PropsWithChildren) {
 
   const colors = colorMode === 'dark' ? darkPalette : lightPalette;
 
+  const value = useMemo<ThemeContextValue>(
+    () => ({
+      colorMode,
+      colors,
+      isDark: colorMode === 'dark',
+      toggleColorMode,
+      setColorMode,
+      colorModeReady: ready,
+    }),
+    [colorMode, colors, toggleColorMode, setColorMode, ready]
+  );
+
   return (
-    <ThemeContext.Provider
-      value={{
-        colorMode,
-        colors,
-        isDark: colorMode === 'dark',
-        toggleColorMode,
-        setColorMode,
-        colorModeReady: ready,
-      }}
-    >
+    <ThemeContext.Provider value={value}>
       {children}
     </ThemeContext.Provider>
   );
