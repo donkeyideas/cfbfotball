@@ -147,15 +147,32 @@ async function UsersTableLoader({
     );
   }
 
-  // Fetch auth provider + email for each user
+  // Fetch auth provider + email for each user, and device platforms
   const supabase = createAdminClient();
-  const { data: authData } = await supabase.auth.admin.listUsers({ perPage: 1000 });
+  const [authRes, deviceRes] = await Promise.all([
+    supabase.auth.admin.listUsers({ perPage: 1000 }),
+    supabase.from('device_tokens').select('user_id, platform').eq('is_active', true),
+  ]);
+
   const providerMap: Record<string, string> = {};
   const emailMap: Record<string, string> = {};
-  if (authData?.users) {
-    for (const au of authData.users) {
+  if (authRes.data?.users) {
+    for (const au of authRes.data.users) {
       providerMap[au.id] = au.app_metadata?.provider || 'email';
       emailMap[au.id] = au.email || '';
+    }
+  }
+
+  // Build device platform set per user (ios, android, web)
+  const deviceMap: Record<string, string[]> = {};
+  if (deviceRes.data) {
+    for (const dt of deviceRes.data) {
+      const uid = dt.user_id as string;
+      const platform = (dt.platform as string || '').toLowerCase();
+      if (!deviceMap[uid]) deviceMap[uid] = [];
+      if (platform && !deviceMap[uid].includes(platform)) {
+        deviceMap[uid].push(platform);
+      }
     }
   }
 
@@ -165,6 +182,7 @@ async function UsersTableLoader({
     school: Array.isArray(u.school) ? (u.school[0] ?? null) : (u.school ?? null),
     auth_provider: providerMap[u.id as string] || 'email',
     email: emailMap[u.id as string] || '',
+    device_platforms: deviceMap[u.id as string] || [],
   }));
 
   const totalPages = Math.ceil(total / PAGE_SIZE);

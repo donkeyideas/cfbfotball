@@ -11,6 +11,7 @@ import {
   Star,
   Users,
   ChevronDown,
+  Mail,
 } from 'lucide-react';
 import { StatusBadge } from '@/components/admin/shared/status-badge';
 import { EmptyState } from '@/components/admin/shared/empty-state';
@@ -45,6 +46,7 @@ interface UserRow {
   last_active_at: string | null;
   school: UserSchool | null;
   auth_provider?: string;
+  device_platforms?: string[];
 }
 
 interface UsersClientProps {
@@ -84,6 +86,63 @@ function formatTier(tier: string | null): string {
     .split('_')
     .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
     .join(' ');
+}
+
+function AuthProviderIcon({ provider }: { provider?: string }) {
+  if (provider === 'google') {
+    return (
+      <span className="inline-flex items-center gap-1" title="Google">
+        <svg className="h-4 w-4" viewBox="0 0 24 24">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" />
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+        </svg>
+      </span>
+    );
+  }
+  if (provider === 'apple') {
+    return (
+      <span className="inline-flex items-center gap-1" title="Apple">
+        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
+        </svg>
+      </span>
+    );
+  }
+  // Email / password
+  return (
+    <span className="inline-flex items-center gap-1" title="Email">
+      <Mail className="h-3.5 w-3.5 text-[var(--admin-text-muted)]" />
+    </span>
+  );
+}
+
+function DevicePlatforms({ platforms }: { platforms?: string[] }) {
+  if (!platforms || platforms.length === 0) {
+    return <span className="text-xs text-[var(--admin-text-muted)]">-</span>;
+  }
+  return (
+    <span className="inline-flex items-center gap-1.5">
+      {platforms.includes('ios') && (
+        <span title="iOS" className="text-[var(--admin-text-secondary)]">
+          <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
+          </svg>
+        </span>
+      )}
+      {platforms.includes('android') && (
+        <span title="Android" className="text-[var(--admin-text-secondary)]">
+          <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="#3DDC84">
+            <path d="M6 18c0 .55.45 1 1 1h1v3.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5V19h2v3.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5V19h1c.55 0 1-.45 1-1V8H6v10zM3.5 8C2.67 8 2 8.67 2 9.5v7c0 .83.67 1.5 1.5 1.5S5 17.33 5 16.5v-7C5 8.67 4.33 8 3.5 8zm17 0c-.83 0-1.5.67-1.5 1.5v7c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5v-7c0-.83-.67-1.5-1.5-1.5zm-4.97-5.84l1.3-1.3c.2-.2.2-.51 0-.71-.2-.2-.51-.2-.71 0l-1.48 1.48A5.84 5.84 0 0 0 12 1c-.96 0-1.86.23-2.66.63L7.85.15c-.2-.2-.51-.2-.71 0-.2.2-.2.51 0 .71l1.31 1.31A5.983 5.983 0 0 0 6 7h12c0-2.12-1.1-3.98-2.47-4.84zM10 5H9V4h1v1zm5 0h-1V4h1v1z" />
+          </svg>
+        </span>
+      )}
+      {platforms.includes('web') && (
+        <span title="Web" className="text-xs font-mono text-[var(--admin-text-muted)]">WEB</span>
+      )}
+    </span>
+  );
 }
 
 export function UsersClient({ users, total, currentPage, totalPages }: UsersClientProps) {
@@ -338,6 +397,8 @@ export function UsersClient({ users, total, currentPage, totalPages }: UsersClie
             <tr>
               <SortableHeader label="User" sortKey="user" sortConfig={userSortConfig} onSort={requestUserSort} />
               <SortableHeader label="Email" sortKey="email" sortConfig={userSortConfig} onSort={requestUserSort} />
+              <th>Auth</th>
+              <th>Device</th>
               <SortableHeader label="School" sortKey="school" sortConfig={userSortConfig} onSort={requestUserSort} />
               <SortableHeader label="Role" sortKey="role" sortConfig={userSortConfig} onSort={requestUserSort} />
               <SortableHeader label="Status" sortKey="status" sortConfig={userSortConfig} onSort={requestUserSort} />
@@ -358,16 +419,8 @@ export function UsersClient({ users, total, currentPage, totalPages }: UsersClie
               >
                 <td>
                   <div>
-                    <p className="flex items-center gap-1.5 font-medium text-[var(--admin-text)]">
+                    <p className="font-medium text-[var(--admin-text)]">
                       {user.display_name ?? user.username}
-                      {user.auth_provider === 'google' && (
-                        <svg className="h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" aria-label="Signed up with Google">
-                          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" />
-                          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-                          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
-                          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
-                        </svg>
-                      )}
                     </p>
                     <p className="text-xs text-[var(--admin-text-muted)]">
                       @{user.username}
@@ -376,6 +429,12 @@ export function UsersClient({ users, total, currentPage, totalPages }: UsersClie
                 </td>
                 <td className="text-xs text-[var(--admin-text-muted)]" style={{ maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {user.email || '-'}
+                </td>
+                <td>
+                  <AuthProviderIcon provider={user.auth_provider} />
+                </td>
+                <td>
+                  <DevicePlatforms platforms={user.device_platforms} />
                 </td>
                 <td className="text-sm text-[var(--admin-text-secondary)]">
                   {user.school?.abbreviation ?? '-'}

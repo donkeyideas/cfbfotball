@@ -21,7 +21,10 @@ async function sendToToken(
   payload: PushPayload
 ): Promise<{ success: boolean; error?: string }> {
   const messaging = await getMessagingInstance();
-  if (!messaging) return { success: false, error: 'FCM not configured' };
+  if (!messaging) {
+    console.warn('[FCM] Messaging not configured — skipping push to token');
+    return { success: false, error: 'FCM not configured' };
+  }
 
   try {
     const data: Record<string, string> = {};
@@ -129,6 +132,13 @@ export async function sendPushToAudience(
 ): Promise<SendResult> {
   const supabase = createAdminClient();
   const result: SendResult = { sent: 0, failed: 0 };
+
+  // Early check: is FCM configured at all?
+  const messaging = await getMessagingInstance();
+  if (!messaging) {
+    console.error('[FCM] Firebase not configured — no push notifications will be sent. Set FIREBASE_SERVICE_ACCOUNT env var or admin_settings DB row.');
+    return result;
+  }
 
   // Get target user IDs based on audience (exclude bots)
   let userQuery = supabase.from('profiles').select('id').or('is_bot.is.null,is_bot.eq.false');

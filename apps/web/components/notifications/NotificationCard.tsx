@@ -168,6 +168,7 @@ export function NotificationCard({
           {message}
         </div>
         <div
+          suppressHydrationWarning
           style={{
             fontFamily: 'var(--sans)',
             fontSize: '0.7rem',

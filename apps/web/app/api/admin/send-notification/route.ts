@@ -130,6 +130,9 @@ export async function POST(req: NextRequest) {
           .eq('id', sysNotif.id);
 
         console.log(`[Send Notification] "${title}" — push: ${result.sent} sent, ${result.failed} failed, ${targetUsers?.length ?? 0} in-app`);
+        if (result.sent === 0 && result.failed === 0) {
+          console.warn('[Send Notification] No push notifications sent. Check: 1) FIREBASE_SERVICE_ACCOUNT configured? 2) Users have active device_tokens? 3) notification_preferences allow push?');
+        }
       } catch (err) {
         console.error('[Send Notification] Background error:', err);
       }
