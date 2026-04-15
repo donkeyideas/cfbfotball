@@ -97,8 +97,10 @@ export const TicketStubCard = memo(function TicketStubCard({ post, isDetailView 
         />
       </Pressable>
 
-      {/* Post text — selectable for copy like Twitter */}
-      <Text style={styles.content} selectable>{extractFirstUrl(post.content) ? stripFirstUrl(post.content) : post.content}</Text>
+      {/* Post text — tap navigates, long-press selects */}
+      <Pressable onPress={navigate}>
+        <Text style={styles.content} selectable>{extractFirstUrl(post.content) ? stripFirstUrl(post.content) : post.content}</Text>
+      </Pressable>
 
       <LinkPreview content={post.content} />
 

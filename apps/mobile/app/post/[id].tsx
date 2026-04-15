@@ -155,7 +155,7 @@ export default function PostDetailScreen() {
   }, [loadAll]);
 
   const renderItem = useCallback(
-    ({ item }: { item: PostData }) => <PostCard post={item} />,
+    ({ item }: { item: PostData }) => <PostCard post={item} isDetailView />,
     []
   );
 

@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { supabase } from '@/lib/supabase';
 import { Avatar } from '@/components/ui/Avatar';
@@ -132,14 +132,6 @@ export function NotificationItem({ notification, onRead }: NotificationItemProps
       width: 40,
       height: 40,
       borderRadius: 20,
-      backgroundColor: dark,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    systemIconText: {
-      fontFamily: typography.serifBold,
-      fontSize: 20,
-      color: '#f4efe4',
     },
     content: {
       flex: 1,
@@ -204,9 +196,11 @@ export function NotificationItem({ notification, onRead }: NotificationItemProps
             size={40}
           />
         ) : (
-          <View style={styles.systemIcon}>
-            <Text style={styles.systemIconText}>G</Text>
-          </View>
+          <Image
+            source={require('@/assets/icon.png')}
+            style={styles.systemIcon}
+            resizeMode="cover"
+          />
         )}
       </View>
 

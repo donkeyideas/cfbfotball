@@ -167,9 +167,14 @@ export function AuthProvider({ children }: PropsWithChildren) {
         await fetchProfiles(initialSession.user.id);
       }
       settle();
-    }).catch((err) => {
+    }).catch(async (err) => {
       clearTimeout(timeout);
-      console.warn('Auth getSession failed:', err);
+      console.warn('Auth getSession failed, clearing stale session:', err);
+      try { await supabase.auth.signOut(); } catch {}
+      setSession(null);
+      setProfiles([]);
+      setActiveId(null);
+      userIdRef.current = null;
       settle();
     });
 

@@ -220,13 +220,15 @@ export const NewspaperClippingCard = memo(function NewspaperClippingCard({ post,
         </View>
       </Pressable>
 
-      {/* Post text — selectable for copy like Twitter */}
-      {headline && (
-        <Text style={styles.headline} selectable>{headline}</Text>
-      )}
-      {body ? (
-        <Text style={styles.content} selectable>{body}</Text>
-      ) : null}
+      {/* Post text — tap navigates, long-press selects */}
+      <Pressable onPress={navigate}>
+        {headline && (
+          <Text style={styles.headline} selectable>{headline}</Text>
+        )}
+        {body ? (
+          <Text style={styles.content} selectable>{body}</Text>
+        ) : null}
+      </Pressable>
 
       <LinkPreview content={post.content} />
 
