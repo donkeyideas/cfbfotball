@@ -1,4 +1,5 @@
 import { getMessagingInstance } from './admin';
+import { sendExpoPush } from './expo-push';
 import { createAdminClient } from '@/lib/admin/supabase/admin';
 
 interface PushPayload {
@@ -12,11 +13,16 @@ interface SendResult {
   failed: number;
 }
 
+/** Check if a token is an Expo push token */
+function isExpoToken(token: string): boolean {
+  return token.startsWith('ExponentPushToken[') || token.startsWith('ExpoPushToken[');
+}
+
 /**
- * Send a push notification to a single device token.
+ * Send a push notification to a single FCM token.
  * Returns success/failure and error code if applicable.
  */
-async function sendToToken(
+async function sendToFcmToken(
   token: string,
   payload: PushPayload
 ): Promise<{ success: boolean; error?: string }> {
@@ -67,6 +73,7 @@ async function sendToToken(
 
 /**
  * Send push notifications to all active device tokens for a user.
+ * Supports both Expo push tokens and FCM tokens.
  * Logs each attempt to push_notification_log.
  * Deactivates invalid tokens automatically.
  */
@@ -86,10 +93,49 @@ export async function sendPushToUser(
 
   if (!tokens || tokens.length === 0) return result;
 
-  for (const t of tokens) {
-    const sendResult = await sendToToken(t.token, payload);
+  // Separate Expo tokens from FCM tokens
+  const expoTokens = tokens.filter((t) => isExpoToken(t.token));
+  const fcmTokens = tokens.filter((t) => !isExpoToken(t.token));
 
-    // Log to push_notification_log
+  // Send to Expo tokens in batch
+  if (expoTokens.length > 0) {
+    const expoResult = await sendExpoPush(
+      expoTokens.map((t) => t.token),
+      payload
+    );
+
+    // Log results for each Expo token
+    for (const t of expoTokens) {
+      const isInvalid = expoResult.invalidTokens.includes(t.token);
+      const success = !isInvalid && expoResult.sent > 0;
+
+      await supabase.from('push_notification_log').insert({
+        notification_id: meta?.notificationId ?? null,
+        system_notification_id: meta?.systemNotificationId ?? null,
+        user_id: userId,
+        device_token: t.token.substring(0, 50),
+        platform: t.platform,
+        status: success ? 'sent' : 'failed',
+        error_message: isInvalid ? 'DeviceNotRegistered' : null,
+        sent_at: new Date().toISOString(),
+      });
+
+      if (isInvalid) {
+        await supabase
+          .from('device_tokens')
+          .update({ is_active: false, updated_at: new Date().toISOString() })
+          .eq('id', t.id);
+      }
+    }
+
+    result.sent += expoResult.sent;
+    result.failed += expoResult.failed;
+  }
+
+  // Send to FCM tokens individually
+  for (const t of fcmTokens) {
+    const sendResult = await sendToFcmToken(t.token, payload);
+
     await supabase.from('push_notification_log').insert({
       notification_id: meta?.notificationId ?? null,
       system_notification_id: meta?.systemNotificationId ?? null,
@@ -105,7 +151,6 @@ export async function sendPushToUser(
       result.sent++;
     } else {
       result.failed++;
-      // Deactivate invalid tokens
       if (sendResult.error === 'INVALID_TOKEN') {
         await supabase
           .from('device_tokens')
@@ -132,13 +177,6 @@ export async function sendPushToAudience(
 ): Promise<SendResult> {
   const supabase = createAdminClient();
   const result: SendResult = { sent: 0, failed: 0 };
-
-  // Early check: is FCM configured at all?
-  const messaging = await getMessagingInstance();
-  if (!messaging) {
-    console.error('[FCM] Firebase not configured — no push notifications will be sent. Set FIREBASE_SERVICE_ACCOUNT env var or admin_settings DB row.');
-    return result;
-  }
 
   // Get target user IDs based on audience (exclude bots)
   let userQuery = supabase.from('profiles').select('id').or('is_bot.is.null,is_bot.eq.false');

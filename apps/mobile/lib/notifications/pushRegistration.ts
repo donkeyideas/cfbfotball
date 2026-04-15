@@ -42,8 +42,11 @@ export async function registerForPushNotifications(
   }
 
   try {
-    // Get the native device push token (FCM on Android, APNs on iOS)
-    const tokenData = await Notifications.getDevicePushTokenAsync();
+    // Get Expo push token — works for both iOS (APNs) and Android (FCM)
+    // Expo's push service handles routing to the correct platform
+    const tokenData = await Notifications.getExpoPushTokenAsync({
+      projectId: '416e432c-3a96-49d1-abe6-934e182b72d5',
+    });
     const token = tokenData.data;
 
     if (!token) {
