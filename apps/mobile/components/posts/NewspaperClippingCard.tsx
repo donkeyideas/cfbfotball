@@ -25,6 +25,10 @@ export const NewspaperClippingCard = memo(function NewspaperClippingCard({ post,
   const hasAgingTake = isAgingReceipt || (post.aging_takes && post.aging_takes.length > 0);
   const [reportVisible, setReportVisible] = useState(false);
 
+  const navigate = () => {
+    if (!isDetailView) router.push(`/post/${post.id}` as never);
+  };
+
   // Format the revisit date from the first aging take
   const receiptDate = hasAgingTake && post.aging_takes?.[0]
     ? new Date(post.aging_takes[0].revisit_date).toLocaleDateString('en-US', {
@@ -174,11 +178,8 @@ export const NewspaperClippingCard = memo(function NewspaperClippingCard({ post,
   const headline = dotIdx > 0 && dotIdx < 80 ? displayContent.slice(0, dotIdx + 1) : null;
   const body = headline ? displayContent.slice(dotIdx + 1).trim() : displayContent;
 
-  const Wrapper = isDetailView ? View : Pressable;
-  const wrapperProps = isDetailView ? {} : { onPress: () => router.push(`/post/${post.id}` as never) };
-
   return (
-    <Wrapper style={[styles.card, hasAgingTake && styles.receiptCard]} {...wrapperProps}>
+    <View style={[styles.card, hasAgingTake && styles.receiptCard]}>
       {/* Repost stamp */}
       {post._repostedBy && (
         <Pressable
@@ -200,20 +201,26 @@ export const NewspaperClippingCard = memo(function NewspaperClippingCard({ post,
         </View>
       )}
 
-      <PostHeader
-        author={post.author ?? null}
-        createdAt={post.created_at}
-      />
+      {/* Header is tappable — navigates to post detail */}
+      <Pressable onPress={navigate}>
+        <PostHeader
+          author={post.author ?? null}
+          createdAt={post.created_at}
+        />
+      </Pressable>
 
       {/* Section label with rules */}
-      <View style={styles.sectionLabelWrap}>
-        <View style={styles.ruleLine} />
-        <Text style={styles.sectionLabel}>
-          {hasAgingTake ? 'RECEIPT FILED' : 'THE SATURDAY EDITION'}
-        </Text>
-        <View style={[styles.ruleLine, { backgroundColor: colors.crimson, height: 2 }]} />
-      </View>
+      <Pressable onPress={navigate}>
+        <View style={styles.sectionLabelWrap}>
+          <View style={styles.ruleLine} />
+          <Text style={styles.sectionLabel}>
+            {hasAgingTake ? 'RECEIPT FILED' : 'THE SATURDAY EDITION'}
+          </Text>
+          <View style={[styles.ruleLine, { backgroundColor: colors.crimson, height: 2 }]} />
+        </View>
+      </Pressable>
 
+      {/* Post text — selectable for copy like Twitter */}
       {headline && (
         <Text style={styles.headline} selectable>{headline}</Text>
       )}
@@ -266,6 +273,6 @@ export const NewspaperClippingCard = memo(function NewspaperClippingCard({ post,
         postAuthorId={post.author_id}
         onClose={() => setReportVisible(false)}
       />
-    </Wrapper>
+    </View>
   );
 });

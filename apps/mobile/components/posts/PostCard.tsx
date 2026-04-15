@@ -70,7 +70,7 @@ export const PostCard = memo(function PostCard({ post, isDetailView }: PostCardP
 
   // Sideline reports for live game posts
   if (post.post_type === 'SIDELINE') {
-    return <SidelineReportCard post={post} />;
+    return <SidelineReportCard post={post} isDetailView={isDetailView} />;
   }
 
   // Default: standard ticket stub card

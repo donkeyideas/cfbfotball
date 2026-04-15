@@ -14,9 +14,10 @@ import type { PostData } from './PostCard';
 
 interface SidelineReportCardProps {
   post: PostData;
+  isDetailView?: boolean;
 }
 
-export const SidelineReportCard = memo(function SidelineReportCard({ post }: SidelineReportCardProps) {
+export const SidelineReportCard = memo(function SidelineReportCard({ post, isDetailView }: SidelineReportCardProps) {
   const colors = useColors();
   const router = useRouter();
   const [dotVisible, setDotVisible] = useState(true);
@@ -110,16 +111,23 @@ export const SidelineReportCard = memo(function SidelineReportCard({ post }: Sid
     },
   }), [colors]);
 
+  const navigate = () => {
+    if (!isDetailView) router.push(`/post/${post.id}` as never);
+  };
+
   return (
-    <Pressable style={styles.card} onPress={() => router.push(`/post/${post.id}` as never)}>
-      <View style={styles.headerBar}>
-        <View style={styles.liveIndicator}>
-          <View
-            style={[styles.liveDot, { opacity: dotVisible ? 1 : 0.2 }]}
-          />
-          <Text style={styles.liveText}>LIVE</Text>
+    <View style={styles.card}>
+      {/* Header bar is tappable — navigates to post detail */}
+      <Pressable onPress={navigate}>
+        <View style={styles.headerBar}>
+          <View style={styles.liveIndicator}>
+            <View
+              style={[styles.liveDot, { opacity: dotVisible ? 1 : 0.2 }]}
+            />
+            <Text style={styles.liveText}>LIVE</Text>
+          </View>
         </View>
-      </View>
+      </Pressable>
 
       <View style={styles.body}>
         {post._repostedBy && (
@@ -132,11 +140,16 @@ export const SidelineReportCard = memo(function SidelineReportCard({ post }: Sid
             {post._repostTime && <Text style={styles.repostStampUser}>{timeAgo(post._repostTime)} ago</Text>}
           </Pressable>
         )}
-        <PostHeader
-          author={post.author ?? null}
-          createdAt={post.created_at}
-        />
 
+        {/* Author header is tappable */}
+        <Pressable onPress={navigate}>
+          <PostHeader
+            author={post.author ?? null}
+            createdAt={post.created_at}
+          />
+        </Pressable>
+
+        {/* Post text — selectable for copy like Twitter */}
         <Text style={styles.content} selectable>{extractFirstUrl(post.content) ? stripFirstUrl(post.content) : post.content}</Text>
 
         <LinkPreview content={post.content} />
@@ -167,6 +180,6 @@ export const SidelineReportCard = memo(function SidelineReportCard({ post }: Sid
           onClose={() => setReportVisible(false)}
         />
       </View>
-    </Pressable>
+    </View>
   );
 });

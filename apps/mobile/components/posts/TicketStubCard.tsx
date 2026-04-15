@@ -1,5 +1,5 @@
 import { memo, useMemo, useState } from 'react';
-import { Pressable, StyleSheet, Text, View, type ViewProps } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { PostHeader } from './PostHeader';
 import { BallotButtons } from './BallotButtons';
@@ -21,6 +21,10 @@ export const TicketStubCard = memo(function TicketStubCard({ post, isDetailView 
   const router = useRouter();
   const schoolColor = post.author?.school?.primary_color || colors.crimson;
   const [reportVisible, setReportVisible] = useState(false);
+
+  const navigate = () => {
+    if (!isDetailView) router.push(`/post/${post.id}` as never);
+  };
 
   const styles = useMemo(() => StyleSheet.create({
     card: {
@@ -72,11 +76,8 @@ export const TicketStubCard = memo(function TicketStubCard({ post, isDetailView 
     },
   }), [colors]);
 
-  const Wrapper = isDetailView ? View : Pressable;
-  const wrapperProps = isDetailView ? {} : { onPress: () => router.push(`/post/${post.id}` as never) };
-
   return (
-    <Wrapper style={[styles.card, { borderLeftColor: schoolColor }]} {...wrapperProps}>
+    <View style={[styles.card, { borderLeftColor: schoolColor }]}>
       {post._repostedBy && (
         <Pressable
           style={styles.repostStamp}
@@ -87,11 +88,16 @@ export const TicketStubCard = memo(function TicketStubCard({ post, isDetailView 
           {post._repostTime && <Text style={styles.repostStampUser}>{timeAgo(post._repostTime)} ago</Text>}
         </Pressable>
       )}
-      <PostHeader
-        author={post.author ?? null}
-        createdAt={post.created_at}
-      />
 
+      {/* Header is tappable — navigates to post detail */}
+      <Pressable onPress={navigate}>
+        <PostHeader
+          author={post.author ?? null}
+          createdAt={post.created_at}
+        />
+      </Pressable>
+
+      {/* Post text — selectable for copy like Twitter */}
       <Text style={styles.content} selectable>{extractFirstUrl(post.content) ? stripFirstUrl(post.content) : post.content}</Text>
 
       <LinkPreview content={post.content} />
@@ -121,6 +127,6 @@ export const TicketStubCard = memo(function TicketStubCard({ post, isDetailView 
         postAuthorId={post.author_id}
         onClose={() => setReportVisible(false)}
       />
-    </Wrapper>
+    </View>
   );
 });
