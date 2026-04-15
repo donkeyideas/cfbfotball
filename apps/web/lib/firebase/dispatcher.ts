@@ -34,6 +34,51 @@ const TYPE_TO_PREF: Record<string, string> = {
   SYSTEM: 'marketing_notifications',
 };
 
+// ---------------------------------------------------------------------------
+// Push batching — prevents notification spam for high-volume types.
+// Only sends a push at specific count thresholds within a rolling window.
+// In-app notifications are always created; only push delivery is throttled.
+// ---------------------------------------------------------------------------
+const BATCH_THRESHOLDS = [1, 5, 10, 25, 50, 100, 250, 500, 1000];
+const BATCH_WINDOW_MINUTES = 60;
+
+/** Types that get batched. groupByPost=true counts per-post, false counts globally. */
+const BATCHABLE_TYPES: Record<string, { groupByPost: boolean }> = {
+  TOUCHDOWN: { groupByPost: true },
+  FUMBLE: { groupByPost: true },
+  REPOST: { groupByPost: true },
+  REPLY: { groupByPost: true },
+  FOLLOW: { groupByPost: false },
+  RIVALRY_VOTE: { groupByPost: true },
+};
+
+/** Build a grouped push message for batched notifications. */
+function buildGroupedPayload(
+  type: string,
+  count: number,
+  postId: string | null
+): { title: string; body: string; data: Record<string, string> } {
+  const data: Record<string, string> = { type };
+  if (postId) data.postId = postId;
+
+  switch (type) {
+    case 'TOUCHDOWN':
+      return { title: 'Touchdown!', body: `${count} people gave your take a TD`, data };
+    case 'FUMBLE':
+      return { title: 'Fumble', body: `${count} people fumbled your take`, data };
+    case 'REPOST':
+      return { title: 'Reposts', body: `${count} people reposted your take`, data };
+    case 'REPLY':
+      return { title: 'New Replies', body: `${count} new replies on your post`, data };
+    case 'FOLLOW':
+      return { title: 'New Followers', body: `${count} new followers`, data };
+    case 'RIVALRY_VOTE':
+      return { title: 'Rivalry Votes', body: `${count} votes on your rivalry`, data };
+    default:
+      return { title: 'CFB Social', body: `You have ${count} new notifications`, data };
+  }
+}
+
 /**
  * Build the push notification title and body based on notification type.
  */
@@ -130,7 +175,42 @@ export async function dispatchPushNotification(notification: NotificationRow): P
     // If no prefs row, defaults are all enabled
   }
 
-  // 2. Resolve actor name if there's an actor_id
+  // 2. Batch throttling for high-volume types
+  const batchConfig = BATCHABLE_TYPES[notification.type];
+  if (batchConfig) {
+    const cutoff = new Date(Date.now() - BATCH_WINDOW_MINUTES * 60 * 1000).toISOString();
+
+    let query = supabase
+      .from('notifications')
+      .select('id', { count: 'exact', head: true })
+      .eq('recipient_id', notification.recipient_id)
+      .eq('type', notification.type)
+      .gte('created_at', cutoff);
+
+    if (batchConfig.groupByPost && notification.post_id) {
+      query = query.eq('post_id', notification.post_id);
+    }
+
+    const { count } = await query;
+    const recentCount = count || 0;
+
+    // Only send push at specific thresholds (1, 5, 10, 25, 50, 100…)
+    if (!BATCH_THRESHOLDS.includes(recentCount)) {
+      return; // Skip push — in-app notification still exists
+    }
+
+    // At a grouped threshold (>1): send summary instead of individual message
+    if (recentCount > 1) {
+      const grouped = buildGroupedPayload(notification.type, recentCount, notification.post_id);
+      await sendPushToUser(notification.recipient_id, grouped, {
+        notificationId: notification.id,
+      });
+      return;
+    }
+    // recentCount === 1: fall through to send individual notification normally
+  }
+
+  // 3. Resolve actor name if there's an actor_id
   let actorName: string | null = null;
   if (notification.actor_id) {
     const { data: actor } = await supabase
@@ -144,10 +224,10 @@ export async function dispatchPushNotification(notification: NotificationRow): P
     }
   }
 
-  // 3. Build payload
+  // 4. Build payload
   const payload = buildPushPayload(notification, actorName);
 
-  // 4. Send push
+  // 5. Send push
   await sendPushToUser(notification.recipient_id, payload, {
     notificationId: notification.id,
   });

@@ -164,6 +164,9 @@ const NOTIFICATION_TYPES = [
   },
 ];
 
+const BATCHED_TYPES = ['TOUCHDOWN', 'FUMBLE', 'REPOST', 'REPLY', 'FOLLOW', 'RIVALRY_VOTE'];
+const BATCHED_POST_TYPES = ['TOUCHDOWN', 'FUMBLE', 'REPOST', 'REPLY', 'RIVALRY_VOTE'];
+
 const PREF_LABELS: Record<string, string> = {
   follow_notifications: 'Follows & General',
   reaction_notifications: 'Reactions',
@@ -236,13 +239,9 @@ export function NotificationTypesTab() {
                   <td style={tdStyle}>
                     <span
                       style={{
-                        display: 'inline-block',
-                        padding: '2px 8px',
-                        borderRadius: 10,
-                        fontSize: '0.7rem',
-                        fontWeight: 600,
-                        color: '#fff',
-                        backgroundColor: PREF_COLORS[nt.preference] || '#555',
+                        fontSize: '0.75rem',
+                        fontWeight: 700,
+                        color: PREF_COLORS[nt.preference] || 'var(--admin-text)',
                         whiteSpace: 'nowrap',
                       }}
                     >
@@ -251,6 +250,56 @@ export function NotificationTypesTab() {
                   </td>
                 </tr>
               ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Push batching info */}
+      <div className="admin-card" style={{ padding: 24, marginTop: 16 }}>
+        <h3 className="admin-subsection-title" style={{ marginTop: 0 }}>
+          Push Batching (Anti-Spam)
+        </h3>
+        <p style={{ fontSize: '0.8rem', color: 'var(--admin-text-secondary)', marginBottom: 12 }}>
+          High-volume notification types are batched to prevent spam. In-app notifications are always created, but push notifications only fire at specific count thresholds within a 60-minute rolling window. At grouped thresholds, the push message summarizes (e.g., "10 people gave your take a TD").
+        </p>
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem' }}>
+            <thead>
+              <tr style={{ borderBottom: '2px solid var(--admin-border, #444)', textAlign: 'left' }}>
+                <th style={thStyle}>Type</th>
+                <th style={thStyle}>Batched?</th>
+                <th style={thStyle}>Group By</th>
+                <th style={thStyle}>Push Thresholds</th>
+              </tr>
+            </thead>
+            <tbody>
+              {NOTIFICATION_TYPES.map((nt) => {
+                const batched = BATCHED_TYPES.includes(nt.type);
+                const groupBy = BATCHED_POST_TYPES.includes(nt.type)
+                  ? 'Per post'
+                  : nt.type === 'FOLLOW'
+                    ? 'Global'
+                    : '--';
+                return (
+                  <tr key={nt.type} style={{ borderBottom: '1px solid var(--admin-border, #333)' }}>
+                    <td style={tdStyle}>
+                      <code style={{ fontFamily: 'var(--admin-mono, monospace)', fontSize: '0.75rem' }}>
+                        {nt.type}
+                      </code>
+                    </td>
+                    <td style={tdStyle}>
+                      <span style={{ fontWeight: 600, color: batched ? '#b8952a' : 'var(--admin-text-secondary)' }}>
+                        {batched ? 'Yes' : 'Always send'}
+                      </span>
+                    </td>
+                    <td style={{ ...tdStyle, color: 'var(--admin-text-secondary)' }}>{groupBy}</td>
+                    <td style={{ ...tdStyle, color: 'var(--admin-text-secondary)' }}>
+                      {batched ? '1st, 5th, 10th, 25th, 50th, 100th, 250th, 500th' : 'Every notification'}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
