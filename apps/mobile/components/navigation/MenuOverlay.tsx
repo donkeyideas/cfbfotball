@@ -84,6 +84,21 @@ export function MenuOverlay({ visible, onClose }: MenuOverlayProps) {
       backgroundColor: 'rgba(244,239,228,0.2)',
       marginBottom: 8,
     },
+    featuresButton: {
+      marginVertical: 8,
+      paddingVertical: 12,
+      paddingHorizontal: 16,
+      backgroundColor: '#c9a84c',
+      borderRadius: 6,
+      alignItems: 'center',
+    },
+    featuresText: {
+      fontFamily: typography.serifBold,
+      fontSize: 16,
+      color: '#2a1f14',
+      letterSpacing: 2,
+      textTransform: 'uppercase',
+    },
     menuItem: {
       paddingVertical: 13,
       paddingHorizontal: 4,
@@ -160,6 +175,9 @@ export function MenuOverlay({ visible, onClose }: MenuOverlayProps) {
         <View style={styles.handle} />
         <Text style={styles.title}>CFB SOCIAL</Text>
         <View style={styles.divider} />
+        <Pressable style={styles.featuresButton} onPress={() => handleNavigate('/features')}>
+          <Text style={styles.featuresText}>Features</Text>
+        </Pressable>
         <ScrollView showsVerticalScrollIndicator={false}>
           {dynamicItems.map((item) => (
             <Pressable

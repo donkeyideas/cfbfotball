@@ -72,6 +72,7 @@ function AppShell() {
             <Stack.Screen name="recruiting" options={{ headerShown: false }} />
             <Stack.Screen name="coaches-call" options={{ headerShown: false }} />
             <Stack.Screen name="vault" options={{ headerShown: false }} />
+            <Stack.Screen name="features" options={{ headerShown: false }} />
             <Stack.Screen name="receipts" options={{ headerShown: false }} />
             <Stack.Screen name="contact" options={{ headerShown: false }} />
             <Stack.Screen name="notifications" options={{ headerShown: false }} />

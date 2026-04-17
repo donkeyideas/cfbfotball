@@ -118,7 +118,7 @@ export default function FeedScreen() {
     fab: {
       position: 'absolute',
       bottom: 24,
-      left: 24,
+      right: 24,
       width: 56,
       height: 56,
       borderRadius: 28,
