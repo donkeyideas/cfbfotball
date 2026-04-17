@@ -9,7 +9,7 @@ export type { SupabaseClient } from './client';
 // Queries
 export { getSchools, getSchoolBySlug, getSchoolById, searchSchools } from './queries/schools';
 export { getProfile, getProfileByUsername, searchProfiles, getLeaderboard } from './queries/profiles';
-export { getFeed, getPost, getPostReplies, getUserPosts } from './queries/posts';
+export { getFeed, getPost, getPostReplies, getUserPosts, searchPosts } from './queries/posts';
 export { getRivalries, getFeaturedRivalry, getRivalryById } from './queries/rivalries';
 export { getChallenges, getChallengeById, getUserChallenges } from './queries/challenges';
 export { getPortalPlayers, getPortalPlayer, getPlayerClaims } from './queries/portal';

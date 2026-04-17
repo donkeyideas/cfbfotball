@@ -1,9 +1,26 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/components/auth/AuthProvider';
+
+interface MentionProfile {
+  id: string;
+  username: string;
+  display_name: string | null;
+  avatar_url: string | null;
+}
+
+function getMentionQuery(text: string, cursor: number): string | null {
+  const before = text.slice(0, cursor);
+  const match = before.match(/@([a-zA-Z0-9_]{0,30})$/);
+  if (!match) return null;
+  const atIndex = before.length - match[0].length;
+  if (atIndex > 0 && !/\s/.test(before[atIndex - 1]!)) return null;
+  return match[1]!;
+}
 
 interface ReplyComposerProps {
   parentId: string;
@@ -15,6 +32,108 @@ export function ReplyComposer({ parentId, parentAuthorId }: ReplyComposerProps) 
   const { profile } = useAuth();
   const [content, setContent] = useState('');
   const [submitting, setSubmitting] = useState(false);
+
+  // Mention autocomplete state
+  const [mentionQuery, setMentionQuery] = useState<string | null>(null);
+  const [mentionResults, setMentionResults] = useState<MentionProfile[]>([]);
+  const [mentionActive, setMentionActive] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const mentionDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Search profiles when mentionQuery changes
+  useEffect(() => {
+    if (mentionDebounceRef.current) clearTimeout(mentionDebounceRef.current);
+
+    if (mentionQuery === null || mentionQuery.length === 0) {
+      setMentionResults([]);
+      setMentionActive(false);
+      return;
+    }
+
+    mentionDebounceRef.current = setTimeout(async () => {
+      const supabase = createClient();
+      const q = mentionQuery.toLowerCase();
+      const { data } = await supabase
+        .from('profiles')
+        .select('id, username, display_name, avatar_url')
+        .or(`username.ilike.%${q}%,display_name.ilike.%${q}%`)
+        .limit(6);
+
+      if (data && data.length > 0) {
+        setMentionResults(data as MentionProfile[]);
+        setMentionActive(true);
+        setActiveIndex(0);
+      } else {
+        setMentionResults([]);
+        setMentionActive(false);
+      }
+    }, 250);
+
+    return () => {
+      if (mentionDebounceRef.current) clearTimeout(mentionDebounceRef.current);
+    };
+  }, [mentionQuery]);
+
+  const checkForMention = useCallback(() => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+    const cursor = textarea.selectionStart;
+    const query = getMentionQuery(textarea.value, cursor);
+    setMentionQuery(query);
+  }, []);
+
+  const insertMention = useCallback((username: string) => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    const cursor = textarea.selectionStart;
+    const before = content.slice(0, cursor);
+    const match = before.match(/@([a-zA-Z0-9_]{0,30})$/);
+    if (!match) return;
+
+    const atStart = before.length - match[0].length;
+    const after = content.slice(cursor);
+    const newContent = content.slice(0, atStart) + `@${username} ` + after;
+    setContent(newContent);
+    setMentionQuery(null);
+    setMentionResults([]);
+    setMentionActive(false);
+
+    requestAnimationFrame(() => {
+      if (textareaRef.current) {
+        const newCursor = atStart + username.length + 2;
+        textareaRef.current.focus();
+        textareaRef.current.setSelectionRange(newCursor, newCursor);
+      }
+    });
+  }, [content]);
+
+  const handleTextareaChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setContent(e.target.value);
+    requestAnimationFrame(() => {
+      checkForMention();
+    });
+  }, [checkForMention]);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (!mentionActive || mentionResults.length === 0) return;
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setActiveIndex((prev) => (prev + 1) % mentionResults.length);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setActiveIndex((prev) => (prev - 1 + mentionResults.length) % mentionResults.length);
+    } else if (e.key === 'Enter' || e.key === 'Tab') {
+      e.preventDefault();
+      const selected = mentionResults[activeIndex];
+      if (selected) insertMention(selected.username);
+    } else if (e.key === 'Escape') {
+      setMentionActive(false);
+      setMentionResults([]);
+    }
+  }, [mentionActive, mentionResults, activeIndex, insertMention]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -36,6 +155,9 @@ export function ReplyComposer({ parentId, parentAuthorId }: ReplyComposerProps) 
 
     if (!error) {
       setContent('');
+      setMentionQuery(null);
+      setMentionResults([]);
+      setMentionActive(false);
       // Update reply_count on the parent post
       const { count } = await supabase
         .from('posts')
@@ -69,14 +191,58 @@ export function ReplyComposer({ parentId, parentAuthorId }: ReplyComposerProps) 
 
   return (
     <form onSubmit={handleSubmit} className="composer" style={{ marginTop: 8 }}>
-      <textarea
-        value={content}
-        onChange={(e) => setContent(e.target.value)}
-        placeholder="Write a reply..."
-        maxLength={500}
-        className="composer-input"
-        rows={2}
-      />
+      <div style={{ position: 'relative' }}>
+        <textarea
+          ref={textareaRef}
+          value={content}
+          onChange={handleTextareaChange}
+          onKeyDown={handleKeyDown}
+          onSelect={checkForMention}
+          placeholder="Write a reply..."
+          maxLength={500}
+          className="composer-input"
+          rows={2}
+        />
+
+        {/* Mention autocomplete dropdown */}
+        {mentionActive && mentionResults.length > 0 && (
+          <div className="mention-dropdown" style={{ top: '100%', marginTop: 4 }}>
+            {mentionResults.map((user, idx) => (
+              <button
+                key={user.id}
+                type="button"
+                className="mention-dropdown-item"
+                data-active={idx === activeIndex ? 'true' : undefined}
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  insertMention(user.username);
+                }}
+                onMouseEnter={() => setActiveIndex(idx)}
+              >
+                {user.avatar_url ? (
+                  <Image
+                    src={user.avatar_url}
+                    alt={user.username}
+                    width={32}
+                    height={32}
+                    className="mention-dropdown-avatar"
+                  />
+                ) : (
+                  <span className="mention-dropdown-avatar-fallback">
+                    {(user.display_name || user.username)[0]?.toUpperCase()}
+                  </span>
+                )}
+                <span className="mention-dropdown-info">
+                  <span className="mention-dropdown-username">@{user.username}</span>
+                  {user.display_name && (
+                    <span className="mention-dropdown-name">{user.display_name}</span>
+                  )}
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
       <div className="composer-footer">
         <div />
         <button

@@ -14,6 +14,7 @@ interface MenuOverlayProps {
 
 const MENU_ITEMS: { label: string; route: string; authRequired?: boolean }[] = [
   { label: 'The Feed', route: '/(tabs)/feed' },
+  { label: 'Search', route: '/search' },
   { label: 'War Room', route: '/war-room' },
   { label: 'Rivalry Ring', route: '/(tabs)/rivalry' },
   { label: 'Mascot Wars', route: '/mascot-wars' },

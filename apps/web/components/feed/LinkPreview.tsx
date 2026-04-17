@@ -1,6 +1,49 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+
+// ---- Video embed detection ----
+
+interface VideoEmbed {
+  platform: 'youtube' | 'instagram' | 'tiktok' | 'twitch';
+  embedUrl: string;
+}
+
+function extractYouTubeId(url: string): string | null {
+  try {
+    const u = new URL(url);
+    if ((u.hostname === 'www.youtube.com' || u.hostname === 'youtube.com' || u.hostname === 'm.youtube.com') && u.pathname === '/watch') {
+      return u.searchParams.get('v');
+    }
+    const pathMatch = u.pathname.match(/^\/(shorts|embed|live|v)\/([^/?&]+)/);
+    if (pathMatch && u.hostname.includes('youtube.com')) return pathMatch[2] ?? null;
+    if (u.hostname === 'youtu.be') return u.pathname.slice(1).split(/[?/]/)[0] || null;
+  } catch { /* ignore */ }
+  return null;
+}
+
+function detectVideoEmbed(url: string): VideoEmbed | null {
+  const ytId = extractYouTubeId(url);
+  if (ytId) return { platform: 'youtube', embedUrl: `https://www.youtube.com/embed/${ytId}?autoplay=1` };
+
+  try {
+    const u = new URL(url);
+    const tiktokMatch = u.pathname.match(/\/@[^/]+\/video\/(\d+)/);
+    if (u.hostname.includes('tiktok.com') && tiktokMatch) {
+      return { platform: 'tiktok', embedUrl: `https://www.tiktok.com/embed/v2/${tiktokMatch[1]}` };
+    }
+    const instaMatch = u.pathname.match(/\/(?:reel|p)\/([A-Za-z0-9_-]+)/);
+    if (u.hostname.includes('instagram.com') && instaMatch) {
+      return { platform: 'instagram', embedUrl: `https://www.instagram.com/p/${instaMatch[1]}/embed` };
+    }
+    const twitchClip = url.match(/clips\.twitch\.tv\/([A-Za-z0-9_-]+)/) || u.pathname.match(/\/clip\/([A-Za-z0-9_-]+)/);
+    if (u.hostname.includes('twitch.tv') && twitchClip) {
+      const host = typeof window !== 'undefined' ? window.location.hostname : 'localhost';
+      return { platform: 'twitch', embedUrl: `https://clips.twitch.tv/embed?clip=${twitchClip[1]}&parent=${host}` };
+    }
+  } catch { /* ignore */ }
+  return null;
+}
 
 interface OgData {
   title: string | null;
@@ -36,8 +79,10 @@ export function LinkPreview({ content }: { content: string }) {
   const [ogData, setOgData] = useState<OgData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
+  const [playing, setPlaying] = useState(false);
 
   const url = extractFirstUrl(content);
+  const videoEmbed = useMemo(() => url ? detectVideoEmbed(url) : null, [url]);
 
   useEffect(() => {
     if (!url) return;
@@ -95,6 +140,25 @@ export function LinkPreview({ content }: { content: string }) {
 
   if (!ogData) return null;
 
+  // If playing, show embedded iframe
+  if (videoEmbed && playing) {
+    const isVertical = videoEmbed.platform === 'tiktok';
+    return (
+      <div
+        className="link-preview link-preview-video-embed"
+        onClick={(e) => e.stopPropagation()}
+        style={{ aspectRatio: isVertical ? '9/16' : '16/9', maxHeight: isVertical ? 500 : undefined }}
+      >
+        <iframe
+          src={videoEmbed.embedUrl}
+          allow="autoplay; encrypted-media; fullscreen"
+          allowFullScreen
+          style={{ width: '100%', height: '100%', border: 'none', borderRadius: 6 }}
+        />
+      </div>
+    );
+  }
+
   const displayDomain = (() => {
     try {
       return new URL(ogData.url).hostname.replace(/^www\./, '');
@@ -103,16 +167,24 @@ export function LinkPreview({ content }: { content: string }) {
     }
   })();
 
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (videoEmbed) {
+      e.preventDefault();
+      setPlaying(true);
+    }
+  };
+
   return (
     <a
       href={ogData.url}
       target="_blank"
       rel="noopener noreferrer"
       className="link-preview"
-      onClick={(e) => e.stopPropagation()}
+      onClick={handleClick}
     >
       {ogData.image && (
-        <div className="link-preview-image">
+        <div className="link-preview-image" style={{ position: 'relative' }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={ogData.image}
@@ -120,6 +192,15 @@ export function LinkPreview({ content }: { content: string }) {
             className="link-preview-img"
             onError={(e) => { (e.target as HTMLImageElement).parentElement!.style.display = 'none'; }}
           />
+          {videoEmbed && (
+            <div className="link-preview-play-overlay">
+              <div className="link-preview-play-btn">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                  <polygon points="6,3 20,12 6,21" />
+                </svg>
+              </div>
+            </div>
+          )}
         </div>
       )}
       <div className="link-preview-info">

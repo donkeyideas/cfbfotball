@@ -136,6 +136,54 @@ export async function getPostReplies(
 }
 
 /**
+ * Search published posts by content (case-insensitive), with cursor-based pagination.
+ */
+export async function searchPosts(
+  client: SupabaseClient,
+  query: string,
+  options: { cursor?: string; limit?: number } = {}
+) {
+  const { cursor, limit = DEFAULT_LIMIT } = options;
+
+  let q = client
+    .from('posts')
+    .select(`
+      *,
+      author:author_id (
+        id,
+        username,
+        display_name,
+        avatar_url,
+        school_id,
+        dynasty_tier,
+        role
+      ),
+      school:school_id (
+        id,
+        name,
+        abbreviation,
+        slug,
+        primary_color,
+        logo_url
+      )
+    `)
+    .eq('status', 'PUBLISHED')
+    .is('parent_id', null)
+    .ilike('content', `%${query}%`)
+    .order('created_at', { ascending: false })
+    .limit(limit);
+
+  if (cursor) {
+    q = q.lt('created_at', cursor);
+  }
+
+  const { data, error } = await q;
+
+  if (error) throw error;
+  return data as (PostRow & { author: Record<string, unknown>; school: Record<string, unknown> | null })[];
+}
+
+/**
  * Get all posts by a specific user
  */
 export async function getUserPosts(

@@ -106,7 +106,7 @@ export default function FeaturesScreen() {
       },
       scrollContent: {
         padding: 16,
-        paddingBottom: 40,
+        paddingBottom: 60,
       },
       sectionTitle: {
         fontFamily: typography.serifBold,
@@ -177,7 +177,7 @@ export default function FeaturesScreen() {
         borderColor: gold,
       },
       predictionHeader: {
-        backgroundColor: '#faf5e6',
+        backgroundColor: colors.surface,
         paddingVertical: 6,
         paddingHorizontal: 12,
         flexDirection: 'row',
@@ -189,7 +189,7 @@ export default function FeaturesScreen() {
       predictionLabel: {
         fontFamily: typography.serifBold,
         fontSize: 13,
-        color: '#6b5d10',
+        color: gold,
         textTransform: 'uppercase',
         letterSpacing: 1,
       },
@@ -214,7 +214,7 @@ export default function FeaturesScreen() {
         borderColor: colors.border,
       },
       agingHeader: {
-        backgroundColor: '#faf5e6',
+        backgroundColor: colors.surface,
         paddingVertical: 6,
         paddingHorizontal: 12,
         borderBottomWidth: 1,
@@ -235,12 +235,14 @@ export default function FeaturesScreen() {
       },
       // --- Receipt ---
       cardReceipt: {
-        backgroundColor: '#f5efd6',
+        backgroundColor: colors.surfaceRaised,
         borderRadius: 2,
         padding: 12,
         marginBottom: 12,
         borderWidth: 1,
-        borderColor: '#d4c9a0',
+        borderColor: colors.border,
+        borderLeftWidth: 3,
+        borderLeftColor: colors.success,
       },
       receiptStamp: {
         fontFamily: typography.mono,
@@ -279,18 +281,18 @@ export default function FeaturesScreen() {
       },
       // --- Penalty (Moderation) ---
       cardPenalty: {
-        backgroundColor: '#fdf8e8',
+        backgroundColor: colors.surfaceRaised,
         borderRadius: 3,
         borderLeftWidth: 4,
         borderLeftColor: crimson,
         padding: 12,
         marginBottom: 12,
         borderTopWidth: 1,
-        borderTopColor: '#e6d9a0',
+        borderTopColor: colors.border,
         borderBottomWidth: 1,
-        borderBottomColor: '#e6d9a0',
+        borderBottomColor: colors.border,
         borderRightWidth: 1,
-        borderRightColor: '#e6d9a0',
+        borderRightColor: colors.border,
       },
       penaltyTitle: {
         fontFamily: typography.serifBold,
@@ -306,8 +308,10 @@ export default function FeaturesScreen() {
         borderRadius: 3,
         padding: 12,
         marginBottom: 12,
-        borderWidth: 1.5,
-        borderColor: 'rgba(59,47,30,0.15)',
+        borderWidth: 1,
+        borderColor: colors.border,
+        borderLeftWidth: 3,
+        borderLeftColor: gold,
       },
       // --- Shared ---
       cardName: {
@@ -324,12 +328,11 @@ export default function FeaturesScreen() {
       },
       tapHint: {
         fontFamily: typography.mono,
-        fontSize: 9,
-        color: colors.textMuted,
+        fontSize: 10,
+        color: colors.textSecondary,
         textTransform: 'uppercase',
         letterSpacing: 1,
-        marginTop: 6,
-        textAlign: 'right',
+        marginTop: 8,
       },
     });
   }, [colors]);

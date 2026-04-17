@@ -9,6 +9,7 @@ import { PostActions } from './PostActions';
 import { AppealForm } from '@/components/moderation/AppealForm';
 import { AgingTakeTimerWrapper } from './AgingTakeTimerWrapper';
 import { LinkPreview, extractFirstUrl, stripFirstUrl } from './LinkPreview';
+import { PostContent } from './PostContent';
 import { trackEvent } from '@/lib/analytics/track';
 
 interface PostAuthor {
@@ -236,7 +237,7 @@ const ClassicPost = memo(function ClassicPost({ post }: { post: Post }) {
         </div>
         <PostUserRow post={post} />
         <Link href={`/post/${post.id}`} className="post-body-link">
-          <div className="post-body">{extractFirstUrl(post.content) ? stripFirstUrl(post.content) : post.content}</div>
+          <div className="post-body"><PostContent content={extractFirstUrl(post.content) ? stripFirstUrl(post.content) : post.content} /></div>
         </Link>
         <LinkPreview content={post.content} />
         <div className="receipt-stamp" suppressHydrationWarning>RECEIPT FILED &mdash; Review {receiptDate}</div>
@@ -250,7 +251,7 @@ const ClassicPost = memo(function ClassicPost({ post }: { post: Post }) {
       {post._repostedBy && <RepostStamp repostedBy={post._repostedBy} repostTime={post._repostTime} />}
       <PostUserRow post={post} />
       <Link href={`/post/${post.id}`} className="post-body-link">
-        <div className="post-body">{extractFirstUrl(post.content) ? stripFirstUrl(post.content) : post.content}</div>
+        <div className="post-body"><PostContent content={extractFirstUrl(post.content) ? stripFirstUrl(post.content) : post.content} /></div>
       </Link>
       <LinkPreview content={post.content} />
       <PostBottom post={post} />
@@ -275,7 +276,7 @@ const ReceiptPost = memo(function ReceiptPost({ post }: { post: Post }) {
       </div>
       <PostUserRow post={post} />
       <Link href={`/post/${post.id}`} className="post-body-link">
-        <div className="post-body">{extractFirstUrl(post.content) ? stripFirstUrl(post.content) : post.content}</div>
+        <div className="post-body"><PostContent content={extractFirstUrl(post.content) ? stripFirstUrl(post.content) : post.content} /></div>
       </Link>
       <LinkPreview content={post.content} />
       <div className="receipt-stamp">RECEIPT CONFIRMED</div>
@@ -301,7 +302,7 @@ const PenaltyPost = memo(function PenaltyPost({ post }: { post: Post }) {
         </div>
       </div>
       <PostUserRow post={post} />
-      <div className="penalty-body">&ldquo;{post.content}&rdquo;</div>
+      <div className="penalty-body">&ldquo;<PostContent content={post.content} />&rdquo;</div>
       <div className="penalty-ruling">
         WARNING: This play has been nullified. All football, all the time.
       </div>
@@ -350,7 +351,7 @@ const PressBoxPost = memo(function PressBoxPost({ post }: { post: Post }) {
       </div>
       <div className="pressbox-body">
         <Link href={`/post/${post.id}`} className="post-body-link">
-          <div className="pressbox-content">{post.content}</div>
+          <div className="pressbox-content"><PostContent content={post.content} /></div>
         </Link>
         <LinkPreview content={post.content} />
       </div>
@@ -380,7 +381,7 @@ const RivalryPost = memo(function RivalryPost({ post }: { post: Post }) {
       <div className="rivalry-body">
         <PostUserRow post={post} />
         <Link href={`/post/${post.id}`} className="post-body-link">
-          <div className="post-body">{extractFirstUrl(post.content) ? stripFirstUrl(post.content) : post.content}</div>
+          <div className="post-body"><PostContent content={extractFirstUrl(post.content) ? stripFirstUrl(post.content) : post.content} /></div>
         </Link>
         <LinkPreview content={post.content} />
         <PostBottom post={post} />
@@ -408,7 +409,7 @@ const PredictionPost = memo(function PredictionPost({ post }: { post: Post }) {
       <div className="prediction-body">
         <PostUserRow post={post} />
         <Link href={`/post/${post.id}`} className="post-body-link">
-          <div className="prediction-question">{post.content}</div>
+          <div className="prediction-question"><PostContent content={post.content} /></div>
         </Link>
         <LinkPreview content={post.content} />
       </div>
@@ -444,7 +445,7 @@ const AgingTakePost = memo(function AgingTakePost({ post }: { post: Post }) {
       <div className="aging-body">
         <PostUserRow post={post} />
         <Link href={`/post/${post.id}`} className="post-body-link">
-          <div className="aging-quote">&ldquo;{post.content}&rdquo;</div>
+          <div className="aging-quote">&ldquo;<PostContent content={post.content} />&rdquo;</div>
         </Link>
         <LinkPreview content={post.content} />
         <AgingTakeTimerWrapper postId={post.id} />

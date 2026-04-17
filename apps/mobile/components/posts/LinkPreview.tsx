@@ -8,6 +8,7 @@ import {
   View,
   Animated,
 } from 'react-native';
+import { WebView } from 'react-native-webview';
 import { useColors } from '@/lib/theme/ThemeProvider';
 import { typography } from '@/lib/theme/typography';
 
@@ -212,6 +213,38 @@ async function fetchOgData(url: string): Promise<OgData | null> {
   }
 }
 
+// ---- Video embed detection ----
+
+interface VideoEmbed {
+  platform: 'youtube' | 'instagram' | 'tiktok' | 'twitch';
+  embedUrl: string;
+}
+
+function detectVideoEmbed(url: string): VideoEmbed | null {
+  const ytId = extractYouTubeId(url);
+  if (ytId) return { platform: 'youtube', embedUrl: `https://www.youtube.com/embed/${ytId}?autoplay=1&playsinline=1` };
+
+  try {
+    const u = new URL(url);
+    // TikTok
+    const tiktokMatch = u.pathname.match(/\/@[^/]+\/video\/(\d+)/);
+    if (u.hostname.includes('tiktok.com') && tiktokMatch) {
+      return { platform: 'tiktok', embedUrl: `https://www.tiktok.com/embed/v2/${tiktokMatch[1]}` };
+    }
+    // Instagram
+    const instaMatch = u.pathname.match(/\/(?:reel|p)\/([A-Za-z0-9_-]+)/);
+    if (u.hostname.includes('instagram.com') && instaMatch) {
+      return { platform: 'instagram', embedUrl: `https://www.instagram.com/p/${instaMatch[1]}/embed` };
+    }
+    // Twitch clips
+    const twitchClip = url.match(/clips\.twitch\.tv\/([A-Za-z0-9_-]+)/) || u.pathname.match(/\/clip\/([A-Za-z0-9_-]+)/);
+    if (u.hostname.includes('twitch.tv') && twitchClip) {
+      return { platform: 'twitch', embedUrl: `https://clips.twitch.tv/embed?clip=${twitchClip[1]}&parent=localhost` };
+    }
+  } catch { /* ignore */ }
+  return null;
+}
+
 interface LinkPreviewProps {
   content: string;
 }
@@ -222,6 +255,7 @@ export const LinkPreview = memo(function LinkPreview({ content }: LinkPreviewPro
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
   const [imgError, setImgError] = useState(false);
+  const [playing, setPlaying] = useState(false);
   const shimmerAnim = useMemo(() => new Animated.Value(0), []);
 
   const url = extractFirstUrl(content);
@@ -337,6 +371,45 @@ export const LinkPreview = memo(function LinkPreview({ content }: LinkPreviewPro
     skeletonInfo: {
       padding: 12,
     },
+    videoContainer: {
+      marginTop: 10,
+      marginBottom: 8,
+      borderRadius: 6,
+      overflow: 'hidden',
+      backgroundColor: '#000',
+    },
+    videoWebView: {
+      height: 220,
+      backgroundColor: '#000',
+    },
+    videoWebViewVertical: {
+      height: 400,
+    },
+    playOverlay: {
+      ...StyleSheet.absoluteFillObject,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: 'rgba(0,0,0,0.35)',
+    },
+    playButton: {
+      width: 56,
+      height: 56,
+      borderRadius: 28,
+      backgroundColor: 'rgba(0,0,0,0.7)',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    playTriangle: {
+      width: 0,
+      height: 0,
+      borderLeftWidth: 18,
+      borderTopWidth: 11,
+      borderBottomWidth: 11,
+      borderLeftColor: '#fff',
+      borderTopColor: 'transparent',
+      borderBottomColor: 'transparent',
+      marginLeft: 4,
+    },
   }), [colors]);
 
   if (!url || error) return null;
@@ -360,6 +433,24 @@ export const LinkPreview = memo(function LinkPreview({ content }: LinkPreviewPro
 
   if (!ogData) return null;
 
+  const videoEmbed = url ? detectVideoEmbed(url) : null;
+
+  // If playing, show embedded video
+  if (videoEmbed && playing) {
+    const isVertical = videoEmbed.platform === 'tiktok';
+    return (
+      <View style={styles.videoContainer}>
+        <WebView
+          source={{ uri: videoEmbed.embedUrl }}
+          style={[styles.videoWebView, isVertical && styles.videoWebViewVertical]}
+          allowsInlineMediaPlayback
+          mediaPlaybackRequiresUserAction={false}
+          javaScriptEnabled
+        />
+      </View>
+    );
+  }
+
   const displayDomain = (() => {
     try {
       return new URL(ogData.url).hostname.replace(/^www\./, '');
@@ -371,15 +462,30 @@ export const LinkPreview = memo(function LinkPreview({ content }: LinkPreviewPro
   return (
     <Pressable
       style={styles.card}
-      onPress={() => Linking.openURL(ogData.url)}
+      onPress={() => {
+        if (videoEmbed) {
+          setPlaying(true);
+        } else {
+          Linking.openURL(ogData.url);
+        }
+      }}
     >
       {ogData.image && !imgError && (
-        <Image
-          source={{ uri: ogData.image }}
-          style={styles.image}
-          resizeMode="cover"
-          onError={() => setImgError(true)}
-        />
+        <View>
+          <Image
+            source={{ uri: ogData.image }}
+            style={styles.image}
+            resizeMode="cover"
+            onError={() => setImgError(true)}
+          />
+          {videoEmbed && (
+            <View style={styles.playOverlay}>
+              <View style={styles.playButton}>
+                <View style={styles.playTriangle} />
+              </View>
+            </View>
+          )}
+        </View>
       )}
       <View style={styles.info}>
         <View style={styles.siteRow}>

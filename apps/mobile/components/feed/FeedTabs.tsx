@@ -13,10 +13,10 @@ interface FeedTabsProps {
 
 const TABS: { key: FeedTab; label: string }[] = [
   { key: 'latest', label: 'Latest' },
+  { key: 'mySchool', label: 'My School' },
   { key: 'top', label: 'Top Takes' },
   { key: 'receipts', label: 'Receipts' },
   { key: 'following', label: 'Following' },
-  { key: 'mySchool', label: 'My School' },
 ];
 
 export function FeedTabs({ activeTab, onTabChange }: FeedTabsProps) {

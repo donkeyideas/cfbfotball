@@ -7,6 +7,7 @@ import { BallotButtons } from './BallotButtons';
 import { PostActions } from './PostActions';
 import { ReportModal } from '../moderation/ReportModal';
 import { LinkPreview, extractFirstUrl, stripFirstUrl } from './LinkPreview';
+import { PostContent } from './PostContent';
 import { useColors } from '@/lib/theme/ThemeProvider';
 import { typography } from '@/lib/theme/typography';
 import { timeAgo } from '@/lib/utils/timeAgo';
@@ -150,7 +151,9 @@ export const SidelineReportCard = memo(function SidelineReportCard({ post, isDet
         </Pressable>
 
         {/* Post text — tap navigates, long-press selects */}
-        <Text style={styles.content} selectable onPress={navigate}>{extractFirstUrl(post.content) ? stripFirstUrl(post.content) : post.content}</Text>
+        <Pressable onPress={navigate}>
+          <PostContent content={extractFirstUrl(post.content) ? stripFirstUrl(post.content) : post.content} style={styles.content} />
+        </Pressable>
 
         <LinkPreview content={post.content} />
 

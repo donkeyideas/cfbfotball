@@ -6,6 +6,7 @@ import { BallotButtons } from './BallotButtons';
 import { PostActions } from './PostActions';
 import { ReportModal } from '../moderation/ReportModal';
 import { LinkPreview, extractFirstUrl, stripFirstUrl } from './LinkPreview';
+import { PostContent } from './PostContent';
 import { useColors } from '@/lib/theme/ThemeProvider';
 import { typography } from '@/lib/theme/typography';
 import { withAlpha } from '@/lib/theme/utils';
@@ -222,10 +223,14 @@ export const NewspaperClippingCard = memo(function NewspaperClippingCard({ post,
 
       {/* Post text — tap navigates, long-press selects */}
       {headline && (
-        <Text style={styles.headline} selectable onPress={navigate}>{headline}</Text>
+        <Pressable onPress={navigate}>
+          <PostContent content={headline} style={styles.headline} />
+        </Pressable>
       )}
       {body ? (
-        <Text style={styles.content} selectable onPress={navigate}>{body}</Text>
+        <Pressable onPress={navigate}>
+          <PostContent content={body} style={styles.content} />
+        </Pressable>
       ) : null}
 
       <LinkPreview content={post.content} />

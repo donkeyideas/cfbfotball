@@ -102,9 +102,9 @@ export function Masthead({ onMenuToggle, menuOpen }: MastheadProps) {
               </a>
             )}
             <ThemeToggle />
-            <button className="masthead-btn" aria-label="Search">
+            <Link href="/search" className="masthead-btn" aria-label="Search">
               <Search className="h-4 w-4" />
-            </button>
+            </Link>
             {isLoggedIn === true ? (
               <>
                 <NotificationBell />

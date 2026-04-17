@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Modal,
   StyleSheet,
@@ -20,6 +20,8 @@ import { typography } from '@/lib/theme/typography';
 import { useColors } from '@/lib/theme/ThemeProvider';
 import { MAX_POST_CHARS } from '@/lib/constants';
 import { LinkPreview, extractFirstUrl } from './LinkPreview';
+import { GifPicker } from './GifPicker';
+import { Avatar } from '@/components/ui/Avatar';
 
 type PostType = 'STANDARD' | 'RECEIPT' | 'PREDICTION' | 'SIDELINE' | 'AGING_TAKE';
 
@@ -38,6 +40,26 @@ const POST_TYPES: { key: PostType; label: string }[] = [
 
 const MAX_CHARS = MAX_POST_CHARS;
 
+interface MentionProfile {
+  id: string;
+  username: string;
+  display_name: string | null;
+  avatar_url: string | null;
+}
+
+/**
+ * Extracts the @mention query at the given cursor position.
+ * Returns the partial text after @ (e.g. "joh" from "hey @joh") or null if not in a mention.
+ */
+function getMentionQuery(text: string, cursor: number): string | null {
+  const before = text.slice(0, cursor);
+  const match = before.match(/@([a-zA-Z0-9_]{0,30})$/);
+  if (!match) return null;
+  const atIndex = before.length - match[0].length;
+  if (atIndex > 0 && !/\s/.test(before[atIndex - 1]!)) return null;
+  return match[1]!;
+}
+
 export function PostComposer({ visible, onClose, onPostCreated }: PostComposerProps) {
   const colors = useColors();
   const { session, userId, profile } = useAuth();
@@ -50,6 +72,80 @@ export function PostComposer({ visible, onClose, onPostCreated }: PostComposerPr
   const [sidelineGame, setSidelineGame] = useState('');
   const [sidelineQuarter, setSidelineQuarter] = useState('');
   const [sidelineTime, setSidelineTime] = useState('');
+  const [gifPickerVisible, setGifPickerVisible] = useState(false);
+
+  // Mention autocomplete state
+  const [mentionQuery, setMentionQuery] = useState<string | null>(null);
+  const [mentionResults, setMentionResults] = useState<MentionProfile[]>([]);
+  const [mentionActive, setMentionActive] = useState(false);
+  const cursorRef = useRef(0);
+  const mentionDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Debounce URL extraction to prevent LinkPreview flickering on paste/type
+  const [debouncedUrl, setDebouncedUrl] = useState<string | null>(null);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedUrl(extractFirstUrl(content));
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [content]);
+
+  // Search profiles when mentionQuery changes
+  useEffect(() => {
+    if (mentionDebounceRef.current) clearTimeout(mentionDebounceRef.current);
+
+    if (mentionQuery === null || mentionQuery.length === 0) {
+      setMentionResults([]);
+      setMentionActive(false);
+      return;
+    }
+
+    mentionDebounceRef.current = setTimeout(async () => {
+      const q = mentionQuery.toLowerCase();
+      const { data } = await supabase
+        .from('profiles')
+        .select('id, username, display_name, avatar_url')
+        .or(`username.ilike.%${q}%,display_name.ilike.%${q}%`)
+        .limit(6);
+
+      if (data && data.length > 0) {
+        setMentionResults(data as MentionProfile[]);
+        setMentionActive(true);
+      } else {
+        setMentionResults([]);
+        setMentionActive(false);
+      }
+    }, 250);
+
+    return () => {
+      if (mentionDebounceRef.current) clearTimeout(mentionDebounceRef.current);
+    };
+  }, [mentionQuery]);
+
+  const handleSelectionChange = useCallback((e: { nativeEvent: { selection: { start: number; end: number } } }) => {
+    cursorRef.current = e.nativeEvent.selection.start;
+  }, []);
+
+  const handleContentChange = useCallback((text: string) => {
+    setContent(text);
+    // Use end-of-text as effective cursor for typing detection
+    const query = getMentionQuery(text, text.length);
+    setMentionQuery(query);
+  }, []);
+
+  const handleMentionSelect = useCallback((username: string) => {
+    const cursor = content.length;
+    const before = content.slice(0, cursor);
+    const match = before.match(/@([a-zA-Z0-9_]{0,30})$/);
+    if (!match) return;
+
+    const atStart = before.length - match[0].length;
+    const newContent = content.slice(0, atStart) + `@${username} ` + content.slice(cursor);
+    setContent(newContent);
+    setMentionQuery(null);
+    setMentionResults([]);
+    setMentionActive(false);
+  }, [content]);
 
   const styles = useMemo(() => StyleSheet.create({
     overlay: {
@@ -149,6 +245,42 @@ export function PostComposer({ visible, onClose, onPostCreated }: PostComposerPr
       color: colors.textPrimary,
       minHeight: 120,
       textAlignVertical: 'top',
+    },
+
+    // Mention autocomplete
+    mentionList: {
+      maxHeight: 200,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 6,
+      backgroundColor: colors.surfaceRaised,
+      marginBottom: 10,
+    },
+    mentionItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 10,
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+    },
+    mentionItemLast: {
+      borderBottomWidth: 0,
+    },
+    mentionInfo: {
+      flex: 1,
+    },
+    mentionUsername: {
+      fontFamily: typography.mono,
+      fontSize: 13,
+      color: colors.textPrimary,
+      fontWeight: '600',
+    },
+    mentionDisplayName: {
+      fontFamily: typography.sans,
+      fontSize: 12,
+      color: colors.textSecondary,
     },
 
     // Sideline fields
@@ -262,6 +394,9 @@ export function PostComposer({ visible, onClose, onPostCreated }: PostComposerPr
     setSidelineGame('');
     setSidelineQuarter('');
     setSidelineTime('');
+    setMentionQuery(null);
+    setMentionResults([]);
+    setMentionActive(false);
     onPostCreated();
     onClose();
   };
@@ -272,6 +407,9 @@ export function PostComposer({ visible, onClose, onPostCreated }: PostComposerPr
     setSidelineGame('');
     setSidelineQuarter('');
     setSidelineTime('');
+    setMentionQuery(null);
+    setMentionResults([]);
+    setMentionActive(false);
     onClose();
   };
 
@@ -285,7 +423,7 @@ export function PostComposer({ visible, onClose, onPostCreated }: PostComposerPr
       onRequestClose={handleClose}
     >
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         style={styles.overlay}
       >
         <Pressable style={styles.backdrop} onPress={handleClose} />
@@ -324,7 +462,7 @@ export function PostComposer({ visible, onClose, onPostCreated }: PostComposerPr
             </View>
           ) : (
             /* Press box composer */
-            <ScrollView style={styles.composerBody} keyboardShouldPersistTaps="handled">
+            <ScrollView style={styles.composerBody} keyboardShouldPersistTaps="always">
               {/* Dashed border press box frame */}
               <View style={styles.pressBox}>
                 <Text style={styles.pressBoxLabel}>FILE YOUR REPORT</Text>
@@ -336,13 +474,44 @@ export function PostComposer({ visible, onClose, onPostCreated }: PostComposerPr
                   multiline
                   maxLength={MAX_CHARS}
                   value={content}
-                  onChangeText={setContent}
+                  onChangeText={handleContentChange}
+                  onSelectionChange={handleSelectionChange}
                   autoFocus
                 />
               </View>
 
+              {/* Mention autocomplete suggestions */}
+              {mentionActive && mentionResults.length > 0 && (
+                <View style={styles.mentionList}>
+                  {mentionResults.map((item, idx) => (
+                    <Pressable
+                      key={item.id}
+                      style={[
+                        styles.mentionItem,
+                        idx === mentionResults.length - 1 && styles.mentionItemLast,
+                      ]}
+                      onPress={() => handleMentionSelect(item.username)}
+                    >
+                      <Avatar
+                        url={item.avatar_url}
+                        name={item.display_name || item.username}
+                        size={32}
+                      />
+                      <View style={styles.mentionInfo}>
+                        <Text style={styles.mentionUsername}>@{item.username}</Text>
+                        {item.display_name && (
+                          <Text style={styles.mentionDisplayName} numberOfLines={1}>
+                            {item.display_name}
+                          </Text>
+                        )}
+                      </View>
+                    </Pressable>
+                  ))}
+                </View>
+              )}
+
               {/* Link preview while composing */}
-              {extractFirstUrl(content) && <LinkPreview content={content} />}
+              {debouncedUrl && <LinkPreview content={content} />}
 
               {/* Sideline report fields (Photo type) */}
               {postType === 'SIDELINE' && (
@@ -403,6 +572,12 @@ export function PostComposer({ visible, onClose, onPostCreated }: PostComposerPr
                       </Pressable>
                     );
                   })}
+                  <Pressable
+                    style={styles.tool}
+                    onPress={() => setGifPickerVisible(true)}
+                  >
+                    <Text style={styles.toolText}>GIF</Text>
+                  </Pressable>
                 </View>
 
                 {/* Char count */}
@@ -431,6 +606,13 @@ export function PostComposer({ visible, onClose, onPostCreated }: PostComposerPr
           )}
         </View>
       </KeyboardAvoidingView>
+      <GifPicker
+        visible={gifPickerVisible}
+        onClose={() => setGifPickerVisible(false)}
+        onSelect={(url) =>
+          setContent((prev) => (prev.trim() ? `${prev.trim()}\n${url}` : url))
+        }
+      />
     </Modal>
   );
 }

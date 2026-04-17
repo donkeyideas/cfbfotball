@@ -1,14 +1,35 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/components/auth/AuthProvider';
 import type { PostType } from '@cfb-social/types';
 import { LinkPreview, extractFirstUrl } from './LinkPreview';
 import { GifPicker } from './GifPicker';
 import { revalidateFeed } from '@/lib/actions/feed';
+
+interface MentionProfile {
+  id: string;
+  username: string;
+  display_name: string | null;
+  avatar_url: string | null;
+}
+
+/**
+ * Extracts the @mention query at the given cursor position.
+ * Returns the partial text after @ or null if not in a mention.
+ */
+function getMentionQuery(text: string, cursor: number): string | null {
+  const before = text.slice(0, cursor);
+  const match = before.match(/@([a-zA-Z0-9_]{0,30})$/);
+  if (!match) return null;
+  const atIndex = before.length - match[0].length;
+  if (atIndex > 0 && !/\s/.test(before[atIndex - 1]!)) return null;
+  return match[1]!;
+}
 
 export function PostComposer() {
   const router = useRouter();
@@ -20,6 +41,110 @@ export function PostComposer() {
   const [sidelineQuarter, setSidelineQuarter] = useState('');
   const [sidelineTime, setSidelineTime] = useState('');
   const [gifPickerOpen, setGifPickerOpen] = useState(false);
+
+  // Mention autocomplete state
+  const [mentionQuery, setMentionQuery] = useState<string | null>(null);
+  const [mentionResults, setMentionResults] = useState<MentionProfile[]>([]);
+  const [mentionActive, setMentionActive] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const mentionDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Search profiles when mentionQuery changes
+  useEffect(() => {
+    if (mentionDebounceRef.current) clearTimeout(mentionDebounceRef.current);
+
+    if (mentionQuery === null || mentionQuery.length === 0) {
+      setMentionResults([]);
+      setMentionActive(false);
+      return;
+    }
+
+    mentionDebounceRef.current = setTimeout(async () => {
+      const supabase = createClient();
+      const q = mentionQuery.toLowerCase();
+      const { data } = await supabase
+        .from('profiles')
+        .select('id, username, display_name, avatar_url')
+        .or(`username.ilike.%${q}%,display_name.ilike.%${q}%`)
+        .limit(6);
+
+      if (data && data.length > 0) {
+        setMentionResults(data as MentionProfile[]);
+        setMentionActive(true);
+        setActiveIndex(0);
+      } else {
+        setMentionResults([]);
+        setMentionActive(false);
+      }
+    }, 250);
+
+    return () => {
+      if (mentionDebounceRef.current) clearTimeout(mentionDebounceRef.current);
+    };
+  }, [mentionQuery]);
+
+  const checkForMention = useCallback(() => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+    const cursor = textarea.selectionStart;
+    const query = getMentionQuery(textarea.value, cursor);
+    setMentionQuery(query);
+  }, []);
+
+  const insertMention = useCallback((username: string) => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    const cursor = textarea.selectionStart;
+    const before = content.slice(0, cursor);
+    const match = before.match(/@([a-zA-Z0-9_]{0,30})$/);
+    if (!match) return;
+
+    const atStart = before.length - match[0].length;
+    const after = content.slice(cursor);
+    const newContent = content.slice(0, atStart) + `@${username} ` + after;
+    setContent(newContent);
+    setMentionQuery(null);
+    setMentionResults([]);
+    setMentionActive(false);
+
+    // Restore focus and move cursor after the inserted mention
+    requestAnimationFrame(() => {
+      if (textareaRef.current) {
+        const newCursor = atStart + username.length + 2; // @username + space
+        textareaRef.current.focus();
+        textareaRef.current.setSelectionRange(newCursor, newCursor);
+      }
+    });
+  }, [content]);
+
+  const handleTextareaChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setContent(e.target.value);
+    // Check for mention after React state update
+    requestAnimationFrame(() => {
+      checkForMention();
+    });
+  }, [checkForMention]);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (!mentionActive || mentionResults.length === 0) return;
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setActiveIndex((prev) => (prev + 1) % mentionResults.length);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setActiveIndex((prev) => (prev - 1 + mentionResults.length) % mentionResults.length);
+    } else if (e.key === 'Enter' || e.key === 'Tab') {
+      e.preventDefault();
+      const selected = mentionResults[activeIndex];
+      if (selected) insertMention(selected.username);
+    } else if (e.key === 'Escape') {
+      setMentionActive(false);
+      setMentionResults([]);
+    }
+  }, [mentionActive, mentionResults, activeIndex, insertMention]);
 
   if (isLoggedIn === false) {
     return (
@@ -75,6 +200,9 @@ export function PostComposer() {
       setSidelineGame('');
       setSidelineQuarter('');
       setSidelineTime('');
+      setMentionQuery(null);
+      setMentionResults([]);
+      setMentionActive(false);
       await revalidateFeed();
       router.refresh();
 
@@ -98,14 +226,58 @@ export function PostComposer() {
 
   return (
     <form onSubmit={handleSubmit} className="composer">
-      <textarea
-        value={content}
-        onChange={(e) => setContent(e.target.value)}
-        placeholder="File your report from the press box..."
-        maxLength={3000}
-        className="composer-input"
-        rows={3}
-      />
+      <div style={{ position: 'relative' }}>
+        <textarea
+          ref={textareaRef}
+          value={content}
+          onChange={handleTextareaChange}
+          onKeyDown={handleKeyDown}
+          onSelect={checkForMention}
+          placeholder="File your report from the press box..."
+          maxLength={3000}
+          className="composer-input"
+          rows={3}
+        />
+
+        {/* Mention autocomplete dropdown */}
+        {mentionActive && mentionResults.length > 0 && (
+          <div className="mention-dropdown" style={{ top: '100%', marginTop: 4 }}>
+            {mentionResults.map((user, idx) => (
+              <button
+                key={user.id}
+                type="button"
+                className="mention-dropdown-item"
+                data-active={idx === activeIndex ? 'true' : undefined}
+                onMouseDown={(e) => {
+                  e.preventDefault(); // prevent textarea blur
+                  insertMention(user.username);
+                }}
+                onMouseEnter={() => setActiveIndex(idx)}
+              >
+                {user.avatar_url ? (
+                  <Image
+                    src={user.avatar_url}
+                    alt={user.username}
+                    width={32}
+                    height={32}
+                    className="mention-dropdown-avatar"
+                  />
+                ) : (
+                  <span className="mention-dropdown-avatar-fallback">
+                    {(user.display_name || user.username)[0]?.toUpperCase()}
+                  </span>
+                )}
+                <span className="mention-dropdown-info">
+                  <span className="mention-dropdown-username">@{user.username}</span>
+                  {user.display_name && (
+                    <span className="mention-dropdown-name">{user.display_name}</span>
+                  )}
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
 
       <div style={{ textAlign: 'right', fontFamily: 'var(--mono)', fontSize: '0.65rem', color: content.length > 2800 ? 'var(--crimson)' : 'var(--text-muted)', marginTop: 4 }}>
         {content.length.toLocaleString()}/3,000

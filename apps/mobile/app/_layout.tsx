@@ -70,6 +70,7 @@ function AppShell() {
             <Stack.Screen name="hall-of-fame" options={{ headerShown: false }} />
             <Stack.Screen name="mascot-wars" options={{ headerShown: false }} />
             <Stack.Screen name="recruiting" options={{ headerShown: false }} />
+            <Stack.Screen name="search" options={{ headerShown: false }} />
             <Stack.Screen name="coaches-call" options={{ headerShown: false }} />
             <Stack.Screen name="vault" options={{ headerShown: false }} />
             <Stack.Screen name="features" options={{ headerShown: false }} />
