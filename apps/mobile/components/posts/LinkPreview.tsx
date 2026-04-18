@@ -314,10 +314,13 @@ function detectVideoEmbed(url: string): VideoEmbed | null {
       const shortId = u.pathname.replace(/^\//, '').split('/')[0];
       if (shortId) return { platform: 'tiktok', embedUrl: url };
     }
-    // Instagram
-    const instaPost = u.pathname.match(/\/(?:reels?|p)\/([A-Za-z0-9_-]+)/);
-    if (u.hostname.includes('instagram.com') && instaPost) {
-      return { platform: 'instagram', embedUrl: `https://www.instagram.com/p/${instaPost[1]}/embed` };
+    // Instagram — reels use /reel/{id}/embed, posts use /p/{id}/embed
+    const instaReel = u.pathname.match(/\/reels?\/([A-Za-z0-9_-]+)/);
+    const instaPost = u.pathname.match(/\/p\/([A-Za-z0-9_-]+)/);
+    if (u.hostname.includes('instagram.com') && (instaReel || instaPost)) {
+      const id = instaReel ? instaReel[1] : instaPost![1];
+      const type = instaReel ? 'reel' : 'p';
+      return { platform: 'instagram', embedUrl: `https://www.instagram.com/${type}/${id}/embed/` };
     }
     // Twitch clips
     const twitchClip = url.match(/clips\.twitch\.tv\/([A-Za-z0-9_-]+)/) || u.pathname.match(/\/clip\/([A-Za-z0-9_-]+)/);
@@ -339,6 +342,7 @@ export const LinkPreview = memo(function LinkPreview({ content }: LinkPreviewPro
   const [error, setError] = useState(false);
   const [imgError, setImgError] = useState(false);
   const [playing, setPlaying] = useState(false);
+  const [embedHeight, setEmbedHeight] = useState<number | null>(null);
   const shimmerAnim = useMemo(() => new Animated.Value(0), []);
 
   const url = extractFirstUrl(content);
@@ -562,19 +566,53 @@ export const LinkPreview = memo(function LinkPreview({ content }: LinkPreviewPro
       );
     }
 
-    // Instagram — iframe wrapper
+    // HTML wrapper approach: embed the URL in a tall iframe (2000px) inside
+    // a wrapper page. The iframe gives the embed plenty of room to layout,
+    // pushing comments far below. The outer RN View clips at the desired
+    // height, so only the header + video are visible.
+    // This avoids the Android issue where direct WebView loading renders
+    // content at the clipped height, squishing everything together.
+
+    const handleHeightMessage = (event: { nativeEvent: { data: string } }) => {
+      try {
+        const data = JSON.parse(event.nativeEvent.data);
+        if (data.type === 'height' && data.height > 150 && data.height < 800) {
+          setEmbedHeight(data.height);
+        }
+      } catch {}
+    };
+
+    function buildEmbedWrapper(embedUrl: string, ua?: string): string {
+      return `<!DOCTYPE html><html><head>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<style>
+*{margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden;background:transparent}
+iframe{width:100%;height:2000px;border:none}
+</style></head><body>
+<iframe src="${embedUrl}" scrolling="no" allowfullscreen
+ allow="autoplay;encrypted-media" referrerpolicy="no-referrer-when-downgrade"></iframe>
+<script>
+// Listen for postMessage height events from embed (Instagram sometimes sends these)
+window.addEventListener('message',function(e){
+  try{
+    var d=typeof e.data==='string'?JSON.parse(e.data):e.data;
+    if(d&&d.details&&d.details.height){
+      window.ReactNativeWebView.postMessage(JSON.stringify({type:'height',height:Math.ceil(d.details.height)}));
+    }
+  }catch(ex){}
+});
+</script></body></html>`;
+    }
+
+    // Instagram — iframe wrapper, outer View clips below video
     if (videoEmbed.platform === 'instagram') {
-      const instaHtml = `<!DOCTYPE html><html><head>
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<style>*{margin:0;padding:0;overflow:hidden}body{background:${colors.surface}}iframe{width:100%;height:100%;border:none}</style>
-</head><body>
-<iframe src="${videoEmbed.embedUrl}" scrolling="no" allowtransparency="true" allowfullscreen></iframe>
-</body></html>`;
+      const clipHeight = embedHeight || 480;
       return (
-        <View style={styles.videoContainer}>
+        <View style={[styles.videoContainer, { height: clipHeight }]}>
           <WebView
-            source={{ html: instaHtml }}
-            style={{ height: 480, backgroundColor: colors.surface }}
+            source={{ html: buildEmbedWrapper(videoEmbed.embedUrl) }}
+            style={{ flex: 1, backgroundColor: colors.surface }}
             allowsInlineMediaPlayback
             mediaPlaybackRequiresUserAction={false}
             javaScriptEnabled
@@ -582,25 +620,21 @@ export const LinkPreview = memo(function LinkPreview({ content }: LinkPreviewPro
             allowsFullscreenVideo
             originWhitelist={['*']}
             mixedContentMode="always"
-            scrollEnabled
+            scrollEnabled={false}
+            onMessage={handleHeightMessage}
           />
         </View>
       );
     }
 
-    // TikTok — iframe wrapper
+    // TikTok — iframe wrapper, outer View clips below video
     if (videoEmbed.platform === 'tiktok') {
-      const tiktokHtml = `<!DOCTYPE html><html><head>
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<style>*{margin:0;padding:0;overflow:hidden}body{background:${colors.surface}}iframe{width:100%;height:100%;border:none}</style>
-</head><body>
-<iframe src="${videoEmbed.embedUrl}" scrolling="no" allow="autoplay" allowfullscreen></iframe>
-</body></html>`;
+      const clipHeight = embedHeight || 500;
       return (
-        <View style={styles.videoContainer}>
+        <View style={[styles.videoContainer, { height: clipHeight }]}>
           <WebView
-            source={{ html: tiktokHtml }}
-            style={{ height: 680, backgroundColor: colors.surface }}
+            source={{ html: buildEmbedWrapper(videoEmbed.embedUrl) }}
+            style={{ flex: 1, backgroundColor: colors.surface }}
             allowsInlineMediaPlayback
             mediaPlaybackRequiresUserAction={false}
             javaScriptEnabled
@@ -608,29 +642,32 @@ export const LinkPreview = memo(function LinkPreview({ content }: LinkPreviewPro
             allowsFullscreenVideo
             originWhitelist={['*']}
             mixedContentMode="always"
-            scrollEnabled
+            scrollEnabled={false}
             userAgent="Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
+            onMessage={handleHeightMessage}
           />
         </View>
       );
     }
 
-    // Twitch and other platforms — load embed URL directly
-    return (
-      <View style={styles.videoContainer}>
-        <WebView
-          source={{ uri: videoEmbed.embedUrl }}
-          style={{ height: 220, backgroundColor: colors.surface }}
-          allowsInlineMediaPlayback
-          mediaPlaybackRequiresUserAction={false}
-          javaScriptEnabled
-          domStorageEnabled
-          allowsFullscreenVideo
-          originWhitelist={['*']}
-          mixedContentMode="always"
-        />
-      </View>
-    );
+    // Twitch — load embed URL directly
+    if (videoEmbed.platform === 'twitch') {
+      return (
+        <View style={styles.videoContainer}>
+          <WebView
+            source={{ uri: videoEmbed.embedUrl }}
+            style={{ height: 220, backgroundColor: colors.surface }}
+            allowsInlineMediaPlayback
+            mediaPlaybackRequiresUserAction={false}
+            javaScriptEnabled
+            domStorageEnabled
+            allowsFullscreenVideo
+            originWhitelist={['*']}
+            mixedContentMode="always"
+          />
+        </View>
+      );
+    }
   }
 
   const displayDomain = (() => {

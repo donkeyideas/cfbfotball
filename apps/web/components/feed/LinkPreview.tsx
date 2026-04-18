@@ -1,12 +1,19 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 // ---- Video embed detection ----
 
 interface VideoEmbed {
   platform: 'youtube' | 'instagram' | 'tiktok' | 'twitch';
   embedUrl: string;
+}
+
+function isTwitterUrl(url: string): boolean {
+  try {
+    const h = new URL(url).hostname;
+    return h === 'twitter.com' || h === 'www.twitter.com' || h === 'x.com' || h === 'www.x.com';
+  } catch { return false; }
 }
 
 function extractYouTubeId(url: string): string | null {
@@ -37,9 +44,13 @@ function detectVideoEmbed(url: string): VideoEmbed | null {
       const shortId = u.pathname.replace(/^\//, '').split('/')[0];
       if (shortId) return { platform: 'tiktok', embedUrl: url };
     }
-    const instaPost = u.pathname.match(/\/(?:reels?|p)\/([A-Za-z0-9_-]+)/);
-    if (u.hostname.includes('instagram.com') && instaPost) {
-      return { platform: 'instagram', embedUrl: `https://www.instagram.com/p/${instaPost[1]}/embed` };
+    // Instagram — reels use /reel/{id}/embed, posts use /p/{id}/embed
+    const instaReel = u.pathname.match(/\/reels?\/([A-Za-z0-9_-]+)/);
+    const instaPost = u.pathname.match(/\/p\/([A-Za-z0-9_-]+)/);
+    if (u.hostname.includes('instagram.com') && (instaReel || instaPost)) {
+      const id = instaReel ? instaReel[1] : instaPost![1];
+      const type = instaReel ? 'reel' : 'p';
+      return { platform: 'instagram', embedUrl: `https://www.instagram.com/${type}/${id}/embed/` };
     }
     const twitchClip = url.match(/clips\.twitch\.tv\/([A-Za-z0-9_-]+)/) || u.pathname.match(/\/clip\/([A-Za-z0-9_-]+)/);
     if (u.hostname.includes('twitch.tv') && twitchClip) {
@@ -108,12 +119,14 @@ export function LinkPreview({ content }: { content: string }) {
   const url = extractFirstUrl(content);
   const videoEmbed = useMemo(() => url ? detectVideoEmbed(url) : null, [url]);
   const gifUrl = useMemo(() => url ? extractGifUrl(url) : null, [url]);
+  const isTweet = useMemo(() => url ? isTwitterUrl(url) : false, [url]);
 
   useEffect(() => {
     if (!url) return;
 
-    // Skip OG fetch for GIF URLs — they render directly
+    // Skip OG fetch for GIF URLs and Twitter — they render directly
     if (extractGifUrl(url)) return;
+    if (isTwitterUrl(url)) return;
 
     // Check cache first (only successes are cached)
     const cached = ogCache.get(url);
@@ -152,8 +165,8 @@ export function LinkPreview({ content }: { content: string }) {
   }, [url]);
 
   if (!url) return null;
-  // Only hide on error for non-video embeds; video embeds show a play button regardless
-  if (error && !videoEmbed) return null;
+  // Only hide on error for non-video/non-tweet embeds
+  if (error && !videoEmbed && !isTweet) return null;
 
   // Fallback OG data for video embeds when OG fetch failed
   const platformNames: Record<string, string> = { youtube: 'YouTube', instagram: 'Instagram', tiktok: 'TikTok', twitch: 'Twitch' };
@@ -191,20 +204,31 @@ export function LinkPreview({ content }: { content: string }) {
     );
   }
 
+  // Twitter/X: render native embed immediately (before effectiveOgData check since we skip OG fetch)
+  if (isTweet) {
+    return <TwitterNativeEmbed tweetUrl={url!} />;
+  }
+
   if (!effectiveOgData) return null;
 
-  // If playing, show embedded iframe
+  // If playing, show embedded content
   if (videoEmbed && playing) {
-    const isVertical = videoEmbed.platform === 'tiktok' || videoEmbed.platform === 'instagram';
+    // Instagram: use native embed (blockquote + embed.js) for automatic sizing
+    if (videoEmbed.platform === 'instagram') {
+      return <InstagramNativeEmbed embedUrl={videoEmbed.embedUrl} />;
+    }
+
+    const isVertical = videoEmbed.platform === 'tiktok';
     return (
       <div
         className="link-preview link-preview-video-embed"
         onClick={(e) => e.stopPropagation()}
         style={{
-          aspectRatio: isVertical ? undefined : '16/9',
-          height: isVertical ? 800 : undefined,
-          maxWidth: isVertical ? 480 : undefined,
+          aspectRatio: isVertical ? '9/16' : '16/9',
+          maxHeight: isVertical ? 700 : undefined,
+          maxWidth: isVertical ? 400 : undefined,
           margin: isVertical ? '0 auto' : undefined,
+          overflow: 'hidden',
         }}
       >
         <iframe
@@ -213,7 +237,12 @@ export function LinkPreview({ content }: { content: string }) {
           allowFullScreen
           scrolling="no"
           sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-presentation"
-          style={{ width: '100%', height: '100%', border: 'none', borderRadius: 6, overflow: 'hidden' }}
+          style={{
+            width: '100%',
+            height: '100%',
+            border: 'none',
+            borderRadius: 6,
+          }}
         />
       </div>
     );
@@ -329,5 +358,131 @@ export function LinkPreview({ content }: { content: string }) {
         )}
       </div>
     </div>
+  );
+}
+
+// Instagram native embed — uses blockquote + embed.js for auto-sizing
+function InstagramNativeEmbed({ embedUrl }: { embedUrl: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const permalink = embedUrl.replace(/\/embed\/?$/, '/');
+
+  useEffect(() => {
+    const container = ref.current;
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    const blockquote = document.createElement('blockquote');
+    blockquote.className = 'instagram-media';
+    blockquote.dataset.instgrmPermalink = permalink;
+    blockquote.dataset.instgrmVersion = '14';
+    blockquote.style.width = '100%';
+    blockquote.style.maxWidth = '540px';
+    blockquote.style.margin = '0 auto';
+    blockquote.style.padding = '0';
+    container.appendChild(blockquote);
+
+    const w = window as Window & { instgrm?: { Embeds: { process: () => void } } };
+    if (w.instgrm) {
+      w.instgrm.Embeds.process();
+    } else if (!document.querySelector('script[src*="instagram.com/embed.js"]')) {
+      const script = document.createElement('script');
+      script.src = 'https://www.instagram.com/embed.js';
+      script.async = true;
+      document.body.appendChild(script);
+    }
+  }, [permalink]);
+
+  return (
+    <div
+      ref={ref}
+      className="link-preview"
+      onClick={(e) => e.stopPropagation()}
+      style={{ border: 'none', background: 'transparent', overflow: 'visible', display: 'flex', justifyContent: 'center' }}
+    />
+  );
+}
+
+// Extract tweet ID from a twitter.com or x.com URL
+function extractTweetId(url: string): string | null {
+  try {
+    const m = new URL(url).pathname.match(/\/status\/(\d+)/);
+    return m ? m[1] : null;
+  } catch { return null; }
+}
+
+type TwttrWidgets = { createTweet: (id: string, el: HTMLElement, opts: Record<string, unknown>) => Promise<HTMLElement | undefined> };
+
+// Twitter/X native embed — uses widgets.js createTweet for reliable rendering
+function TwitterNativeEmbed({ tweetUrl }: { tweetUrl: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const tweetId = extractTweetId(tweetUrl);
+
+  useEffect(() => {
+    const container = ref.current;
+    if (!container || !tweetId) return;
+
+    let cancelled = false;
+    container.innerHTML = '';
+    const isDark = document.documentElement.classList.contains('dark');
+
+    function renderTweet(widgets: TwttrWidgets) {
+      if (cancelled) return;
+      widgets.createTweet(tweetId!, container!, {
+        theme: isDark ? 'dark' : 'light',
+        dnt: true,
+        align: 'center',
+      });
+    }
+
+    const w = window as Window & { twttr?: { widgets: TwttrWidgets } };
+    if (w.twttr?.widgets) {
+      renderTweet(w.twttr.widgets);
+    } else {
+      if (!document.querySelector('script[src*="platform.twitter.com/widgets.js"]')) {
+        const script = document.createElement('script');
+        script.src = 'https://platform.twitter.com/widgets.js';
+        script.async = true;
+        document.body.appendChild(script);
+      }
+      const interval = setInterval(() => {
+        const tw = (window as Window & { twttr?: { widgets: TwttrWidgets } }).twttr;
+        if (tw?.widgets) {
+          clearInterval(interval);
+          renderTweet(tw.widgets);
+        }
+      }, 200);
+      setTimeout(() => clearInterval(interval), 10000);
+    }
+
+    return () => {
+      cancelled = true;
+      container.innerHTML = '';
+    };
+  }, [tweetId]);
+
+  if (!tweetId) {
+    // Fallback: just link to the tweet
+    return (
+      <div
+        className="link-preview"
+        style={{ cursor: 'pointer' }}
+        onClick={(e) => { e.stopPropagation(); window.open(tweetUrl, '_blank', 'noopener,noreferrer'); }}
+      >
+        <div className="link-preview-info">
+          <div className="link-preview-site"><span>X (Twitter)</span></div>
+          <div className="link-preview-title">View post on X</div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      ref={ref}
+      className="link-preview"
+      onClick={(e) => e.stopPropagation()}
+      style={{ border: 'none', background: 'transparent', overflow: 'visible' }}
+    />
   );
 }

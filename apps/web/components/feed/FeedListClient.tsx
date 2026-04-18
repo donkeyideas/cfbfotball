@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { PostCard } from './PostCard';
@@ -140,21 +140,32 @@ export function FeedListClient({ tab, cursor: initialCursor, userSchoolId }: Fee
     setLoading(false);
   }, [cursor, loading, hasMore, tab, userSchoolId, profileId]);
 
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry && entry.isIntersecting) {
+          loadMore();
+        }
+      },
+      { rootMargin: '400px' },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [loadMore]);
+
   return (
     <>
       {posts.map((post) => (
         <PostCard key={(post._feedKey ?? post.id) as string} post={post as never} />
       ))}
       {hasMore && (
-        <div style={{ textAlign: 'center', padding: '16px 0' }}>
-          <button
-            onClick={loadMore}
-            disabled={loading}
-            className="composer-submit"
-            style={{ opacity: loading ? 0.5 : 1 }}
-          >
-            {loading ? 'Loading...' : 'Load More'}
-          </button>
+        <div ref={sentinelRef} style={{ textAlign: 'center', padding: '16px 0' }}>
+          {loading && <span className="post-time">Loading...</span>}
         </div>
       )}
     </>

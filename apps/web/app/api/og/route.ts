@@ -59,6 +59,42 @@ async function fetchYouTubeOg(url: string, videoId: string): Promise<OgData | nu
   }
 }
 
+// ---- TikTok helper ----
+
+function isTikTokUrl(url: string): boolean {
+  try {
+    const h = new URL(url).hostname;
+    return h.includes('tiktok.com');
+  } catch { return false; }
+}
+
+async function fetchTikTokOg(url: string): Promise<OgData | null> {
+  try {
+    const oembedUrl = `https://www.tiktok.com/oembed?url=${encodeURIComponent(url)}`;
+    const res = await fetch(oembedUrl, { signal: AbortSignal.timeout(5000) });
+    if (!res.ok) return null;
+
+    const data = await res.json() as { title?: string; author_name?: string; thumbnail_url?: string };
+    return {
+      title: data.title || 'TikTok Video',
+      description: data.author_name ? `Video by ${data.author_name}` : null,
+      image: data.thumbnail_url || null,
+      siteName: 'TikTok',
+      favicon: 'https://www.tiktok.com/favicon.ico',
+      url,
+    };
+  } catch {
+    return {
+      title: 'TikTok Video',
+      description: null,
+      image: null,
+      siteName: 'TikTok',
+      favicon: 'https://www.tiktok.com/favicon.ico',
+      url,
+    };
+  }
+}
+
 // ---- Twitter/X helper ----
 
 function isTwitterUrl(url: string): boolean {
@@ -68,15 +104,40 @@ function isTwitterUrl(url: string): boolean {
   } catch { return false; }
 }
 
-function buildTwitterOg(url: string): OgData {
-  return {
-    title: 'Post on X',
-    description: null,
-    image: null,
-    siteName: 'X (Twitter)',
-    favicon: 'https://abs.twimg.com/favicons/twitter.3.ico',
-    url,
-  };
+async function fetchTwitterOg(url: string): Promise<OgData> {
+  try {
+    const oembedUrl = `https://publish.twitter.com/oembed?url=${encodeURIComponent(url)}&omit_script=true`;
+    const res = await fetch(oembedUrl, { signal: AbortSignal.timeout(5000) });
+    if (!res.ok) throw new Error('Failed');
+
+    const data = await res.json() as { author_name?: string; html?: string };
+    // Extract tweet text from the oembed HTML blockquote
+    let tweetText: string | null = null;
+    if (data.html) {
+      const textMatch = data.html.match(/<p[^>]*>([\s\S]*?)<\/p>/i);
+      if (textMatch?.[1]) {
+        tweetText = textMatch[1].replace(/<[^>]+>/g, '').replace(/&mdash;/g, '--').trim();
+        if (tweetText.length > 200) tweetText = tweetText.slice(0, 200) + '...';
+      }
+    }
+    return {
+      title: data.author_name ? `${data.author_name} on X` : 'Post on X',
+      description: tweetText,
+      image: null,
+      siteName: 'X (Twitter)',
+      favicon: 'https://abs.twimg.com/favicons/twitter.3.ico',
+      url,
+    };
+  } catch {
+    return {
+      title: 'Post on X',
+      description: null,
+      image: null,
+      siteName: 'X (Twitter)',
+      favicon: 'https://abs.twimg.com/favicons/twitter.3.ico',
+      url,
+    };
+  }
 }
 
 export async function GET(req: NextRequest) {
@@ -105,9 +166,16 @@ export async function GET(req: NextRequest) {
     if (og) return NextResponse.json(og, { headers: cacheHeaders });
   }
 
+  // Special handling: TikTok (blocks server-side scraping)
+  if (isTikTokUrl(url)) {
+    const og = await fetchTikTokOg(url);
+    if (og) return NextResponse.json(og, { headers: cacheHeaders });
+  }
+
   // Special handling: Twitter/X (blocks all scraping)
   if (isTwitterUrl(url)) {
-    return NextResponse.json(buildTwitterOg(url), { headers: cacheHeaders });
+    const og = await fetchTwitterOg(url);
+    return NextResponse.json(og, { headers: cacheHeaders });
   }
 
   try {

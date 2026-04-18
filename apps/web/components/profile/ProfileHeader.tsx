@@ -112,7 +112,7 @@ export function ProfileHeader({ user, isOwnProfile = false }: ProfileHeaderProps
                 >
                   Edit Profile
                 </Link>
-                <SignOutButton />
+                <SignOutButton accentColor={adjustedSecondary ?? undefined} />
               </>
             )}
             {!isOwnProfile && <FollowButton userId={user.id} />}
@@ -125,7 +125,7 @@ export function ProfileHeader({ user, isOwnProfile = false }: ProfileHeaderProps
 
         {/* School */}
         {user.school && (
-          <p className="mt-1 font-serif text-sm font-semibold" style={{ color: adjustedPrimary! }}>
+          <p className="mt-1 font-serif text-sm font-semibold" style={{ color: adjustedSecondary ?? adjustedPrimary! }}>
             {user.school.name}
           </p>
         )}

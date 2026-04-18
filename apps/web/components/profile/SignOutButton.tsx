@@ -3,8 +3,9 @@
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 
-export function SignOutButton() {
+export function SignOutButton({ accentColor }: { accentColor?: string }) {
   const router = useRouter();
+  const color = accentColor || 'var(--crimson)';
 
   async function handleSignOut() {
     const supabase = createClient();
@@ -23,9 +24,9 @@ export function SignOutButton() {
         fontWeight: 600,
         letterSpacing: '0.5px',
         textTransform: 'uppercase' as const,
-        color: 'var(--crimson)',
+        color: color,
         background: 'transparent',
-        border: '1px solid var(--crimson)',
+        border: `1px solid ${color}`,
         borderRadius: 2,
         cursor: 'pointer',
       }}

@@ -503,7 +503,8 @@ html.dark .feed-tab:hover {
 }
 
 html.dark .feed-tab.active {
-  color: var(--crimson);
+  color: var(--secondary);
+  border-bottom-color: var(--secondary);
 }
 
 /* --- Dark mode: Right Sidebar --- */
@@ -1214,6 +1215,9 @@ html.dark .account-switcher-divider {
   font-size: 0.8rem;
   font-weight: 600;
   color: var(--crimson);
+}
+html.dark .account-switcher-add {
+  color: var(--secondary);
 }
 
 /* ============================================================
