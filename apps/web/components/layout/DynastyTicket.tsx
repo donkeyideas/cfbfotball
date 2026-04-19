@@ -35,9 +35,14 @@ export function DynastyTicket() {
   };
 
   const dynastyTier = profile.dynasty_tier || 'WALK_ON';
+  const XP_THRESHOLDS = [0, 100, 300, 600, 1000, 1500, 2200, 3000, 4000, 5200, 6600, 8200, 10000, 12500, 15500, 19000, 23000, 28000, 34000, 41000, 50000];
   const userLevel = profile.level ?? 1;
-  const xpForNext = userLevel * 500;
-  const xpPct = Math.min((profile.xp / xpForNext) * 100, 100);
+  const currentThreshold = XP_THRESHOLDS[userLevel - 1] ?? 0;
+  const nextThreshold = XP_THRESHOLDS[userLevel] ?? XP_THRESHOLDS[XP_THRESHOLDS.length - 1]!;
+  const xpForNext = nextThreshold;
+  const xpPct = nextThreshold > currentThreshold
+    ? Math.min(100, ((profile.xp - currentThreshold) / (nextThreshold - currentThreshold)) * 100)
+    : 100;
 
   // Compute real prediction accuracy
   const correct = profile.correct_predictions ?? 0;

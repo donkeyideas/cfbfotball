@@ -744,52 +744,7 @@ export async function botReactToPosts(botId: string): Promise<{ success: boolean
 
     reactCount++;
 
-    // FUMBLE + REPLY combo: 25% of fumbles generate a disagreement reply (reduced from 80% to cut API costs)
-    if (reactionType === 'FUMBLE' && Math.random() < 0.25) {
-      try {
-        // Check if already replied
-        const { data: existingReply } = await supabase
-          .from('posts')
-          .select('id')
-          .eq('author_id', botId)
-          .eq('parent_id', post.id)
-          .limit(1);
-
-        if (!existingReply?.length) {
-          const rivalryHint = isDifferentSchool
-            ? `\nYou DISAGREE with this take. The author is from a rival school. Be competitive and push back hard.`
-            : `\nYou DISAGREE with this take. Explain why in 1-2 short sentences.`;
-
-          let replyContent = await generateReplyContent(
-            personality,
-            bot?.school ?? null,
-            (post.content as string) + rivalryHint,
-            bot?.bot_mood ?? 5
-          );
-
-          if (replyContent) {
-            replyContent = humanizeContent(replyContent, personality, {
-              bot_region: bot?.bot_region ?? null,
-              bot_age_bracket: bot?.bot_age_bracket ?? null,
-              bot_mood: bot?.bot_mood ?? 5,
-              schoolName: bot?.school?.name,
-              mascotName: bot?.school?.mascot,
-            });
-
-            await supabase.from('posts').insert({
-              author_id: botId,
-              content: replyContent,
-              post_type: 'STANDARD',
-              school_id: bot?.school_id,
-              parent_id: post.id,
-              status: 'PUBLISHED',
-            });
-          }
-        }
-      } catch {
-        // Non-critical: fumble+reply is best-effort
-      }
-    }
+    // FUMBLE + REPLY combo disabled — bots no longer generate replies
 
     if (reactCount >= 5) break;
   }
@@ -829,140 +784,11 @@ export async function botReactToPosts(botId: string): Promise<{ success: boolean
 
 /**
  * Reply to a recent post with AI-generated content.
- * Prioritizes bot-to-bot interaction and rivalry-aware replies.
+ * DISABLED: Bots no longer generate replies to posts.
  */
-export async function botReplyToPost(botId: string): Promise<{ success: boolean; postId?: string; error?: string }> {
-  const supabase = createAdminClient();
-  const bot = await fetchBot(botId);
-  if (!bot || !bot.is_bot || !bot.bot_active) return { success: false, error: 'Bot inactive' };
-
-  const personality = parsePersonality(bot.bot_personality);
-  const mood = bot.bot_mood ?? 5;
-
-  // Fetch recent posts with author school info for rivalry detection
-  const { data: recentPosts } = await supabase
-    .from('posts')
-    .select('id, content, author_id, school_id, author:profiles!posts_author_id_fkey(is_bot, school_id, school:schools!profiles_school_id_fkey(name, conference))')
-    .neq('author_id', botId)
-    .eq('status', 'PUBLISHED')
-    .is('parent_id', null)
-    .order('created_at', { ascending: false })
-    .limit(20);
-
-  if (!recentPosts?.length) return { success: false, error: 'No posts to reply to' };
-
-  // Prioritize posts: rival school bots > same conference bots > any bot > user posts
-  type ScoredPost = { post: typeof recentPosts[0]; score: number };
-  const scored: ScoredPost[] = recentPosts.map(post => {
-    let score = 1;
-    const author = Array.isArray(post.author) ? post.author[0] : post.author;
-    const authorSchool = author && typeof author === 'object' && 'school' in author
-      ? (Array.isArray((author as Record<string, unknown>).school)
-        ? ((author as Record<string, unknown>).school as Array<Record<string, unknown>>)[0]
-        : (author as Record<string, unknown>).school) as Record<string, unknown> | null
-      : null;
-    const isBot = author && typeof author === 'object' && 'is_bot' in author ? (author as Record<string, unknown>).is_bot : false;
-    const isDifferentSchool = post.school_id !== bot.school_id;
-    const isSameConference = authorSchool?.conference === bot.school?.conference;
-
-    if (isBot && isDifferentSchool && isSameConference) score = 10; // Rival bot = highest priority
-    else if (isBot && isDifferentSchool) score = 7; // Different school bot
-    else if (isBot) score = 4; // Same school bot
-    else if (isDifferentSchool) score = 3; // User from different school
-    else score = 2; // User from same school
-
-    return { post, score };
-  });
-
-  // Sort by score descending with some randomization
-  scored.sort((a, b) => {
-    const jitter = (Math.random() - 0.5) * 3; // Add some randomness
-    return (b.score + jitter) - a.score;
-  });
-
-  for (const { post } of scored) {
-    // Higher reply probability for high-priority targets
-    if (Math.random() > personality.replyProbability * 1.5) continue;
-
-    // Check if already replied
-    const { data: existingReply } = await supabase
-      .from('posts')
-      .select('id')
-      .eq('author_id', botId)
-      .eq('parent_id', post.id)
-      .eq('status', 'PUBLISHED')
-      .limit(1);
-    if (existingReply?.length) continue;
-
-    // Build rivalry-aware reply context
-    const author = Array.isArray(post.author) ? post.author[0] : post.author;
-    const authorSchool = author && typeof author === 'object' && 'school' in author
-      ? (Array.isArray((author as Record<string, unknown>).school)
-        ? ((author as Record<string, unknown>).school as Array<Record<string, unknown>>)[0]
-        : (author as Record<string, unknown>).school) as Record<string, unknown> | null
-      : null;
-    const isDifferentSchool = post.school_id !== bot.school_id;
-    const authorSchoolName = authorSchool?.name as string | undefined;
-
-    let rivalryContext = '';
-    if (isDifferentSchool && authorSchoolName) {
-      const isSameConference = authorSchool?.conference === bot.school?.conference;
-      if (isSameConference) {
-        rivalryContext = `\nThe author is a ${authorSchoolName} fan -- a CONFERENCE RIVAL of your ${bot.school?.name}. Be combative, competitive, and talk trash about their program.`;
-      } else {
-        rivalryContext = `\nThe author is a ${authorSchoolName} fan. Show some competitive edge but be respectful since they are not in your conference.`;
-      }
-    }
-
-    // Generate reply
-    let replyContent = await generateReplyContent(personality, bot.school, (post.content as string) + rivalryContext, mood);
-
-    // If AI generation failed, skip — do NOT post generic fallback replies
-    if (!replyContent) {
-      continue;
-    }
-
-    // Apply humanizer to reply
-    replyContent = humanizeContent(replyContent, personality, {
-      bot_region: bot.bot_region,
-      bot_age_bracket: bot.bot_age_bracket,
-      bot_mood: mood,
-      schoolName: bot.school?.name,
-      mascotName: bot.school?.mascot,
-    });
-
-    const { data: reply, error } = await supabase
-      .from('posts')
-      .insert({
-        author_id: botId,
-        content: replyContent,
-        post_type: 'STANDARD',
-        school_id: bot.school_id,
-        parent_id: post.id,
-        status: 'PUBLISHED',
-      })
-      .select('id')
-      .single();
-
-    if (error) return { success: false, error: error.message };
-
-    // Update last_active_at
-    await supabase.from('profiles').update({ last_active_at: new Date().toISOString() }).eq('id', botId);
-
-    // Log
-    await supabase.from('bot_activity_log').insert({
-      bot_id: botId,
-      action_type: 'REPLY',
-      target_post_id: post.id,
-      created_post_id: reply.id,
-      content_preview: replyContent.slice(0, 200),
-      success: true,
-    });
-
-    return { success: true, postId: reply.id };
-  }
-
-  return { success: false, error: 'No suitable post to reply to' };
+export async function botReplyToPost(_botId: string): Promise<{ success: boolean; postId?: string; error?: string }> {
+  // Bot replies disabled — bots should only create top-level posts, not reply to others
+  return { success: false, error: 'Bot replies disabled' };
 }
 
 /**
@@ -1129,40 +955,13 @@ export async function botIssueChallenge(botId: string): Promise<{ success: boole
 
     if (error) continue;
 
-    // Generate a visible reply on the post so it shows in comments
-    let replyContent = await generateReplyContent(
-      personality,
-      bot.school,
-      `You just issued a challenge on this post: "${postContent}". Write a 1-3 sentence reply calling out the poster. Be competitive and bold — you're throwing down the gauntlet. Example tones: "I'm calling you out on this one." / "Let's settle this — your program vs mine." / "Bold words. Prove it. Challenge issued."`,
-      bot.bot_mood ?? 5
-    );
-    if (!replyContent) {
-      replyContent = `I'm calling you out on this one. Challenge issued. Let's see if you can back it up.`;
-    }
-    replyContent = humanizeContent(replyContent, personality, {
-      bot_region: bot.bot_region,
-      bot_age_bracket: bot.bot_age_bracket,
-      bot_mood: bot.bot_mood ?? 5,
-      schoolName: bot.school?.name,
-      mascotName: bot.school?.mascot,
-    });
-
-    await supabase.from('posts').insert({
-      author_id: botId,
-      content: replyContent,
-      post_type: 'STANDARD',
-      school_id: bot.school_id,
-      parent_id: post.id,
-      status: 'PUBLISHED',
-    });
-
-    // Log
+    // Log (no reply generated — bot replies disabled)
     await supabase.from('bot_activity_log').insert({
       bot_id: botId,
-      action_type: 'REPLY',
+      action_type: 'CHALLENGE',
       target_post_id: post.id,
       created_post_id: challenge.id,
-      content_preview: `[CHALLENGE] ${replyContent.slice(0, 100)}`,
+      content_preview: `[CHALLENGE] ${topic.slice(0, 100)}`,
       success: true,
     });
 
@@ -1224,38 +1023,12 @@ export async function botMarkForAging(botId: string): Promise<{ success: boolean
 
     if (error) continue;
 
-    // Generate a visible reply so the receipt filing shows in comments
-    let replyContent = await generateReplyContent(
-      personality,
-      bot.school,
-      `You are filing a receipt on this prediction: "${(post.content as string).slice(0, 200)}". Write a 1-2 sentence reply marking this take for revisit. Be confident you'll come back to it. Example tones: "Filing a receipt on this one." / "Bookmarking this. We'll see in a few weeks." / "Screenshot this. I'm coming back for you."`,
-      bot.bot_mood ?? 5
-    );
-    if (!replyContent) {
-      replyContent = `Filing a receipt on this one. We'll revisit.`;
-    }
-    replyContent = humanizeContent(replyContent, personality, {
-      bot_region: bot.bot_region,
-      bot_age_bracket: bot.bot_age_bracket,
-      bot_mood: bot.bot_mood ?? 5,
-      schoolName: bot.school?.name,
-      mascotName: bot.school?.mascot,
-    });
-
-    await supabase.from('posts').insert({
-      author_id: botId,
-      content: replyContent,
-      post_type: 'STANDARD',
-      school_id: bot.school_id,
-      parent_id: post.id,
-      status: 'PUBLISHED',
-    });
-
+    // Log (no reply generated — bot replies disabled)
     await supabase.from('bot_activity_log').insert({
       bot_id: botId,
-      action_type: 'REPLY',
+      action_type: 'AGING',
       target_post_id: post.id,
-      content_preview: `[AGING] ${replyContent.slice(0, 100)}`,
+      content_preview: `[AGING] Filed receipt on post`,
       success: true,
     });
 
@@ -1319,39 +1092,13 @@ export async function botFactCheck(botId: string): Promise<{ success: boolean; e
 
       if (error) continue;
 
-      // Generate a visible reply so the fact check shows in comments
-      let replyContent = await generateReplyContent(
-        personality,
-        bot.school,
-        `You are fact-checking this claim: "${(post.content as string).slice(0, 200)}". Write a 1-3 sentence reply questioning or verifying the claim. Be analytical and specific. Example tones: "Gonna need a source on that one." / "Actually, the numbers tell a different story..." / "Fact check: this checks out, but context matters."`,
-        bot.bot_mood ?? 5
-      );
-      if (!replyContent) {
-        replyContent = `Gonna need a source on that one. Fact check filed.`;
-      }
-      replyContent = humanizeContent(replyContent, personality, {
-        bot_region: bot.bot_region,
-        bot_age_bracket: bot.bot_age_bracket,
-        bot_mood: bot.bot_mood ?? 5,
-        schoolName: bot.school?.name,
-        mascotName: bot.school?.mascot,
-      });
-
-      await supabase.from('posts').insert({
-        author_id: botId,
-        content: replyContent,
-        post_type: 'STANDARD',
-        school_id: bot.school_id,
-        parent_id: post.id,
-        status: 'PUBLISHED',
-      });
-
+      // Log (no reply generated — bot replies disabled)
       await supabase.from('bot_activity_log').insert({
         bot_id: botId,
-        action_type: 'REPLY',
+        action_type: 'FACT_CHECK',
         target_post_id: post.id,
         created_post_id: factCheck.id,
-        content_preview: `[FACT CHECK] ${replyContent.slice(0, 100)}`,
+        content_preview: `[FACT CHECK] Filed on post`,
         success: true,
       });
 
@@ -1505,46 +1252,12 @@ export async function botRevisitAgedTakes(botId: string): Promise<{ success: boo
 
   if (!originalPost) return { success: false, error: 'Original post not found' };
 
-  // Generate revisit verdict
-  let replyContent = await generateReplyContent(
-    personality,
-    bot.school,
-    `You are revisiting a prediction you filed a receipt on. Original take: "${(originalPost.content as string).slice(0, 300)}". Were you right or wrong? Write a short 1-2 sentence verdict. Use "Called it." energy if right, or "Eating crow on this one" energy if wrong. Be honest.`,
-    bot.bot_mood ?? 5
-  );
-
-  if (!replyContent) {
-    replyContent = Math.random() < 0.5
-      ? 'Called it. I said what I said and the results speak for themselves.'
-      : 'Taking the L on this one. Sometimes you miss. That\'s football.';
-  }
-
-  replyContent = humanizeContent(replyContent, personality, {
-    bot_region: bot.bot_region,
-    bot_age_bracket: bot.bot_age_bracket,
-    bot_mood: bot.bot_mood ?? 5,
-    schoolName: bot.school?.name,
-    mascotName: bot.school?.mascot,
-  });
-
-  // Post the revisit reply
-  const { error } = await supabase.from('posts').insert({
-    author_id: botId,
-    content: replyContent,
-    post_type: 'STANDARD',
-    school_id: bot.school_id,
-    parent_id: take.post_id,
-    status: 'PUBLISHED',
-  });
-
-  if (error) return { success: false, error: error.message };
-
-  // Log
+  // Bot replies disabled — just log the revisit without posting a reply
   await supabase.from('bot_activity_log').insert({
     bot_id: botId,
-    action_type: 'REPLY',
+    action_type: 'REVISIT',
     target_post_id: take.post_id,
-    content_preview: `[REVISIT] ${replyContent.slice(0, 100)}`,
+    content_preview: `[REVISIT] Aged take revisited`,
     success: true,
   });
 

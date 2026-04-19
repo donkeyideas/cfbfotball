@@ -65,6 +65,7 @@ export default function DynastyScreen() {
   const [loadingAchievements, setLoadingAchievements] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [recruitingCopied, setRecruitingCopied] = useState<'code' | 'link' | null>(null);
+  const [referralEnabled, setReferralEnabled] = useState(false);
 
   const styles = useMemo(() => StyleSheet.create({
     container: {
@@ -397,8 +398,21 @@ export default function DynastyScreen() {
     setLoadingAchievements(false);
   }, [userId]);
 
+  // Fetch referral system enabled setting
+  useEffect(() => {
+    supabase
+      .from('admin_settings')
+      .select('value')
+      .eq('key', 'referral_system_enabled')
+      .single()
+      .then(({ data }) => {
+        setReferralEnabled(data?.value === 'true');
+      });
+  }, []);
+
   useEffect(() => {
     if (activeTab === 'my-dynasty' && userId) {
+      refreshProfile(); // Refresh profile to get latest XP/level
       fetchXpLog();
       fetchAchievements();
     } else if (activeTab === 'achievements') {
@@ -422,10 +436,15 @@ export default function DynastyScreen() {
   };
 
   // ---------- XP calculations ----------
+  const XP_THRESHOLDS = [0, 100, 300, 600, 1000, 1500, 2200, 3000, 4000, 5200, 6600, 8200, 10000, 12500, 15500, 19000, 23000, 28000, 34000, 41000, 50000];
   const xp = profile?.xp ?? 0;
   const level = profile?.level ?? 1;
-  const xpForNext = level * 500;
-  const xpPct = Math.min((xp / xpForNext) * 100, 100);
+  const currentThreshold = XP_THRESHOLDS[level - 1] ?? 0;
+  const nextThreshold = XP_THRESHOLDS[level] ?? XP_THRESHOLDS[XP_THRESHOLDS.length - 1]!;
+  const xpForNext = nextThreshold;
+  const xpPct = nextThreshold > currentThreshold
+    ? Math.min(100, ((xp - currentThreshold) / (nextThreshold - currentThreshold)) * 100)
+    : 100;
 
   // ---------- Stats ----------
   const achievementCount = userAchievementIds.size;
@@ -520,8 +539,8 @@ export default function DynastyScreen() {
           </View>
         </View>
 
-        {/* Recruiting Rank */}
-        {profile?.referral_code && (() => {
+        {/* Recruiting Rank — only shown when referral system is enabled */}
+        {referralEnabled && profile?.referral_code && (() => {
           const refCount = profile.referral_count ?? 0;
           const charLimitVal = profile.char_limit ?? 500;
           const currentTier = getReferralTier(refCount);

@@ -102,8 +102,13 @@ export function DynastyWidget() {
     );
   }
 
-  const xpForNext = profile.level * 500;
-  const xpProgress = Math.min(profile.xp / xpForNext, 1);
+  const XP_THRESHOLDS = [0, 100, 300, 600, 1000, 1500, 2200, 3000, 4000, 5200, 6600, 8200, 10000, 12500, 15500, 19000, 23000, 28000, 34000, 41000, 50000];
+  const currentThreshold = XP_THRESHOLDS[profile.level - 1] ?? 0;
+  const nextThreshold = XP_THRESHOLDS[profile.level] ?? XP_THRESHOLDS[XP_THRESHOLDS.length - 1]!;
+  const xpForNext = nextThreshold;
+  const xpProgress = nextThreshold > currentThreshold
+    ? Math.min(((profile.xp - currentThreshold) / (nextThreshold - currentThreshold)), 1)
+    : 1;
 
   return (
     <Pressable

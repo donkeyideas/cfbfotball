@@ -35,8 +35,13 @@ export function DynastyPlaque({
 }: DynastyPlaqueProps) {
   const colors = useColors();
   const accent = accentColor || colors.crimson;
-  const xpForNext = level * 500;
-  const xpPct = Math.min((xp / xpForNext) * 100, 100);
+  const XP_THRESHOLDS = [0, 100, 300, 600, 1000, 1500, 2200, 3000, 4000, 5200, 6600, 8200, 10000, 12500, 15500, 19000, 23000, 28000, 34000, 41000, 50000];
+  const currentThreshold = XP_THRESHOLDS[level - 1] ?? 0;
+  const nextThreshold = XP_THRESHOLDS[level] ?? XP_THRESHOLDS[XP_THRESHOLDS.length - 1]!;
+  const xpForNext = nextThreshold;
+  const xpPct = nextThreshold > currentThreshold
+    ? Math.min(100, ((xp - currentThreshold) / (nextThreshold - currentThreshold)) * 100)
+    : 100;
   const tierLabel = tier ? TIER_LABELS[tier] || tier.replace(/_/g, ' ') : 'Walk-On';
 
   const styles = useMemo(() => StyleSheet.create({

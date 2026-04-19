@@ -100,6 +100,14 @@ async function DynastyProfile() {
   const dynasty = await getDynastyProfile(supabase, user.id);
   const { profile, achievements, xpLog } = dynasty;
 
+  // Check if referral system is enabled
+  const { data: referralSetting } = await supabase
+    .from('admin_settings')
+    .select('value')
+    .eq('key', 'referral_system_enabled')
+    .single();
+  const referralEnabled = referralSetting?.value === 'true';
+
   const thresholds = [0, 100, 300, 600, 1000, 1500, 2200, 3000, 4000, 5200, 6600, 8200, 10000, 12500, 15500, 19000, 23000, 28000, 34000, 41000, 50000];
   const currentLevel = profile.level ?? 1;
   const currentXP = profile.xp ?? 0;
@@ -171,8 +179,8 @@ async function DynastyProfile() {
         </div>
       </div>
 
-      {/* Recruiting Rank */}
-      {profile.referral_code && (
+      {/* Recruiting Rank — only shown when referral system is enabled */}
+      {referralEnabled && profile.referral_code && (
         <RecruitingCard
           referralCode={profile.referral_code}
           referralCount={profile.referral_count ?? 0}
