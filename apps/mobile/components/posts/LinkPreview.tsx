@@ -2,6 +2,7 @@ import { memo, useEffect, useMemo, useState } from 'react';
 import {
   Image,
   Linking,
+  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -67,8 +68,8 @@ function decodeHtmlEntities(str: string): string {
     .replace(/&gt;/g, '>')
     .replace(/&quot;/g, '"')
     .replace(/&#39;/g, "'")
-    .replace(/&#x27;/g, "'")
-    .replace(/&#x2F;/g, '/');
+    .replace(/&#x([0-9a-fA-F]+);/g, (_, hex: string) => String.fromCodePoint(parseInt(hex, 16)))
+    .replace(/&#(\d+);/g, (_, dec: string) => String.fromCodePoint(parseInt(dec, 10)));
 }
 
 function extractOgFromHtml(html: string, baseUrl: URL): OgData {
@@ -584,30 +585,34 @@ export const LinkPreview = memo(function LinkPreview({ content }: LinkPreviewPro
     );
   }
 
-  // Twitter/X: render native embed immediately (no play button needed)
+  // Twitter/X: render native embed on Android, card on iOS (iOS blocks WebView embeds)
   if (videoEmbed?.platform === 'twitter') {
-    const handleTweetHeight = (event: { nativeEvent: { data: string } }) => {
-      try {
-        const data = JSON.parse(event.nativeEvent.data);
-        if (data.type === 'height' && data.height > 100 && data.height < 800) {
-          setEmbedHeight(data.height);
-        }
-      } catch {}
-    };
-    return (
-      <View style={[styles.videoContainer, { height: embedHeight || 350 }]}>
-        <WebView
-          source={{ html: buildTwitterEmbedHtml(videoEmbed.embedUrl, isDark) }}
-          style={{ flex: 1, backgroundColor: isDark ? '#1a1a1a' : '#fff' }}
-          javaScriptEnabled
-          domStorageEnabled
-          originWhitelist={['*']}
-          mixedContentMode="always"
-          scrollEnabled={false}
-          onMessage={handleTweetHeight}
-        />
-      </View>
-    );
+    if (Platform.OS === 'ios') {
+      // Fall through to OG card rendering below — tapping opens in Safari
+    } else {
+      const handleTweetHeight = (event: { nativeEvent: { data: string } }) => {
+        try {
+          const data = JSON.parse(event.nativeEvent.data);
+          if (data.type === 'height' && data.height > 100 && data.height < 800) {
+            setEmbedHeight(data.height);
+          }
+        } catch {}
+      };
+      return (
+        <View style={[styles.videoContainer, { height: embedHeight || 350 }]}>
+          <WebView
+            source={{ html: buildTwitterEmbedHtml(videoEmbed.embedUrl, isDark) }}
+            style={{ flex: 1, backgroundColor: isDark ? '#1a1a1a' : '#fff' }}
+            javaScriptEnabled
+            domStorageEnabled
+            originWhitelist={['*']}
+            mixedContentMode="always"
+            scrollEnabled={false}
+            onMessage={handleTweetHeight}
+          />
+        </View>
+      );
+    }
   }
 
   if (!effectiveOgData) return null;
@@ -750,7 +755,13 @@ window.addEventListener('message',function(e){
       style={styles.card}
       onPress={() => {
         if (videoEmbed) {
-          setPlaying(true);
+          // Instagram, TikTok & Twitter block WebView embeds on iOS — open in native browser
+          const blockedOnIos = ['instagram', 'tiktok', 'twitter'];
+          if (Platform.OS === 'ios' && blockedOnIos.includes(videoEmbed.platform)) {
+            Linking.openURL(url!);
+          } else {
+            setPlaying(true);
+          }
         } else {
           Linking.openURL(effectiveOgData.url);
         }
