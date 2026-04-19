@@ -50,7 +50,7 @@ html.dark {
   --admin-text-muted: #8a8070;
   --admin-success: #4a7c59;
   --admin-warning: #b8860b;
-  --admin-error: #c43030;
+  --admin-error: #e05555;
   --admin-info: #4a6c8c;
   --admin-gold: #c9a84c;
   --admin-tan: #443d32;
@@ -183,6 +183,7 @@ html.dark .admin-table th {
 .admin-table td {
   padding: 0.75rem 1rem;
   font-size: 0.875rem;
+  color: var(--admin-text);
   border-bottom: 1px dotted var(--admin-border);
 }
 

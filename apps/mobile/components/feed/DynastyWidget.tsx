@@ -131,6 +131,11 @@ export function DynastyWidget() {
         <Text style={styles.xpSubtitle}>
           {profile.xp.toLocaleString()} / {xpForNext.toLocaleString()} XP to next level
         </Text>
+        {profile.referral_count > 0 && (
+          <Text style={styles.xpSubtitle}>
+            Recruits: {profile.referral_count.toLocaleString()}
+          </Text>
+        )}
       </View>
     </Pressable>
   );

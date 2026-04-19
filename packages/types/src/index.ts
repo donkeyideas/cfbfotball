@@ -59,3 +59,7 @@ export { toNotification, toNotificationPreferences } from './notification';
 
 // Analytics
 export type { AnalyticsEvent, AnalyticsEventRow, DailyStats, DailyStatsRow, APIPerformanceLog, APIPerformanceLogRow, DashboardOverview } from './analytics';
+
+// Referrals
+export type { ReferralTier, ReferralRow } from './referral';
+export { REFERRAL_CHAR_TIERS, getCharLimitForReferrals, getReferralTier, getNextReferralTier } from './referral';

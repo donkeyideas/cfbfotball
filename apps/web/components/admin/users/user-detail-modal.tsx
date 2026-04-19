@@ -455,6 +455,9 @@ export function UserDetailModal({ open, onClose, user, onRefresh }: UserDetailMo
           if (res.ok) {
             onClose();
             onRefresh();
+          } else {
+            const body = await res.json().catch(() => ({}));
+            alert(`Delete failed: ${body.error || res.statusText}`);
           }
         } finally {
           setActionLoading(false);

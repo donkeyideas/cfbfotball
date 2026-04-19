@@ -234,7 +234,7 @@ export function PostComposer() {
           onKeyDown={handleKeyDown}
           onSelect={checkForMention}
           placeholder="File your report from the press box..."
-          maxLength={3000}
+          maxLength={profile?.char_limit ?? 3000}
           className="composer-input"
           rows={3}
         />
@@ -279,8 +279,13 @@ export function PostComposer() {
         )}
       </div>
 
-      <div style={{ textAlign: 'right', fontFamily: 'var(--mono)', fontSize: '0.65rem', color: content.length > 2800 ? 'var(--crimson)' : 'var(--text-muted)', marginTop: 4 }}>
-        {content.length.toLocaleString()}/3,000
+      <div style={{ textAlign: 'right', fontFamily: 'var(--mono)', fontSize: '0.65rem', color: content.length > Math.floor((profile?.char_limit ?? 3000) * 0.93) ? 'var(--crimson)' : 'var(--text-muted)', marginTop: 4 }}>
+        {content.length.toLocaleString()}/{(profile?.char_limit ?? 3000).toLocaleString()}
+        {profile && profile.char_limit < 3000 && (
+          <span style={{ display: 'block', fontSize: '0.7rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>
+            Recruit friends to increase your limit
+          </span>
+        )}
       </div>
 
       {extractFirstUrl(content) && <LinkPreview content={content} />}

@@ -2,6 +2,7 @@ import { Suspense } from 'react';
 import { AchievementCard } from '@/components/dynasty/AchievementCard';
 import { DynastyLeaderboard } from '@/components/dynasty/DynastyLeaderboard';
 import { DynastyTierBadge } from '@/components/dynasty/DynastyTierBadge';
+import { RecruitingCard } from '@/components/dynasty/RecruitingCard';
 
 export const dynamic = 'force-dynamic';
 
@@ -169,6 +170,15 @@ async function DynastyProfile() {
           ))}
         </div>
       </div>
+
+      {/* Recruiting Rank */}
+      {profile.referral_code && (
+        <RecruitingCard
+          referralCode={profile.referral_code}
+          referralCount={profile.referral_count ?? 0}
+          charLimit={profile.char_limit ?? 500}
+        />
+      )}
 
       {/* Recent XP Activity */}
       {xpLog.length > 0 && (

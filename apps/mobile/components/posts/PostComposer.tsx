@@ -18,7 +18,7 @@ import { useSchoolTheme } from '@/lib/theme/SchoolThemeProvider';
 import { supabase } from '@/lib/supabase';
 import { typography } from '@/lib/theme/typography';
 import { useColors } from '@/lib/theme/ThemeProvider';
-import { MAX_POST_CHARS } from '@/lib/constants';
+import { DEFAULT_POST_CHARS } from '@/lib/constants';
 import { LinkPreview, extractFirstUrl } from './LinkPreview';
 import { GifPicker } from './GifPicker';
 import { Avatar } from '@/components/ui/Avatar';
@@ -37,8 +37,6 @@ const POST_TYPES: { key: PostType; label: string }[] = [
   { key: 'SIDELINE', label: 'Photo' },
   { key: 'AGING_TAKE', label: 'Challenge' },
 ];
-
-const MAX_CHARS = MAX_POST_CHARS;
 
 interface MentionProfile {
   id: string;
@@ -66,6 +64,7 @@ export function PostComposer({ visible, onClose, onPostCreated }: PostComposerPr
   const { dark, accent } = useSchoolTheme();
   const router = useRouter();
   const { showAlert } = useThemedAlert();
+  const charLimit = profile?.char_limit ?? DEFAULT_POST_CHARS;
   const [content, setContent] = useState('');
   const [postType, setPostType] = useState<PostType>('STANDARD');
   const [submitting, setSubmitting] = useState(false);
@@ -414,7 +413,7 @@ export function PostComposer({ visible, onClose, onPostCreated }: PostComposerPr
     onClose();
   };
 
-  const charWarning = content.length > MAX_CHARS * 0.9;
+  const charWarning = content.length > charLimit * 0.9;
 
   return (
     <Modal
@@ -473,7 +472,7 @@ export function PostComposer({ visible, onClose, onPostCreated }: PostComposerPr
                   placeholder="File your report from the press box..."
                   placeholderTextColor={colors.textMuted}
                   multiline
-                  maxLength={MAX_CHARS}
+                  maxLength={charLimit}
                   value={content}
                   onChangeText={handleContentChange}
                   onSelectionChange={handleSelectionChange}
@@ -583,7 +582,7 @@ export function PostComposer({ visible, onClose, onPostCreated }: PostComposerPr
 
                 {/* Char count */}
                 <Text style={[styles.charCount, charWarning && [styles.charCountWarning, { color: dark }]]}>
-                  {content.length.toLocaleString()}/{MAX_CHARS.toLocaleString()}
+                  {content.length.toLocaleString()}/{charLimit.toLocaleString()}
                 </Text>
 
                 {/* Submit */}

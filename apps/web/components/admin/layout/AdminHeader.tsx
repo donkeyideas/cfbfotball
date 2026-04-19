@@ -19,6 +19,12 @@ export function AdminHeader() {
     const stored = localStorage.getItem('cfb-admin-theme');
     const isDark = stored !== 'light';
     setDark(isDark);
+    // Apply the class immediately so CSS variables match
+    if (isDark) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
   }, []);
 
   function toggleTheme() {

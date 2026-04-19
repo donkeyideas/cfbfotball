@@ -21,6 +21,12 @@ export default function AdminLayout({
 }) {
   return (
     <div className="admin-root">
+      {/* Inline script to apply dark class before paint, preventing flash */}
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `(function(){try{if(localStorage.getItem('cfb-admin-theme')!=='light'){document.documentElement.classList.add('dark')}else{document.documentElement.classList.remove('dark')}}catch(e){}})()`,
+        }}
+      />
       <div style={{ display: 'flex', minHeight: '100vh', maxWidth: '100vw' }}>
         {/* Sidebar */}
         <AdminSidebar />

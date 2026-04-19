@@ -15,6 +15,7 @@ export const XP_VALUES = {
   STREAK_BONUS: 10,
   RECEIPT_VERIFIED: 30,
   AGING_TAKE_CORRECT: 25,
+  REFERRAL_ACTIVATED: 25,
 } as const;
 
 export type XPAction = keyof typeof XP_VALUES;

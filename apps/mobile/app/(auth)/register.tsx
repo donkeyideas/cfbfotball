@@ -10,7 +10,7 @@ import {
   ScrollView,
   ActivityIndicator,
 } from 'react-native';
-import { useRouter, Link } from 'expo-router';
+import { useRouter, Link, useLocalSearchParams } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import * as AppleAuthentication from 'expo-apple-authentication';
 import { makeRedirectUri } from 'expo-auth-session';
@@ -27,15 +27,24 @@ export default function RegisterScreen() {
   const colors = useColors();
   const router = useRouter();
   const { dark } = useSchoolTheme();
+  const { ref } = useLocalSearchParams<{ ref?: string }>();
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [schoolId, setSchoolId] = useState('');
+  const [referralCode, setReferralCode] = useState('');
   const [schools, setSchools] = useState<SchoolRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [oauthLoading, setOauthLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+
+  // Pre-fill referral code from URL query param
+  useEffect(() => {
+    if (ref) {
+      setReferralCode(String(ref).toUpperCase().slice(0, 20));
+    }
+  }, [ref]);
 
   const styles = useMemo(() => StyleSheet.create({
     container: {
@@ -254,6 +263,7 @@ export default function RegisterScreen() {
         data: {
           username,
           school_id: schoolId,
+          referral_code: referralCode || undefined,
         },
       },
     });
@@ -464,6 +474,21 @@ export default function RegisterScreen() {
                 />
               )}
             </View>
+          </View>
+
+          <View>
+            <Text style={styles.label}>Referral Code (optional)</Text>
+            <TextInput
+              style={styles.input}
+              value={referralCode}
+              onChangeText={(text) => setReferralCode(text.toUpperCase().slice(0, 20))}
+              placeholder="e.g. BAMA_FAN_X7K2"
+              placeholderTextColor={colors.textMuted}
+              autoCapitalize="characters"
+              autoCorrect={false}
+              maxLength={20}
+            />
+            <Text style={styles.hint}>Got a code from a friend? Enter it here.</Text>
           </View>
 
           <Pressable style={styles.termsRow} onPress={() => setAgreedToTerms(!agreedToTerms)}>

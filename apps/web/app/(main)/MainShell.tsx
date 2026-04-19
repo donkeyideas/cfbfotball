@@ -39,6 +39,10 @@ const AuthCtaBanner = dynamic(
   () => import('@/components/layout/AuthCtaBanner').then((m) => m.AuthCtaBanner),
   { ssr: false },
 );
+const FloatingComposer = dynamic(
+  () => import('@/components/feed/FloatingComposer').then((m) => m.FloatingComposer),
+  { ssr: false },
+);
 
 export function MainShell({ children }: { children: React.ReactNode }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -74,6 +78,7 @@ export function MainShell({ children }: { children: React.ReactNode }) {
 
           <Footer />
           <AuthCtaBanner />
+          <FloatingComposer />
 
           {/* Mobile sidebar overlay */}
           {mobileMenuOpen && (

@@ -71,6 +71,10 @@ export function DynastyTicket() {
           {total > 0 ? `${correct}/${total} (${winRate}%)` : '0'}
         </span>
       </div>
+      <div className="ticket-stat">
+        <span className="ticket-stat-label">Recruits</span>
+        <span className="ticket-stat-value">{profile?.referral_count ?? 0}</span>
+      </div>
       <div className="xp-bar-track">
         <div className="xp-bar-fill" style={{ width: `${xpPct}%` }} />
       </div>

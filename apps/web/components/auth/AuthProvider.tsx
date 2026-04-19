@@ -17,6 +17,9 @@ interface AuthProfile {
   prediction_count: number;
   display_name: string | null;
   owner_id: string;
+  referral_code: string | null;
+  referral_count: number;
+  char_limit: number;
 }
 
 interface AuthContextValue {
@@ -57,7 +60,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const supabase = createClient();
     const { data } = await supabase
       .from('profiles')
-      .select('id, username, display_name, avatar_url, school_id, dynasty_tier, xp, level, post_count, correct_predictions, prediction_count, owner_id')
+      .select('id, username, display_name, avatar_url, school_id, dynasty_tier, xp, level, post_count, correct_predictions, prediction_count, owner_id, referral_code, referral_count, char_limit')
       .eq('owner_id', uid)
       .order('created_at', { ascending: true });
 
@@ -75,6 +78,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         correct_predictions: (d.correct_predictions as number) ?? 0,
         prediction_count: (d.prediction_count as number) ?? 0,
         owner_id: (d.owner_id as string) ?? uid,
+        referral_code: (d.referral_code as string) ?? null,
+        referral_count: (d.referral_count as number) ?? 0,
+        char_limit: (d.char_limit as number) ?? 3000,
       }));
 
       setProfiles(mapped);
@@ -86,9 +92,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setActiveId(match.id);
       } else {
         // Default to primary profile (id === owner_id)
-        const primary = mapped.find((p) => p.id === p.owner_id) ?? mapped[0];
-        setActiveId(primary.id);
-        setActiveProfileId(primary.id);
+        const primary = mapped.find((p) => p.id === p.owner_id) ?? mapped[0]!;
+        setActiveId(primary!.id);
+        setActiveProfileId(primary!.id);
       }
     }
   }, []);

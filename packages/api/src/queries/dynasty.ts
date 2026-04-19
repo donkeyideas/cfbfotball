@@ -58,7 +58,7 @@ export async function getXPLog(client: SupabaseClient, userId: string, limit = 2
 export async function getDynastyProfile(client: SupabaseClient, userId: string) {
   const { data: profile, error: profileError } = await client
     .from('profiles')
-    .select('id, username, display_name, avatar_url, xp, level, dynasty_tier, post_count, touchdown_count, follower_count, challenge_wins, correct_predictions')
+    .select('id, username, display_name, avatar_url, xp, level, dynasty_tier, post_count, touchdown_count, follower_count, challenge_wins, correct_predictions, referral_code, referral_count, char_limit')
     .eq('id', userId)
     .single();
 

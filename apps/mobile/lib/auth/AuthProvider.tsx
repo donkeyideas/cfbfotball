@@ -33,6 +33,9 @@ interface AuthProfile {
   touchdown_count: number;
   fumble_count: number;
   owner_id: string;
+  referral_code: string | null;
+  referral_count: number;
+  char_limit: number;
 }
 
 interface AuthContextType {
@@ -76,7 +79,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
       const { data, error } = await supabase
         .from('profiles')
         .select(
-          'id, username, display_name, avatar_url, banner_url, bio, school_id, dynasty_tier, xp, level, post_count, correct_predictions, prediction_count, follower_count, following_count, touchdown_count, fumble_count, owner_id'
+          'id, username, display_name, avatar_url, banner_url, bio, school_id, dynasty_tier, xp, level, post_count, correct_predictions, prediction_count, follower_count, following_count, touchdown_count, fumble_count, owner_id, referral_code, referral_count, char_limit'
         )
         .eq('owner_id', uid)
         .order('created_at', { ascending: true });
@@ -106,6 +109,9 @@ export function AuthProvider({ children }: PropsWithChildren) {
           touchdown_count: (d.touchdown_count as number) ?? 0,
           fumble_count: (d.fumble_count as number) ?? 0,
           owner_id: (d.owner_id as string) ?? uid,
+          referral_code: (d.referral_code as string) ?? null,
+          referral_count: (d.referral_count as number) ?? 0,
+          char_limit: (d.char_limit as number) ?? 3000,
         }));
 
         setProfiles(mapped);

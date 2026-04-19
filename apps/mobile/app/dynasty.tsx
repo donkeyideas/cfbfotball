@@ -8,7 +8,9 @@ import {
   RefreshControl,
   Pressable,
   ActivityIndicator,
+  Share,
 } from 'react-native';
+import * as Clipboard from 'expo-clipboard';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { useSchoolTheme } from '@/lib/theme/SchoolThemeProvider';
@@ -23,6 +25,7 @@ import { DynastyLeaderboard } from '@/components/dynasty/DynastyLeaderboard';
 import { AchievementCard, type AchievementData } from '@/components/dynasty/AchievementCard';
 import { useColors } from '@/lib/theme/ThemeProvider';
 import { typography } from '@/lib/theme/typography';
+import { getReferralTier, getNextReferralTier } from '@cfb-social/types';
 
 type DynastyTab = 'my-dynasty' | 'leaderboard' | 'achievements';
 
@@ -61,6 +64,7 @@ export default function DynastyScreen() {
   const [loadingXp, setLoadingXp] = useState(false);
   const [loadingAchievements, setLoadingAchievements] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [recruitingCopied, setRecruitingCopied] = useState<'code' | 'link' | null>(null);
 
   const styles = useMemo(() => StyleSheet.create({
     container: {
@@ -242,6 +246,102 @@ export default function DynastyScreen() {
       borderBottomColor: colors.border,
       paddingBottom: 6,
     },
+    recruitingCard: {
+      backgroundColor: colors.surfaceRaised,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 12,
+      padding: 16,
+    },
+    recruitingHeader: {
+      fontFamily: typography.mono,
+      fontSize: 11,
+      color: colors.textMuted,
+      letterSpacing: 1.5,
+      textTransform: 'uppercase' as const,
+      marginBottom: 12,
+    },
+    recruitingTierRow: {
+      flexDirection: 'row' as const,
+      justifyContent: 'space-between' as const,
+      alignItems: 'baseline' as const,
+      marginBottom: 6,
+    },
+    recruitingTierName: {
+      fontFamily: typography.serifBold,
+      fontSize: 18,
+      color: colors.textPrimary,
+    },
+    recruitingTierProgress: {
+      fontFamily: typography.sans,
+      fontSize: 12,
+      color: colors.textMuted,
+    },
+    recruitingBarBg: {
+      height: 10,
+      borderRadius: 5,
+      backgroundColor: colors.surface,
+      overflow: 'hidden' as const,
+      marginBottom: 16,
+    },
+    recruitingBarFill: {
+      height: '100%' as const,
+      borderRadius: 5,
+    },
+    recruitingCodeRow: {
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      gap: 8,
+      marginBottom: 8,
+    },
+    recruitingCodeLabel: {
+      fontFamily: typography.sans,
+      fontSize: 13,
+      color: colors.textSecondary,
+    },
+    recruitingCode: {
+      fontFamily: typography.mono,
+      fontSize: 15,
+      fontWeight: '700' as const,
+      letterSpacing: 1,
+      backgroundColor: colors.surface,
+      paddingHorizontal: 8,
+      paddingVertical: 2,
+      borderRadius: 4,
+      borderWidth: 1,
+      borderColor: colors.border,
+      color: colors.textPrimary,
+      overflow: 'hidden' as const,
+    },
+    recruitingCopyBtn: {
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      borderRadius: 4,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    recruitingCopyText: {
+      fontFamily: typography.sansSemiBold,
+      fontSize: 11,
+      color: colors.textMuted,
+    },
+    recruitingCharLimit: {
+      fontFamily: typography.sans,
+      fontSize: 12,
+      color: colors.textMuted,
+      marginBottom: 16,
+    },
+    recruitingShareBtn: {
+      paddingVertical: 12,
+      borderRadius: 8,
+      alignItems: 'center' as const,
+    },
+    recruitingShareText: {
+      fontFamily: typography.sansSemiBold,
+      fontSize: 13,
+      letterSpacing: 1,
+      textTransform: 'uppercase' as const,
+    },
   }), [colors]);
 
   // ---------- Fetch XP log ----------
@@ -419,6 +519,83 @@ export default function DynastyScreen() {
             <Text style={styles.statLabel}>Achievements</Text>
           </View>
         </View>
+
+        {/* Recruiting Rank */}
+        {profile?.referral_code && (() => {
+          const refCount = profile.referral_count ?? 0;
+          const charLimitVal = profile.char_limit ?? 500;
+          const currentTier = getReferralTier(refCount);
+          const nextTier = getNextReferralTier(refCount);
+          const recruitPct = nextTier
+            ? Math.min(100, ((refCount - currentTier.minReferrals) / (nextTier.minReferrals - currentTier.minReferrals)) * 100)
+            : 100;
+          const inviteLink = `https://www.cfbsocial.com/join/${profile.referral_code}`;
+
+          const handleCopyCode = async () => {
+            await Clipboard.setStringAsync(profile.referral_code!);
+            setRecruitingCopied('code');
+            setTimeout(() => setRecruitingCopied(null), 2000);
+          };
+
+          const handleShareInvite = async () => {
+            try {
+              await Share.share({
+                message: `Join the college football conversation on CFB Social. Use my referral code: ${profile.referral_code}\n${inviteLink}`,
+              });
+            } catch {
+              await Clipboard.setStringAsync(inviteLink);
+              setRecruitingCopied('link');
+              setTimeout(() => setRecruitingCopied(null), 2000);
+            }
+          };
+
+          return (
+            <>
+              <OrnamentDivider />
+              <View style={styles.recruitingCard}>
+                <Text style={styles.recruitingHeader}>RECRUITING RANK</Text>
+
+                <View style={styles.recruitingTierRow}>
+                  <Text style={styles.recruitingTierName}>{currentTier.name}</Text>
+                  {nextTier ? (
+                    <Text style={styles.recruitingTierProgress}>
+                      {refCount}/{nextTier.minReferrals} to {nextTier.name}
+                    </Text>
+                  ) : (
+                    <Text style={[styles.recruitingTierProgress, { color: colors.warning }]}>MAX RANK</Text>
+                  )}
+                </View>
+
+                <View style={styles.recruitingBarBg}>
+                  <View style={[styles.recruitingBarFill, { width: `${recruitPct}%`, backgroundColor: dark }]} />
+                </View>
+
+                <View style={styles.recruitingCodeRow}>
+                  <Text style={styles.recruitingCodeLabel}>Your Code:</Text>
+                  <Text style={styles.recruitingCode}>{profile.referral_code}</Text>
+                  <Pressable style={styles.recruitingCopyBtn} onPress={handleCopyCode}>
+                    <Text style={[styles.recruitingCopyText, recruitingCopied === 'code' && { color: colors.warning }]}>
+                      {recruitingCopied === 'code' ? 'Copied!' : 'Copy'}
+                    </Text>
+                  </Pressable>
+                </View>
+
+                <Text style={styles.recruitingCharLimit}>
+                  Character Limit: <Text style={{ fontFamily: typography.sansSemiBold, color: colors.textSecondary }}>{charLimitVal.toLocaleString()}</Text>
+                </Text>
+
+                <Pressable
+                  style={[styles.recruitingShareBtn, { backgroundColor: dark }]}
+                  onPress={handleShareInvite}
+                >
+                  <Text style={[styles.recruitingShareText, { color: colors.paper }]}>
+                    {recruitingCopied === 'link' ? 'Link Copied!' : 'Share Invite Link'}
+                  </Text>
+                </Pressable>
+              </View>
+            </>
+          );
+        })()}
 
         <OrnamentDivider />
 

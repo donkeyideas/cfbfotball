@@ -11,6 +11,7 @@ interface DynastyPlaqueProps {
   posts: number;
   touchdowns: number;
   predictions: number;
+  recruits: number;
 }
 
 const TIER_LABELS: Record<string, string> = {
@@ -30,6 +31,7 @@ export function DynastyPlaque({
   posts,
   touchdowns,
   predictions,
+  recruits,
 }: DynastyPlaqueProps) {
   const colors = useColors();
   const accent = accentColor || colors.crimson;
@@ -171,6 +173,10 @@ export function DynastyPlaque({
           <View style={styles.statItem}>
             <Text style={styles.statValue}>{predictions}</Text>
             <Text style={styles.statLabel}>Predictions</Text>
+          </View>
+          <View style={styles.statItem}>
+            <Text style={styles.statValue}>{recruits}</Text>
+            <Text style={styles.statLabel}>Recruits</Text>
           </View>
         </View>
       </View>

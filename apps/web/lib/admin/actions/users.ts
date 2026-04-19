@@ -32,7 +32,7 @@ export async function getAllUsers(params: {
 export async function getUserDetail(userId: string) {
   const supabase = createAdminClient();
 
-  const [authUser, profile, posts, modEvents, reports, appeals, xpLog, achievements] = await Promise.all([
+  const results = await Promise.allSettled([
     supabase.auth.admin.getUserById(userId),
     supabase.from('profiles').select('*, school:schools!profiles_school_id_fkey(id, name, abbreviation, conference, primary_color, logo_url)').eq('id', userId).single(),
     supabase.from('posts').select('id, content, post_type, status, created_at, touchdown_count, fumble_count').eq('author_id', userId).order('created_at', { ascending: false }).limit(20),
@@ -43,22 +43,39 @@ export async function getUserDetail(userId: string) {
     supabase.from('user_achievements').select('*, achievement:achievements(*)').eq('user_id', userId).order('unlocked_at', { ascending: false }),
   ]);
 
+  const authUser = results[0].status === 'fulfilled' ? results[0].value : null;
+  const profile = results[1].status === 'fulfilled' ? results[1].value : null;
+  const posts = results[2].status === 'fulfilled' ? results[2].value : null;
+  const modEvents = results[3].status === 'fulfilled' ? results[3].value : null;
+  const reports = results[4].status === 'fulfilled' ? results[4].value : null;
+  const appeals = results[5].status === 'fulfilled' ? results[5].value : null;
+  const xpLog = results[6].status === 'fulfilled' ? results[6].value : null;
+  const achievements = results[7].status === 'fulfilled' ? results[7].value : null;
+
+  // Log any failures for debugging
+  results.forEach((r, i) => {
+    if (r.status === 'rejected') {
+      const labels = ['authUser', 'profile', 'posts', 'modEvents', 'reports', 'appeals', 'xpLog', 'achievements'];
+      console.error(`[getUserDetail] ${labels[i]} query failed:`, r.reason);
+    }
+  });
+
   // Merge email + auth provider from auth.users into profile
-  const profileData = profile.data ? {
+  const profileData = profile?.data ? {
     ...profile.data,
-    email: authUser.data?.user?.email ?? null,
-    auth_provider: authUser.data?.user?.app_metadata?.provider ?? 'email',
-    last_sign_in_at: authUser.data?.user?.last_sign_in_at ?? null,
+    email: authUser?.data?.user?.email ?? null,
+    auth_provider: authUser?.data?.user?.app_metadata?.provider ?? 'email',
+    last_sign_in_at: authUser?.data?.user?.last_sign_in_at ?? null,
   } : null;
 
   return {
     profile: profileData,
-    posts: posts.data ?? [],
-    moderationEvents: modEvents.data ?? [],
-    reports: reports.data ?? [],
-    appeals: appeals.data ?? [],
-    xpLog: xpLog.data ?? [],
-    achievements: achievements.data ?? [],
+    posts: posts?.data ?? [],
+    moderationEvents: modEvents?.data ?? [],
+    reports: reports?.data ?? [],
+    appeals: appeals?.data ?? [],
+    xpLog: xpLog?.data ?? [],
+    achievements: achievements?.data ?? [],
   };
 }
 
@@ -131,7 +148,41 @@ export async function restoreUser(userId: string, adminId: string) {
 
 export async function deleteUser(userId: string) {
   const supabase = createAdminClient();
+
+  // Clean up user data from tables with FK constraints before deleting auth user
+  const cleanupTables = [
+    { table: 'reactions', column: 'user_id' },
+    { table: 'reports', column: 'reporter_id' },
+    { table: 'reports', column: 'reported_user_id' },
+    { table: 'appeals', column: 'user_id' },
+    { table: 'moderation_events', column: 'user_id' },
+    { table: 'xp_log', column: 'user_id' },
+    { table: 'user_achievements', column: 'user_id' },
+    { table: 'device_tokens', column: 'user_id' },
+    { table: 'push_notification_log', column: 'user_id' },
+    { table: 'follows', column: 'follower_id' },
+    { table: 'follows', column: 'following_id' },
+    { table: 'bookmarks', column: 'user_id' },
+    { table: 'roster_claims', column: 'user_id' },
+    { table: 'mascot_votes', column: 'user_id' },
+    { table: 'game_thread_messages', column: 'user_id' },
+    { table: 'posts', column: 'author_id' },
+    { table: 'profiles', column: 'id' },
+  ];
+
+  for (const { table, column } of cleanupTables) {
+    const { error } = await supabase.from(table).delete().eq(column, userId);
+    if (error) {
+      console.error(`[deleteUser] Failed to clean ${table}.${column}:`, error.message);
+      // Continue cleanup — some tables may not exist or have no rows
+    }
+  }
+
+  // Delete from Supabase auth
   const { error } = await supabase.auth.admin.deleteUser(userId);
+  if (error) {
+    console.error('[deleteUser] auth.admin.deleteUser failed:', error.message);
+  }
   return { error };
 }
 

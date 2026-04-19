@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { checkPasswordBreaches } from '@/lib/providers/hibp';
 import { TurnstileWidget } from '@/components/turnstile/TurnstileWidget';
@@ -10,16 +10,26 @@ import type { SchoolRow } from '@cfb-social/types';
 
 export function RegisterForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [schoolId, setSchoolId] = useState('');
+  const [referralCode, setReferralCode] = useState('');
   const [schools, setSchools] = useState<SchoolRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [breachCount, setBreachCount] = useState<number | null>(null);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const turnstileEnabled = !!process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+
+  // Pre-fill referral code from URL query param
+  useEffect(() => {
+    const ref = searchParams?.get('ref');
+    if (ref) {
+      setReferralCode(ref.toUpperCase().slice(0, 20));
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     async function fetchSchools() {
@@ -90,6 +100,7 @@ export function RegisterForm() {
         data: {
           username,
           school_id: schoolId,
+          referral_code: referralCode || undefined,
         },
       },
     });
@@ -208,6 +219,24 @@ export function RegisterForm() {
               </option>
             ))}
           </select>
+        </div>
+
+        <div>
+          <label htmlFor="referralCode" className="mb-1 block text-sm font-medium text-[var(--text-secondary)]">
+            Referral Code (optional)
+          </label>
+          <input
+            id="referralCode"
+            type="text"
+            value={referralCode}
+            onChange={(e) => setReferralCode(e.target.value.toUpperCase().slice(0, 20))}
+            maxLength={20}
+            className="gridiron-input w-full"
+            placeholder="e.g. BAMA_FAN_X7K2"
+          />
+          <p className="mt-1 text-xs text-[var(--text-muted)]">
+            Got a code from a friend? Enter it here.
+          </p>
         </div>
 
         {turnstileEnabled && (

@@ -1348,6 +1348,13 @@ html.dark .account-switcher-add {
   position: sticky;
   top: var(--header-total-h, 120px);
   align-self: start;
+  max-height: calc(100vh - var(--header-total-h, 120px));
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.col-left::-webkit-scrollbar {
+  display: none;
 }
 
 .col-center {
@@ -1362,6 +1369,13 @@ html.dark .account-switcher-add {
   position: sticky;
   top: var(--header-total-h, 120px);
   align-self: start;
+  max-height: calc(100vh - var(--header-total-h, 120px));
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.col-right::-webkit-scrollbar {
+  display: none;
 }
 
 /* ============================================================
@@ -1743,11 +1757,16 @@ html.dark .fb-desc {
 
 .feed-header {
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
+  flex-direction: column;
+  align-items: center;
   margin-bottom: 16px;
   padding-bottom: 8px;
   border-bottom: 3px double var(--dark-brown);
+  position: sticky;
+  top: var(--header-total-h, 120px);
+  z-index: 10;
+  background: var(--aged-paper);
+  padding-top: 8px;
 }
 
 .feed-title {
@@ -1784,6 +1803,128 @@ html.dark .fb-desc {
   color: var(--crimson);
   border-bottom: 2px solid var(--crimson);
   font-weight: 600;
+}
+
+/* ============================================================
+   FLOATING COMPOSE BUTTON (FAB)
+   ============================================================ */
+
+.fab-compose {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--crimson);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 14px rgba(139,26,26,0.4);
+  z-index: 50;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.fab-compose:hover {
+  transform: scale(1.08);
+  box-shadow: 0 6px 20px rgba(139,26,26,0.5);
+}
+
+.fab-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.fab-modal {
+  background: var(--aged-paper);
+  border: 2px solid var(--dark-brown);
+  border-radius: 6px;
+  width: 100%;
+  max-width: 640px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+}
+
+.fab-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-bottom: 2px solid var(--dark-brown);
+}
+
+.fab-modal-title {
+  font-family: var(--serif);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--dark-brown);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.fab-modal-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--faded-ink);
+  cursor: pointer;
+  line-height: 1;
+  padding: 0 4px;
+}
+
+.fab-modal-close:hover {
+  color: var(--dark-brown);
+}
+
+html.dark .fab-modal {
+  background: #1e1b18;
+  border-color: #504a42;
+}
+
+html.dark .fab-modal-header {
+  border-bottom-color: #504a42;
+}
+
+html.dark .fab-modal-title {
+  color: #ddd8ce;
+}
+
+html.dark .fab-modal-close {
+  color: #8a8070;
+}
+
+html.dark .fab-modal-close:hover {
+  color: #ddd8ce;
+}
+
+.fab-modal .composer {
+  border: none;
+  border-radius: 0;
+  margin-bottom: 0;
+  background: transparent;
+}
+
+.fab-modal .composer::before {
+  display: none;
+}
+
+@media (max-width: 480px) {
+  .fab-compose {
+    bottom: 20px;
+    right: 20px;
+    width: 48px;
+    height: 48px;
+  }
 }
 
 /* ============================================================

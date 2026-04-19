@@ -18,8 +18,11 @@ export const SCORE_REFRESH_MS = 30_000;
 /** War room / scores banner refresh interval (ms) */
 export const GAMES_REFRESH_MS = 60_000;
 
-/** Maximum character count for posts */
-export const MAX_POST_CHARS = 3000;
+/** Default character limit for posts (fallback when profile.char_limit is unavailable) */
+export const DEFAULT_POST_CHARS = 3000;
+
+/** @deprecated Use DEFAULT_POST_CHARS instead */
+export const MAX_POST_CHARS = DEFAULT_POST_CHARS;
 
 /** Web app API base URL for news feeds and article scraping */
 export const WEB_API_URL = 'https://www.cfbsocial.com';

@@ -135,6 +135,7 @@ async function ProfileContent({ username }: { username: string }) {
         correctPredictions={user.correct_predictions ?? 0}
         challengeWins={user.challenge_wins ?? 0}
         challengeLosses={user.challenge_losses ?? 0}
+        referralCount={user.referral_count ?? 0}
       />
 
       {/* User's posts */}

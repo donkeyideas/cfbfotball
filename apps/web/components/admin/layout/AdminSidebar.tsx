@@ -4,35 +4,10 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import {
-  LayoutDashboard,
-  Shield,
-  Users,
-  FileText,
-  TrendingUp,
-  GraduationCap,
-  Flag,
-  Server,
-  Download,
-  Settings,
-  Brain,
-  Sparkles,
-  BarChart3,
-  Radar,
-  Lightbulb,
-  Plug,
-  Bell,
-  Mail,
-  Share2,
-  MessageSquare,
-  Bot,
-  type LucideIcon,
-} from 'lucide-react';
 
 interface NavItem {
   href: string;
   label: string;
-  icon: LucideIcon;
   badge?: number;
 }
 
@@ -45,46 +20,47 @@ const navSections: NavSection[] = [
   {
     label: 'Platform',
     items: [
-      { href: '/admin', label: 'Overview', icon: LayoutDashboard },
-      { href: '/admin/users', label: 'Users', icon: Users },
-      { href: '/admin/schools', label: 'Schools', icon: GraduationCap },
+      { href: '/admin', label: 'Overview' },
+      { href: '/admin/users', label: 'Users' },
+      { href: '/admin/schools', label: 'Schools' },
+      { href: '/admin/referrals', label: 'Referrals' },
     ],
   },
   {
     label: 'Moderation',
     items: [
-      { href: '/admin/moderation', label: 'Moderation', icon: Shield },
-      { href: '/admin/reports', label: 'Reports', icon: Flag },
+      { href: '/admin/moderation', label: 'Moderation' },
+      { href: '/admin/reports', label: 'Reports' },
     ],
   },
   {
     label: 'Content',
     items: [
-      { href: '/admin/content', label: 'Content', icon: FileText },
-      { href: '/admin/engagement', label: 'Engagement', icon: TrendingUp },
-      { href: '/admin/bots', label: 'AI Bots', icon: Bot },
+      { href: '/admin/content', label: 'Content' },
+      { href: '/admin/engagement', label: 'Engagement' },
+      { href: '/admin/bots', label: 'AI Bots' },
     ],
   },
   {
     label: 'Intelligence',
     items: [
-      { href: '/admin/ai-analytics', label: 'AI & Content', icon: Brain },
-      { href: '/admin/ai-intelligence', label: 'AI Intelligence', icon: Sparkles },
-      { href: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
-      { href: '/admin/user-signals', label: 'User Signals', icon: Radar },
-      { href: '/admin/data-intelligence', label: 'Data Intelligence', icon: Lightbulb },
+      { href: '/admin/ai-analytics', label: 'AI & Content' },
+      { href: '/admin/ai-intelligence', label: 'AI Intelligence' },
+      { href: '/admin/analytics', label: 'Analytics' },
+      { href: '/admin/user-signals', label: 'User Signals' },
+      { href: '/admin/data-intelligence', label: 'Data Intelligence' },
     ],
   },
   {
     label: 'Operations',
     items: [
-      { href: '/admin/api-mgmt', label: 'API Management', icon: Plug },
-      { href: '/admin/system', label: 'System Health', icon: Server },
-      { href: '/admin/notifications', label: 'Notification Center', icon: Bell },
-      { href: '/admin/email-templates', label: 'Email Templates', icon: Mail },
-      { href: '/admin/social-posts', label: 'Social Posts', icon: Share2 },
-      { href: '/admin/contacts', label: 'Contacts', icon: MessageSquare },
-      { href: '/admin/exports', label: 'Exports', icon: Download },
+      { href: '/admin/api-mgmt', label: 'API Management' },
+      { href: '/admin/system', label: 'System Health' },
+      { href: '/admin/notifications', label: 'Notification Center' },
+      { href: '/admin/email-templates', label: 'Email Templates' },
+      { href: '/admin/social-posts', label: 'Social Posts' },
+      { href: '/admin/contacts', label: 'Contacts' },
+      { href: '/admin/exports', label: 'Exports' },
     ],
   },
 ];
@@ -125,8 +101,6 @@ export function AdminSidebar() {
   const navActiveBg = dark ? '#2e2a24' : '#fff';
   const navText = dark ? '#ddd8ce' : '#3b2f1e';
   const navActiveText = dark ? '#c9a84c' : '#8b1a1a';
-  const navShadow = dark ? '1px 2px 4px rgba(0,0,0,0.3)' : '1px 2px 4px rgba(0,0,0,0.15)';
-  const navActiveShadow = dark ? '2px 3px 6px rgba(0,0,0,0.4)' : '2px 3px 6px rgba(0,0,0,0.2)';
   const activeBorderLeft = dark ? '3px solid #c9a84c' : '3px solid #8b1a1a';
   const bottomBorder = dark ? '2px dashed rgba(62,58,52,0.7)' : '2px dashed rgba(139,115,64,0.5)';
 
@@ -181,50 +155,29 @@ export function AdminSidebar() {
             }}>
               {section.label}
             </p>
-            {/* Nav pins */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              {section.items.map((item, idx) => {
-                const Icon = item.icon;
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+              {section.items.map((item) => {
                 const active = isActive(item.href);
-                const rotation = idx % 3 === 0 ? -0.5 : idx % 3 === 1 ? 0.3 : -0.8;
-                const pinColors = ['#8b1a1a', '#2a5a9e', '#2a7a2a', '#b8952a', '#8b1a1a'];
-                const pinColor = pinColors[idx % pinColors.length];
                 return (
                   <Link
                     key={item.href}
                     href={item.href}
                     style={{
-                      background: active ? navActiveBg : navBg,
                       display: 'flex',
                       alignItems: 'center',
                       gap: '10px',
-                      padding: '8px 12px',
+                      padding: '7px 12px',
+                      borderRadius: '4px',
                       fontFamily: 'var(--admin-sans)',
                       fontSize: '0.82rem',
                       color: active ? navActiveText : navText,
                       textDecoration: 'none',
-                      position: 'relative',
-                      boxShadow: active ? navActiveShadow : navShadow,
-                      transform: active ? 'rotate(0deg)' : `rotate(${rotation}deg)`,
-                      borderLeft: active ? activeBorderLeft : 'none',
+                      background: active ? navActiveBg : 'transparent',
+                      borderLeft: active ? activeBorderLeft : '3px solid transparent',
                       fontWeight: active ? 600 : 400,
                       transition: 'all 0.15s',
-                      marginTop: idx === 0 ? '6px' : '0',
                     }}
                   >
-                    {/* Pushpin dot */}
-                    <span style={{
-                      position: 'absolute',
-                      top: '-5px',
-                      left: idx % 2 === 0 ? '12px' : 'auto',
-                      right: idx % 2 === 1 ? '14px' : 'auto',
-                      width: '10px',
-                      height: '10px',
-                      borderRadius: '50%',
-                      background: `radial-gradient(circle at 35% 35%, color-mix(in srgb, ${pinColor} 60%, #fff), ${pinColor})`,
-                      boxShadow: '0 1px 2px rgba(0,0,0,0.5)',
-                    }} />
-                    <Icon className="h-4 w-4 shrink-0" />
                     <span style={{ flex: 1 }}>{item.label}</span>
                     {item.badge !== undefined && item.badge > 0 && (
                       <span style={{
@@ -256,35 +209,21 @@ export function AdminSidebar() {
         <Link
           href="/admin/settings"
           style={{
-            background: isActive('/admin/settings') ? navActiveBg : navBg,
             display: 'flex',
             alignItems: 'center',
-            gap: '10px',
-            padding: '8px 12px',
+            padding: '7px 12px',
+            borderRadius: '4px',
             fontFamily: 'var(--admin-sans)',
             fontSize: '0.82rem',
             color: isActive('/admin/settings') ? navActiveText : navText,
             textDecoration: 'none',
-            position: 'relative',
-            boxShadow: navShadow,
-            transform: 'rotate(-0.3deg)',
-            borderLeft: isActive('/admin/settings') ? activeBorderLeft : 'none',
+            background: isActive('/admin/settings') ? navActiveBg : 'transparent',
+            borderLeft: isActive('/admin/settings') ? activeBorderLeft : '3px solid transparent',
             fontWeight: isActive('/admin/settings') ? 600 : 400,
             transition: 'all 0.15s',
           }}
         >
-          <span style={{
-            position: 'absolute',
-            top: '-5px',
-            left: '12px',
-            width: '10px',
-            height: '10px',
-            borderRadius: '50%',
-            background: 'radial-gradient(circle at 35% 35%, color-mix(in srgb, #8b1a1a 60%, #fff), #8b1a1a)',
-            boxShadow: '0 1px 2px rgba(0,0,0,0.5)',
-          }} />
-          <Settings className="h-4 w-4 shrink-0" />
-          <span>Settings</span>
+          Settings
         </Link>
       </div>
     </aside>

@@ -48,6 +48,7 @@ interface ProfileData {
   following_count: number;
   correct_predictions: number;
   prediction_count: number;
+  referral_count: number;
   school: {
     id: string;
     name: string;
@@ -178,7 +179,7 @@ export default function ProfileScreen() {
         xp, level, dynasty_tier,
         post_count, touchdown_count, fumble_count,
         follower_count, following_count,
-        correct_predictions, prediction_count,
+        correct_predictions, prediction_count, referral_count,
         school:schools!profiles_school_id_fkey(
           id, name, abbreviation, primary_color, secondary_color, slug
         )
@@ -379,6 +380,7 @@ export default function ProfileScreen() {
           posts={profile.post_count}
           touchdowns={profile.touchdown_count}
           predictions={profile.correct_predictions}
+          recruits={profile.referral_count ?? 0}
         />
       </View>
 
